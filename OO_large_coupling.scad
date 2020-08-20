@@ -19,7 +19,7 @@ module frontarc(height, radius, width, thickness){
 
 
 //the arc with arms and a base. No mechanism to hold hook or connect to train
-module coupling_base(arm_thickness, arm_length, coupling_height, coupling_width, arc_radius, min_thickness, base_width){
+module coupling_base(arm_thickness, arm_length, coupling_height, coupling_width, arc_radius, min_thickness, base_width, flange_max, flange_min){
 
 
 
@@ -30,9 +30,9 @@ module coupling_base(arm_thickness, arm_length, coupling_height, coupling_width,
     translate([0,arm_length-arc_offset,0]){
         //front arc with notch taken out
         difference(){
-            frontarc(height=coupling_height, radius=arc_radius, width=coupling_width, thickness=1.05);
+            frontarc(height=coupling_height, radius=arc_radius, width=coupling_width, thickness=flange_max);
             translate([0,0,min_thickness]){
-                frontarc(height=2.5, radius=arc_radius-0.5, width=20.7-arm_thickness*2, thickness=1.05);
+                frontarc(height=2.5, radius=arc_radius-flange_min, width=20.7-arm_thickness*2, thickness=flange_max);
             }
         }
     }
