@@ -32,7 +32,7 @@ module coupling_base(arm_thickness, arm_length, coupling_height, coupling_width,
         difference(){
             frontarc(height=coupling_height, radius=arc_radius, width=coupling_width, thickness=flange_max);
             translate([0,0,min_thickness]){
-                frontarc(height=2.5, radius=arc_radius-flange_min, width=20.7-arm_thickness*2, thickness=flange_max);
+                frontarc(height=2.5, radius=arc_radius-flange_min, width=coupling_width-arm_thickness*2, thickness=flange_max);
             }
         }
     }
