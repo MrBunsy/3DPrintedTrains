@@ -11,7 +11,7 @@ topbar_height = 1.9;
 main_arm_width = 6;
 
 hinge_base_diameter=4.2;
-hinge_diameter = 1.5;
+hinge_diameter = 2.1;
 hinge_bar_height = 2.6;
 hinge_bar_width=8+1;
 hinge_bar_y = 2.6;
@@ -63,25 +63,23 @@ rotate([0,0,-30]){
 }
 
 
-//hinge bar
-translate([-hinge_bar_width,hinge_bar_y,0]){
-    cube([hinge_bar_width, hinge_bar_height, thickness]);
-}
+
+
+
 difference(){
     union(){
-        //hinge itself
+        //hinge bar
+        translate([-hinge_bar_width,hinge_bar_y,0]){
+            cube([hinge_bar_width, hinge_bar_height, thickness]);
+        }
         translate([-hinge_x, hinge_y,0]){
             cylinder(h=thickness,r=hinge_base_diameter/2, $fn=200);
-            cylinder(h=hinge_depth, r= hinge_diameter/2, $fn=200);
-        }
-
-        //hinge top
-        translate([-hinge_x, hinge_y, hinge_depth]){
-            cylinder(h = flange_depth ,r=flange_extra/2 +  hinge_diameter/2, r2=0, $fn=200);
         }
     }
-    translate([-(hinge_x + flange_slit/2), 0,hinge_depth*(1-flange_slit_depth_multiplier)]){
-    cube([flange_slit, 20, hinge_depth*2]);
-}
+            
+ translate([-hinge_x, hinge_y,-0.5]){
+            cylinder(h=thickness*3,r=hinge_diameter/2, $fn=200);
+ }
+
 }
 
