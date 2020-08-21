@@ -38,10 +38,12 @@ difference() {
 hook_base_width = 1.5;//main_arm_width/2;
 hook_base_length = 3.4;//main_arm_length-hole_diameter*0.75;
 hook_height = 4.7;
-hook_holder_diameter = 1.6;//1.85;
+//2.0 works for the garden wire I'm using, but it's hard to bend it to a shape with a 45deg angle at the front so it can auto-couple, might need thinner wire
+hook_holder_diameter = 2.0;//1.6 too small, 1.9 just doesn't quite drop under its own weight
+
 hook_holder_length = 1.3;
 hook_holder_end_cap_thickness = 0.6;
 hook_holder_height=3;
-hook_holder_y=4;
+hook_holder_y=main_arm_length - hook_base_length/2;
 
 hook_base_hole(-main_arm_width/2, -main_arm_length, main_arm_width, hook_base_length, hook_height, hook_holder_diameter/2, hook_holder_length, hook_holder_end_cap_thickness, hook_holder_height, hook_holder_y);
