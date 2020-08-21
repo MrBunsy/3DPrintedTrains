@@ -47,4 +47,6 @@ hook_holder_end_cap_thickness = 0.6;
 hook_holder_height=3;
 hook_holder_y=main_arm_length - hook_base_length/2;
 
-hook_base_hole(-main_arm_width/2, -main_arm_length, main_arm_width, hook_base_length, hook_height, hook_holder_diameter/2, hook_holder_length, hook_holder_end_cap_thickness, hook_holder_height, hook_holder_y);
+anti_wobble = 3;
+
+hook_base_hole(-main_arm_width/2, -main_arm_length, main_arm_width-anti_wobble, hook_base_length, hook_height, hook_holder_diameter/2, hook_holder_length, hook_holder_end_cap_thickness, hook_holder_height, hook_holder_y);

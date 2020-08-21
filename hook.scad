@@ -30,6 +30,8 @@ hook_overhang = 1.3;
 hook_inner_x = 9.6 + midbar_width;
 hook_d = hook_total_height - topbar_height - topbar_height;
 
+anti_wobble_height = 3;
+
 //mid bar
 cube([midbar_width, midbar_height, thickness]);
 
@@ -75,10 +77,14 @@ difference(){
         translate([-hinge_x, hinge_y,0]){
             cylinder(h=thickness,r=hinge_base_diameter/2, $fn=200);
         }
+        
+         translate([-hinge_x, hinge_y,0]){
+            cylinder(h=thickness+anti_wobble_height,r=hinge_base_diameter/2-0.5, $fn=200);
+        }
     }
             
  translate([-hinge_x, hinge_y,-0.5]){
-            cylinder(h=thickness*3,r=hinge_diameter/2, $fn=200);
+            cylinder(h=thickness*100,r=hinge_diameter/2, $fn=200);
  }
 
 }
