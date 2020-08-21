@@ -73,3 +73,19 @@ module hook_base(x, y, width, length, height, hook_holder_radius, hook_holder_le
     }
 }
 
+
+//x,y are bottom left
+module hook_base_hole(x, y, width, length, height, hook_holder_radius, hook_holder_length, hook_holder_end_cap_thickness, hook_holder_height, hook_holder_y){
+    difference(){
+        translate([x,y,0]){
+            cube([width, length, height]);
+        };
+        translate([x-width, -hook_holder_y, hook_holder_height]){
+            rotate([0,90,0]){
+              cylinder(h=width*10, r=hook_holder_radius, $fn=200);
+            }
+        }
+    }
+}
+
+
