@@ -54,6 +54,22 @@ module coupling_base(arm_thickness, arm_length, coupling_height, coupling_width,
 
 }
 
-
-
+//x,y are bottom left
+module hook_base(x, y, width, length, height, hook_holder_radius, hook_holder_length, hook_holder_end_cap_thickness, hook_holder_height, hook_holder_y){
+    
+    translate([x,y,0]){
+        cube([width, length, height]);
+    };
+    translate([x+
+    width, -hook_holder_y, hook_holder_height]){
+        rotate([0,90,0]){
+            union(){
+                cylinder(h=hook_holder_length, r=hook_holder_radius, $fn=200);
+                translate([0,0,hook_holder_length-hook_holder_end_cap_thickness]){
+                    cylinder(h=hook_holder_end_cap_thickness, r=hook_holder_radius*1.5, $fn=200);
+                }
+            }
+        }
+    }
+}
 

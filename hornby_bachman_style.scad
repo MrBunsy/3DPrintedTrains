@@ -10,7 +10,7 @@ hole_diameter = 2.7;
 second_hole_diameters=2;
 second_hole_distance=7.4;
 main_arm_width = 6;
-main_arm_length = 4.3;
+main_arm_length = 5.9;//4.3;
 
 
 difference() {
@@ -34,3 +34,14 @@ difference() {
        }
    }
 }
+
+hook_base_width = 1.5;//main_arm_width/2;
+hook_base_length = 3.4;//main_arm_length-hole_diameter*0.75;
+hook_height = 4.7;
+hook_holder_diameter = 1.85;
+hook_holder_length = 1.3;
+hook_holder_end_cap_thickness = 0.6;
+hook_holder_height=3;
+hook_holder_y=4;
+
+hook_base(main_arm_width/2-hook_base_width, -main_arm_length, hook_base_width, hook_base_length, hook_height, hook_holder_diameter/2, hook_holder_length, hook_holder_end_cap_thickness, hook_holder_height, hook_holder_y);
