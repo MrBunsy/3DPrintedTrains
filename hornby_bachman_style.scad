@@ -8,7 +8,7 @@ min_thickness = 1.5;
 
 hole_diameter = 2.7;
 second_hole_diameters=2;
-second_hole_distance=7.4;
+second_hole_distance=7.5;
 main_arm_width = 6+2;
 main_arm_length = 5.9;
 

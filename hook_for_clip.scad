@@ -2,7 +2,7 @@
 thickness = 1;
 
 midbar_width = 3.2;
-midbar_height = 9.2;
+midbar_height = 9.5;
 
 topbar_width = 15.2;
 topbar_height = 1.9;
