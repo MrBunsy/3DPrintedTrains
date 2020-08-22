@@ -19,7 +19,7 @@ module frontarc(height, radius, width, thickness){
 
 
 //the arc with arms and a base. No mechanism to hold hook or connect to train
-module coupling_base(arm_thickness, arm_length, coupling_height, coupling_width, arc_radius, min_thickness, base_width, flange_max, flange_min){
+module coupling_base(arm_thickness, arm_length, coupling_height, coupling_width, arc_radius, min_thickness, base_width, flange_max, flange_min, min_front_thickness){
 
 
 
@@ -31,7 +31,7 @@ module coupling_base(arm_thickness, arm_length, coupling_height, coupling_width,
         //front arc with notch taken out
         difference(){
             frontarc(height=coupling_height, radius=arc_radius, width=coupling_width, thickness=flange_max);
-            translate([0,0,min_thickness]){
+            translate([0,0,min_front_thickness]){
                 frontarc(height=2.5, radius=arc_radius-flange_min, width=coupling_width-arm_thickness*2, thickness=flange_max);
             }
         }
@@ -54,6 +54,7 @@ module coupling_base(arm_thickness, arm_length, coupling_height, coupling_width,
 
 }
 
+//hook base with sticking out bit for hook to clip on. didn't print well
 //x,y are bottom left
 module hook_base(x, y, width, length, height, hook_holder_radius, hook_holder_length, hook_holder_end_cap_thickness, hook_holder_height, hook_holder_y){
     
@@ -73,7 +74,7 @@ module hook_base(x, y, width, length, height, hook_holder_radius, hook_holder_le
     }
 }
 
-
+//hook base with a hole on the coupling, works fine but needs an extra bit of wire carefully bent
 //x,y are bottom left
 module hook_base_hole(x, y, width, length, height, hook_holder_radius, hook_holder_length, hook_holder_end_cap_thickness, hook_holder_height, hook_holder_y){
     difference(){
@@ -88,4 +89,19 @@ module hook_base_hole(x, y, width, length, height, hook_holder_radius, hook_hold
     }
 }
 
+//attempt at a better clip, so no extra wire will be needed
+module hook_base_clip(x, y, width, length, height, hook_holder_radius, hook_holder_length, hook_holder_end_cap_thickness, hook_holder_height, hook_holder_y){
 
+        translate([x,y,0]){
+            cube([width, length, height]);
+        };
+        translate([x+width, -hook_holder_y, hook_holder_height]){
+            rotate([0,90,0]){
+              cylinder(h=hook_holder_end_cap_thickness, r=hook_holder_radius, $fn=200);
+            }
+        }
+        translate([x+width+hook_holder_end_cap_thickness,y,0]){
+            cube([hook_holder_end_cap_thickness, length, hook_holder_height+hook_holder_radius]);
+        };
+    
+}
