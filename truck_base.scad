@@ -7,8 +7,20 @@ axle_space = 23.0;
 //bachman 22.2
 
 width=28;
-length=70;
-thick = 2;
+length=75;
+thick = 4;
+
+//1.7 tiny bit too tight
+//1.9 fine for the coarse thread screws, bit tight for fine 
+m2_thread_size=2.1;
+m2_head_size=5;
+
+
+//min length required to hold the metal weight
+weight_length=60+3;
+//min width required to hold the metal weight
+weight_width=9.7+3;
+weight_depth=3;
 
 axle_distance = 40;
 
@@ -23,7 +35,8 @@ wheel_diameter = 14.0;
 axle_height = 5;
 
 
-edge=5;
+edge=7;
+edge_ends=8;
 
 //centred in xy plane
 module centredCube(x,y,width,length, height){
@@ -95,12 +108,13 @@ module axle_holder(axle_space, x, axle_height){
 
 module coupling_mount(height){
    
-    side_holders_top_r = 0.75;
-    top_r_distance=13.7+side_holders_top_r;
+    side_holders_top_r = 0.85;
+    top_r_distance=14+side_holders_top_r;
     
     difference(){
         cylinder(h=height,r=4.8/2, $fn=200);
-        cylinder(h=height+0.1,r=1.9/2, $fn=200);//1.7 tiny bit too tight
+       
+        cylinder(h=height+0.1,r=m2_thread_size/2, $fn=200);
     }
     
     translate([top_r_distance/2,0]){
@@ -131,14 +145,15 @@ difference(){
             cube([width,length,thick]);
         }
         
-           translate([edge-width/2, edge-length/2,-thick]){
-            cube([width-edge*2,length-edge*2,thick*3]);
+           translate([edge-width/2, edge_ends-length/2,-thick]){
+            cube([width-edge*2,length-edge_ends*2,thick*3]);
         }
         
     }
     
-    //space for wheels
+    
     union(){
+        //space for wheels
         translate([0,-axle_distance/2,0]){
             cube([axle_space,wheel_max_space,thick*3], center=true);
         }
@@ -147,11 +162,29 @@ difference(){
         }
         //extra deep hole for couplings
         translate([0,length/2-edge/2,-thick]){
-            cylinder(h=thick*3,r=1.9/2, $fn=200);//1.7 tiny bit too tight
+            cylinder(h=thick*3,r=m2_thread_size/2, $fn=200);
         }
         translate([0,-(length/2-edge/2),-thick]){
-            cylinder(h=thick*3,r=1.9/2, $fn=200);//1.7 tiny bit too tight
+            cylinder(h=thick*3,r=m2_thread_size/2, $fn=200);
         }
+        //place for weight
+        centredCube(0,0,weight_width,weight_length,weight_depth);
+        
+        screw_depth=2;
+        
+        //holes for screws in sides
+        translate([edge/2-width/2,0,(thick-screw_depth)/2 + thick-screw_depth]){
+            cylinder(r=m2_head_size/2,h=thick-screw_depth,$fn=200,center=true);
+            cylinder(r=m2_thread_size/2,h=thick*3,$fn=200,center=true);
+        }
+        
+        
+         //holes for screws in sides
+        translate([-(edge/2-width/2),0,(thick-screw_depth)/2 + thick-screw_depth]){
+            cylinder(r=m2_head_size/2,h=thick-screw_depth,$fn=200,center=true);
+            cylinder(r=m2_thread_size/2,h=thick*3,$fn=200,center=true);
+        }
+
     }
 }
 
