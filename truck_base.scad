@@ -6,9 +6,11 @@ axle_space = 23.0;
 //hornby is 23.0
 //bachman 22.2
 
+//TODO - instead of making base thicker to hold the weight, put bits on top that are higher
+
 width=28;
 length=75;
-thick = 4;
+thick = 2;
 
 //1.7 tiny bit too tight
 //1.9 fine for the coarse thread screws, bit tight for fine 
@@ -35,8 +37,8 @@ wheel_diameter = 14.0;
 axle_height = 5;
 
 
-edge=7;
-edge_ends=8;
+edge=5;
+edge_ends=5;
 
 //centred in xy plane
 module centredCube(x,y,width,length, height){
@@ -139,18 +141,23 @@ module coupling_mount(height){
 
 difference(){
 
-    //base with hole in the middle
-    difference(){
-        translate([-width/2, -length/2,0]){
-            cube([width,length,thick]);
+    union(){
+        //base with hole in the middle
+        difference(){
+            translate([-width/2, -length/2,0]){
+                cube([width,length,thick]);
+            }
+            
+               translate([edge-width/2, edge_ends-length/2,-thick]){
+                cube([width-edge*2,length-edge_ends*2,thick*3]);
+            }
+            
         }
-        
-           translate([edge-width/2, edge_ends-length/2,-thick]){
-            cube([width-edge*2,length-edge_ends*2,thick*3]);
-        }
-        
-    }
-    
+        weightHolderLength=3;
+        //extra bit to hold the metal weight
+        centredCube(0,length/2-edge_ends - weightHolderLength/2,width-edge*2,weightHolderLength,thick*2);
+        centredCube(0,-(length/2-edge_ends - weightHolderLength/2),width-edge*2,weightHolderLength,thick*2);
+    }    
     
     union(){
         //space for wheels
