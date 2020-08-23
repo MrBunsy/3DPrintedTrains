@@ -6,11 +6,18 @@ axle_space = 23.0;
 //hornby is 23.0
 //bachman 22.2
 
-//TODO - instead of making base thicker to hold the weight, put bits on top that are higher
+//width of the bar holding the buffers
+buffer_end_width = 35;
+buffer_end_height = 4;
+//length in y axis
+buffer_length = 1.5;
+//how far apart the centres of the buffers are
+buffer_distance = 22.2;
+buffer_holder_d = 1;
 
 width=28;
 length=75;
-thick = 2;
+thick = 4;
 
 //1.7 tiny bit too tight
 //1.9 fine for the coarse thread screws, bit tight for fine 
@@ -21,7 +28,7 @@ m2_head_size=5;
 //min length required to hold the metal weight
 weight_length=60+3;
 //min width required to hold the metal weight
-weight_width=9.7+3;
+weight_width=9.7+1;
 weight_depth=3;
 
 axle_distance = 40;
@@ -136,6 +143,29 @@ module coupling_mount(height){
     
 }
 
+//facing +ve y direction
+module buffer(buffer_end_width, buffer_end_height, buffer_distance, buffer_length){
+    
+    
+    difference(){
+        centredCube(0,0,buffer_end_width, buffer_length, buffer_end_height);
+        union(){
+            translate([-buffer_distance/2,0,buffer_end_height/2]){
+                rotate([90,0,0]){
+                //holes to hold buffers
+                cylinder(h=buffer_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+                }
+            }
+            translate([buffer_distance/2,0,buffer_end_height/2]){
+                rotate([90,0,0]){
+                //holes to hold buffers
+                cylinder(h=buffer_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+                }
+            }
+        }
+    }
+    
+}
 
 
 
@@ -155,8 +185,8 @@ difference(){
         }
         weightHolderLength=3;
         //extra bit to hold the metal weight
-        centredCube(0,length/2-edge_ends - weightHolderLength/2,width-edge*2,weightHolderLength,thick*2);
-        centredCube(0,-(length/2-edge_ends - weightHolderLength/2),width-edge*2,weightHolderLength,thick*2);
+        centredCube(0,length/2-edge_ends - weightHolderLength/2,width-edge*2,weightHolderLength,weight_depth+1.5);
+        centredCube(0,-(length/2-edge_ends - weightHolderLength/2),width-edge*2,weightHolderLength,weight_depth+1.5);
     }    
     
     union(){
@@ -191,7 +221,33 @@ difference(){
             cylinder(r=m2_head_size/2,h=thick-screw_depth,$fn=200,center=true);
             cylinder(r=m2_thread_size/2,h=thick*3,$fn=200,center=true);
         }
-
+        
+        //holes for buffers
+        translate([-buffer_distance/2,length/2-buffer_length/2,buffer_end_height/2]){
+            rotate([90,0,0]){
+            //holes to hold buffers
+            cylinder(h=buffer_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+            }
+        }
+        translate([buffer_distance/2,length/2-buffer_length/2,buffer_end_height/2]){
+            rotate([90,0,0]){
+            //holes to hold buffers
+            cylinder(h=buffer_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+            }
+        }
+        translate([-buffer_distance/2,-(length/2-buffer_length/2),buffer_end_height/2]){
+            rotate([90,0,0]){
+            //holes to hold buffers
+            cylinder(h=buffer_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+            }
+        }
+        translate([buffer_distance/2,-(length/2-buffer_length/2),buffer_end_height/2]){
+            rotate([90,0,0]){
+            //holes to hold buffers
+            cylinder(h=buffer_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+            }
+        }
+        
     }
 }
 
@@ -210,3 +266,12 @@ translate([0,-(length/2-edge/2),thick]){
 }
 
 axle_holder(axle_space, 20, axle_height);
+
+translate([0,length/2-buffer_length/2,0]){
+    buffer(buffer_end_width, buffer_end_height, buffer_distance, buffer_length);
+}
+rotate([0,0,180]){
+    translate([0,length/2-buffer_length/2,0]){
+        buffer(buffer_end_width, buffer_end_height, buffer_distance, buffer_length);
+    }
+}
