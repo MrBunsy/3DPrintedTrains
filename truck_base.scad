@@ -20,6 +20,9 @@ width=28;
 length=75;
 thick = 3.5;
 
+//wall thickness + screw head size + wiggle room
+top_screw_holders_from_edge = 5;
+
 //1.7 tiny bit too tight
 //1.9 fine for the coarse thread screws, bit tight for fine 
 m2_thread_size=2.1;
@@ -124,7 +127,9 @@ module coupling_mount(height){
     difference(){
         cylinder(h=height,r=4.8/2, $fn=200);
        
-        cylinder(h=height+0.1,r=m2_thread_size/2, $fn=200);
+        translate([0,0,-0.1]){
+            cylinder(h=height*2,r=m2_thread_size/2, $fn=200);
+        }
     }
     
     translate([top_r_distance/2,0]){
@@ -171,6 +176,7 @@ module buffer(buffer_end_width, buffer_end_height, buffer_distance, buffer_lengt
 
 difference(){
 
+//main body of the truck
     union(){
         //base with hole in the middle
         difference(){
@@ -187,8 +193,22 @@ difference(){
         //extra bit to hold the metal weight
         centredCube(0,length/2-edge_ends - weightHolderLength/2,width-edge*2,weightHolderLength,weight_depth+1.5);
         centredCube(0,-(length/2-edge_ends - weightHolderLength/2),width-edge*2,weightHolderLength,weight_depth+1.5);
+        
+        //buffers
+        translate([0,length/2-buffer_length/2,0]){
+    buffer(buffer_end_width, buffer_end_height, buffer_distance, buffer_length);
+}
+rotate([0,0,180]){
+    translate([0,length/2-buffer_length/2,0]){
+        buffer(buffer_end_width, buffer_end_height, buffer_distance, buffer_length);
+    }
+}   
+    //arm across the middle
+        centredCube(0,0,width-edge,5,weight_depth+1.5);
+
     }    
     
+//union of all the holes to punch out
     union(){
         //space for wheels
         translate([0,-axle_distance/2,0]){
@@ -199,7 +219,7 @@ difference(){
         }
         //extra deep hole for couplings
         translate([0,length/2-edge/2,-thick]){
-            cylinder(h=thick*3,r=m2_thread_size/2, $fn=200);
+            cylinder(h=thick*4,r=m2_thread_size/2, $fn=200);
         }
         translate([0,-(length/2-edge/2),-thick]){
             cylinder(h=thick*3,r=m2_thread_size/2, $fn=200);
@@ -211,15 +231,15 @@ difference(){
         
         screw_depth=2;
         
-        //holes for screws in sides
-        translate([edge/2-width/2,0,thick+1]){
+        //holes for screws in centre
+        translate([width/2-top_screw_holders_from_edge,0,thick+1]){
             cylinder(r=m2_head_size/2,h=thick-screw_depth+2,$fn=200,center=true);
             cylinder(r=m2_thread_size/2,h=thick*3,$fn=200,center=true);
         }
         
         
          //holes for screws in sides
-        translate([-(edge/2-width/2),0,thick+1]){
+        translate([-(width/2-top_screw_holders_from_edge),0,thick+1]){
             cylinder(r=m2_head_size/2,h=thick-screw_depth+2,$fn=200,center=true);
             cylinder(r=m2_thread_size/2,h=thick*3,$fn=200,center=true);
         }
@@ -269,12 +289,5 @@ translate([0,-(length/2-edge/2),thick]){
 
 axle_holder(axle_space, 20, axle_height);
 
-translate([0,length/2-buffer_length/2,0]){
-    buffer(buffer_end_width, buffer_end_height, buffer_distance, buffer_length);
-}
-rotate([0,0,180]){
-    translate([0,length/2-buffer_length/2,0]){
-        buffer(buffer_end_width, buffer_end_height, buffer_distance, buffer_length);
-    }
-}
+
 
