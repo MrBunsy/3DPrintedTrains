@@ -9,3 +9,7 @@ I've had some success at producing an equivilant to Hornby's X8031. This is comp
 ## Truck Base
 
 I'm still looking into ways to attach a top half to the truck, and this is only a prototype for testing dimensions, no modelled to look like a real truck yet.
+
+## Buffers
+
+0.2mm layer height without brim seems to print well.

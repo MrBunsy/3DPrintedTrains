@@ -67,7 +67,7 @@ module axle_mount(width,length, axle_height, axle_depth){
           //      }
             //}
     
-    extra_height = axle_height*0.5;
+    extra_height = axle_height*0.3;
     
     //didn't actually want a centred cube, push it so the inside edge will be at the endge of axle_space
     translate([-width/2,0,0]){
@@ -143,12 +143,12 @@ module axle_mount_decoration(width,length, axle_height, axle_depth){
             
             extraMountRatio=0.8;
             
-            translate([-width-decoration_thick*extraMountRatio,-bearing_mount_length*extraMountRatio/2, axle_height-bearing_mount_height*(1/extraMountRatio)]){
+            translate([-width-decoration_thick*extraMountRatio,-bearing_mount_length*extraMountRatio/2, axle_height-bearing_mount_height*(1/extraMountRatio)*0.8]){
                 cube([decoration_thick*extraMountRatio,bearing_mount_length*extraMountRatio,bearing_mount_height*(1/extraMountRatio)]);
             }
             //cart springs! or at least, crude representations of
-            radius = 10;
-            translate([-width-decoration_thick,0,-radius+axle_height-decoration_thick*3]){
+            radius = 8;
+            translate([-width-decoration_thick,0,-radius+axle_height-decoration_thick*2.2]){
                 rotate([0,90,0]){
                     difference(){
                     cylinder(h=decoration_thick,r=radius,$fn=200);
