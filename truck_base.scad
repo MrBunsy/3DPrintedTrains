@@ -71,28 +71,71 @@ module axle_mount(width,length, axle_height, axle_depth){
     
     //didn't actually want a centred cube, push it so the inside edge will be at the endge of axle_space
     translate([-width/2,0,0]){
-    
-    difference(){
-        centredCube(0,0,width,length, axle_height+extra_height);
-        union(){
-            //cone for axle to rest in
-             translate([width/2+0.01,0,axle_height]){
-                rotate([0,-90,0]){
-                    cylinder(h=axle_depth,r1=axle_depth/2, r2=0,$fn=200);
+        
+        difference(){
+            centredCube(0,0,width,length, axle_height+extra_height);
+            union(){
+                //cone for axle to rest in
+                 translate([width/2+0.01,0,axle_height]){
+                    rotate([0,-90,0]){
+                        cylinder(h=axle_depth,r1=axle_depth/2, r2=0,$fn=200);
+                    }
                 }
+                //groove to help slot axle in
+                translate([width/2,0,axle_height]){
+                    rotate([0,0,45]){
+                        centredCube(0,0,axle_depth*0.2,axle_depth*0.2,extra_height+0.01);
+                    }
+                }
+                
             }
-            //groove to help slot axle in
-            translate([width/2,0,axle_height]){
-                rotate([0,0,45]){
-                    centredCube(0,0,axle_depth*0.2,axle_depth*0.2,extra_height+0.01);
+        }
+    }
+    
+    pretty_stuff_thick = 1;
+    
+    //try and make it look like a real axle mount
+    difference(){
+        union(){
+            //note, sticking with length in +ve, width in +ve x
+            wonkyBitAngle = 60;
+            //length along the angle
+            wonkyBitLength = axle_height/sin(wonkyBitAngle);
+            //length in y axis
+            wonkyBitYFootprint = wonkyBitLength*cos(wonkyBitAngle);
+            wonkyBitZHeight = wonkyBitLength*sin(wonkyBitAngle);
+            
+            translate([0,-length*0.99,axle_height-wonkyBitZHeight/2]){
+                rotate([wonkyBitAngle,0,0]){
+                    //surface we want is lying flat in the xy plane
+                    translate([-width, -wonkyBitLength/2, -pretty_stuff_thick]){
+                        cube([width, wonkyBitLength, pretty_stuff_thick]);
+                 }
                 }
             }
             
+            rotate([0,0,180]){
+                //copypasta with tweak to this translate
+            translate([width,-length*0.99,axle_height-wonkyBitZHeight/2]){
+                rotate([wonkyBitAngle,0,0]){
+                    //surface we want is lying flat in the xy plane
+                    translate([-width, -wonkyBitLength/2, -pretty_stuff_thick]){
+                        cube([width, wonkyBitLength, pretty_stuff_thick]);
+                 }
+                }
+            }
+        }
+
+            
+        }
+        //lopping off anything that sticks through the bottom
+        translate([-500, -500, -100]){
+        cube([1000,1000,100]);
         }
     }
+    
+    
 }
-}
-
 
 module axle_holder(axle_space, x, axle_height){
     
@@ -117,13 +160,15 @@ module axle_holder(axle_space, x, axle_height){
             axle_mount(width,length, axle_height+thick, axle_depth);
         }
     }
+    
+    
+    
 }
 
 module coupling_mount(height){
    
     side_holders_top_r = 0.85;
     top_r_distance=14+side_holders_top_r;
-    
     difference(){
         cylinder(h=height,r=4.8/2, $fn=200);
        
@@ -146,6 +191,7 @@ module coupling_mount(height){
             cube([side_holders_top_r,side_holders_top_r*3,height]);
         }
     }
+    
     
 }
 
