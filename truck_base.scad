@@ -98,33 +98,35 @@ module axle_mount(width,length, axle_height, axle_depth){
     difference(){
         union(){
             //note, sticking with length in +ve, width in +ve x
-            wonkyBitAngle = 60;
+            wonkyBitAngle = 65;
             //length along the angle
-            wonkyBitLength = axle_height/sin(wonkyBitAngle);
+            wonkyBitLength = axle_height*1.1/sin(wonkyBitAngle);
             //length in y axis
             wonkyBitYFootprint = wonkyBitLength*cos(wonkyBitAngle);
             wonkyBitZHeight = wonkyBitLength*sin(wonkyBitAngle);
             
-            translate([0,-length*0.99,axle_height-wonkyBitZHeight/2]){
+            translate([0,-wonkyBitYFootprint-length/2,0]){
                 rotate([wonkyBitAngle,0,0]){
                     //surface we want is lying flat in the xy plane
-                    translate([-width, -wonkyBitLength/2, -pretty_stuff_thick]){
-                        cube([width, wonkyBitLength, pretty_stuff_thick]);
+                    translate([-width, 0, -pretty_stuff_thick]){
+                        cube([pretty_stuff_thick, wonkyBitLength, pretty_stuff_thick]);
                  }
                 }
             }
             
-            rotate([0,0,180]){
-                //copypasta with tweak to this translate
-            translate([width,-length*0.99,axle_height-wonkyBitZHeight/2]){
-                rotate([wonkyBitAngle,0,0]){
-                    //surface we want is lying flat in the xy plane
-                    translate([-width, -wonkyBitLength/2, -pretty_stuff_thick]){
-                        cube([width, wonkyBitLength, pretty_stuff_thick]);
-                 }
+            translate([pretty_stuff_thick-width*2,0,0]){
+                rotate([0,0,180]){
+                    translate([0,-wonkyBitYFootprint-length/2,0]){
+                        rotate([wonkyBitAngle,0,0]){
+                            //surface we want is lying flat in the xy plane
+                            translate([-width, 0, -pretty_stuff_thick]){
+                                cube([pretty_stuff_thick, wonkyBitLength, pretty_stuff_thick]);
+                         }
+                        }
+                    }
                 }
-            }
         }
+            
 
             
         }
