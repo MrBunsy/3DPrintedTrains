@@ -1,10 +1,14 @@
 //pointy bit to pointy bit of spare hornby axles
 axle_width = 25.65;
 
+//distance between the two axle holders (along the axle)
 //bachman spacing
 axle_space = 23.0;
 //hornby is 23.0
 //bachman 22.2
+
+//distance between the two axles (perpendicular to each axle)
+axle_distance = 40;
 
 //width of the bar holding the buffers
 buffer_end_width = 35;
@@ -35,7 +39,9 @@ weight_length=60+3;
 weight_width=9.7+1;
 weight_depth=3;
 
-axle_distance = 40;
+//how deep below the "top" surface the head of a scre should sit
+screw_depth = 2;
+
 
 //diameter around which there can be no obstructions for the wheels
 wheel_max_space = 17;
@@ -168,6 +174,54 @@ module axle_mount_decoration(width,length, axle_height, axle_depth){
     
 }
 
+//on the +ve x side
+module decorative_brake_mounts(x, length, height){
+    decoration_thick = 1;
+    
+   
+    
+    wonkyBitAngle = 75;
+    //length along the angle
+    wonkyBitLength = height/sin(wonkyBitAngle);
+    //length in y axis
+    wonkyBitYFootprint = wonkyBitLength*cos(wonkyBitAngle);
+    wonkyBitZHeight = wonkyBitLength*sin(wonkyBitAngle);
+    
+    //A frame with centred pillar
+    translate([0,-wonkyBitYFootprint/2-decoration_thick/2,wonkyBitZHeight/2]){
+        rotate([wonkyBitAngle,0,0]){
+            //put it so it's inline with the surface plane
+            translate([0,0,-decoration_thick]){
+                centredCube(x, 0, decoration_thick,wonkyBitLength,decoration_thick);
+            }
+        }
+    }
+    centredCube(x, 0, decoration_thick,decoration_thick,height);
+    translate([0,wonkyBitYFootprint/2+decoration_thick/2,wonkyBitZHeight/2]){
+        rotate([-wonkyBitAngle,0,0]){
+            //put it so it's inline with the surface plane
+            translate([0,0,-decoration_thick]){
+                centredCube(x, 0, decoration_thick,wonkyBitLength,decoration_thick);
+            }
+        }
+    }
+    
+    //"brake pad" bits
+    centredCube(x,length/2,decoration_thick,decoration_thick,height);
+    centredCube(x,-length/2,decoration_thick,decoration_thick,height);
+    
+    //levels to push brake pads
+    //these should be at an angle, but not sure that will print
+    translate([0,0,height*0.5]){
+        centredCube(x,-length/4,decoration_thick,length/2,decoration_thick);
+    }
+    
+    translate([0,0,height*0.7]){
+        centredCube(x,length/4,decoration_thick,length/2,decoration_thick);
+    }
+    
+}
+
 module axle_holder(axle_space, x, axle_height){
     
     width = 2.5;
@@ -285,7 +339,7 @@ rotate([0,0,180]){
     }
 }   
     //arm across the middle
-        centredCube(0,0,width-edge,5,weight_depth+1.5);
+        centredCube(0,0,width-edge,5,thick);
 
     }    
     
@@ -310,18 +364,17 @@ rotate([0,0,180]){
             centredCube(0,0,weight_width,weight_length,weight_depth+1);
         }
         
-        screw_depth=2;
-        
+
         //holes for screws in centre
-        translate([width/2-top_screw_holders_from_edge,0,thick+1]){
-            cylinder(r=m2_head_size/2,h=thick-screw_depth+2,$fn=200,center=true);
+        translate([width/2-top_screw_holders_from_edge,0,screw_depth]){
+            cylinder(r=m2_head_size/2,h=thick*3,$fn=200);
             cylinder(r=m2_thread_size/2,h=thick*3,$fn=200,center=true);
         }
         
         
          //holes for screws in sides
-        translate([-(width/2-top_screw_holders_from_edge),0,thick+1]){
-            cylinder(r=m2_head_size/2,h=thick-screw_depth+2,$fn=200,center=true);
+        translate([-(width/2-top_screw_holders_from_edge),0,screw_depth]){
+            cylinder(r=m2_head_size/2,h=thick*3,$fn=200);
             cylinder(r=m2_thread_size/2,h=thick*3,$fn=200,center=true);
         }
         
@@ -370,5 +423,10 @@ translate([0,-(length/2-edge/2),thick]){
 
 axle_holder(axle_space, 20, axle_height);
 
-
+translate([0,0,thick]){
+    decorative_brake_mounts(width/2-edge/4, axle_distance-wheel_max_space*0.9, axle_height*1.3);
+    rotate([0,0,180]){
+        decorative_brake_mounts(width/2-edge/4, axle_distance-wheel_max_space*0.9,axle_height*1.3);
+    }
+}
 
