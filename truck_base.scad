@@ -16,7 +16,7 @@ buffer_distance = 22.2;
 buffer_holder_d = 1.7;
 buffer_holder_length = 3;
 
-width=28;
+width=30;//28;
 length=75;
 thick = 3.5;
 
@@ -92,11 +92,21 @@ module axle_mount(width,length, axle_height, axle_depth){
         }
     }
     
-    pretty_stuff_thick = 1;
+    
+}
+//cartsprings, bracing and bearing box
+module axle_mount_decoration(width,length, axle_height, axle_depth){
+    
+    decoration_thick = 1;
+    bearing_mount_height = 3;
+    bearing_mount_length=2;
     
     //try and make it look like a real axle mount
     difference(){
         union(){
+            
+            //some sloping side holders for the axle mount
+            
             //note, sticking with length in +ve, width in +ve x
             wonkyBitAngle = 65;
             //length along the angle
@@ -108,28 +118,47 @@ module axle_mount(width,length, axle_height, axle_depth){
             translate([0,-wonkyBitYFootprint-length/2,0]){
                 rotate([wonkyBitAngle,0,0]){
                     //surface we want is lying flat in the xy plane
-                    translate([-width, 0, -pretty_stuff_thick]){
-                        cube([pretty_stuff_thick, wonkyBitLength, pretty_stuff_thick]);
+                    translate([-width, 0, -decoration_thick]){
+                        cube([decoration_thick, wonkyBitLength, decoration_thick]);
                  }
                 }
             }
             
-            translate([pretty_stuff_thick-width*2,0,0]){
+            translate([decoration_thick-width*2,0,0]){
                 rotate([0,0,180]){
                     translate([0,-wonkyBitYFootprint-length/2,0]){
                         rotate([wonkyBitAngle,0,0]){
                             //surface we want is lying flat in the xy plane
-                            translate([-width, 0, -pretty_stuff_thick]){
-                                cube([pretty_stuff_thick, wonkyBitLength, pretty_stuff_thick]);
+                            translate([-width, 0, -decoration_thick]){
+                                cube([decoration_thick, wonkyBitLength, decoration_thick]);
                          }
                         }
                     }
                 }
-        }
+            }   
+            //bearing mount
+            translate([-width-decoration_thick,-bearing_mount_length/2, axle_height-bearing_mount_height/2]){
+                cube([decoration_thick,bearing_mount_length,bearing_mount_height]);
+            }
             
-
+            extraMountRatio=0.8;
             
-        }
+            translate([-width-decoration_thick*extraMountRatio,-bearing_mount_length*extraMountRatio/2, axle_height-bearing_mount_height*(1/extraMountRatio)]){
+                cube([decoration_thick*extraMountRatio,bearing_mount_length*extraMountRatio,bearing_mount_height*(1/extraMountRatio)]);
+            }
+            //cart springs! or at least, crude representations of
+            radius = 10;
+            translate([-width-decoration_thick,0,-radius+axle_height-decoration_thick*3]){
+                rotate([0,90,0]){
+                    difference(){
+                    cylinder(h=decoration_thick,r=radius,$fn=200);
+                    cylinder(h=decoration_thick*3,r=radius-decoration_thick,$fn=200, center=true);
+                    }
+                }
+            }
+        
+            
+        }//end of union
         //lopping off anything that sticks through the bottom
         translate([-500, -500, -100]){
         cube([1000,1000,100]);
@@ -147,19 +176,23 @@ module axle_holder(axle_space, x, axle_height){
     
     translate([-axle_space/2,-axle_distance/2,0]){
         axle_mount(width,length, axle_height+thick, axle_depth);
+        axle_mount_decoration(width,length, axle_height+thick, axle_depth);
     }
     
     translate([-axle_space/2,axle_distance/2,0]){
         axle_mount(width,length, axle_height+thick, axle_depth);
+        axle_mount_decoration(width,length, axle_height+thick, axle_depth);
     }
     
     rotate([0,0,180]){
         translate([-axle_space/2,-axle_distance/2,0]){
             axle_mount(width,length, axle_height+thick, axle_depth);
+            axle_mount_decoration(width,length, axle_height+thick, axle_depth);
         }
         
         translate([-axle_space/2,axle_distance/2,0]){
             axle_mount(width,length, axle_height+thick, axle_depth);
+            axle_mount_decoration(width,length, axle_height+thick, axle_depth);
         }
     }
     
