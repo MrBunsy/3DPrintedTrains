@@ -24,7 +24,15 @@ cylinder(r=buffer_holder_d/2,h=total_length+holder_length, $fn=200);
 
 translate([0,0,total_length-endplate_length]){
     intersection(){
-    cylinder(r=endplate_d/2, h=endplate_length, $fn=200);
+        union(){
+            cylinder(r=endplate_d/2, h=endplate_length, $fn=200);
+            cone_height = 1;
+            //add a cone around the truck end, should help it print more cleanly
+            translate([0,0,-endplate_length*2]){
+                cylinder(r2=endplate_d/2,r1=pole_diameter/2, h=cone_height,$fn=200);
+            }
+        }
         cube([100,max_height,100], center=true);
     }
 }
+
