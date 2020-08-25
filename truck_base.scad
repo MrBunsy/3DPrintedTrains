@@ -73,7 +73,7 @@ module axle_mount(width,length, axle_height, axle_depth){
           //      }
             //}
     
-    extra_height = axle_height*0.3;
+    extra_height = axle_height*0.4;
     
     //didn't actually want a centred cube, push it so the inside edge will be at the endge of axle_space
     translate([-width/2,0,0]){
@@ -107,6 +107,15 @@ module axle_mount_decoration(width,length, axle_height, axle_depth){
     bearing_mount_height = 3;
     bearing_mount_length=2;
     
+    //copy pasted...
+    extra_height = axle_height*0.4;
+    
+    //little ledge at the bottom
+    
+    translate([-width-decoration_thick/2, -length/2, axle_height+extra_height-decoration_thick/2]){
+        cube([decoration_thick/2, length, decoration_thick/2]);
+    }
+    
     //try and make it look like a real axle mount
     difference(){
         union(){
@@ -116,7 +125,7 @@ module axle_mount_decoration(width,length, axle_height, axle_depth){
             //note, sticking with length in +ve, width in +ve x
             wonkyBitAngle = 65;
             //length along the angle
-            wonkyBitLength = axle_height*1.1/sin(wonkyBitAngle);
+            wonkyBitLength = axle_height*1.2/sin(wonkyBitAngle);
             //length in y axis
             wonkyBitYFootprint = wonkyBitLength*cos(wonkyBitAngle);
             wonkyBitZHeight = wonkyBitLength*sin(wonkyBitAngle);
@@ -175,12 +184,12 @@ module axle_mount_decoration(width,length, axle_height, axle_depth){
 }
 
 //on the +ve x side
-module decorative_brake_mounts(x, length, height){
+module decorative_brake_mounts(x, length, height, lever_y, edge){
     decoration_thick = 1;
     
    
     
-    wonkyBitAngle = 75;
+    wonkyBitAngle = 65;
     //length along the angle
     wonkyBitLength = height/sin(wonkyBitAngle);
     //length in y axis
@@ -210,7 +219,7 @@ module decorative_brake_mounts(x, length, height){
     centredCube(x,length/2,decoration_thick,decoration_thick,height);
     centredCube(x,-length/2,decoration_thick,decoration_thick,height);
     
-    //levels to push brake pads
+    //levers to push brake pads
     //these should be at an angle, but not sure that will print
     translate([0,0,height*0.5]){
         centredCube(x,-length/4,decoration_thick,length/2,decoration_thick);
@@ -220,6 +229,13 @@ module decorative_brake_mounts(x, length, height){
         centredCube(x,length/4,decoration_thick,length/2,decoration_thick);
     }
     
+    //lever to control brakes
+    centredCube(edge-decoration_thick/2,lever_y,decoration_thick, decoration_thick, height);
+    
+    bottom_size = decoration_thick*2;
+    translate([0,0, height-decoration_thick]){
+        centredCube(edge-bottom_size/2,lever_y-bottom_size/2,bottom_size, bottom_size, decoration_thick);
+    }
 }
 
 module axle_holder(axle_space, x, axle_height){
@@ -424,9 +440,9 @@ translate([0,-(length/2-edge/2),thick]){
 axle_holder(axle_space, 20, axle_height);
 
 translate([0,0,thick]){
-    decorative_brake_mounts(width/2-edge/4, axle_distance-wheel_max_space*0.9, axle_height*1.3);
+    decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_space, axle_height*1.3,axle_distance/2+wheel_max_space*0.25, width/2);
     rotate([0,0,180]){
-        decorative_brake_mounts(width/2-edge/4, axle_distance-wheel_max_space*0.9,axle_height*1.3);
+        decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_space,axle_height*1.3, axle_distance/2+wheel_max_space*0.25, width/2);
     }
 }
 
