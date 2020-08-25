@@ -1,12 +1,16 @@
 width=35;
+
 length=75;
 
-wall_thick=2;
+wall_thick=1.5;
 base_thick=2;
 
+//height of the apex of the ends
 height=31;
 //aiming for side height of 26;
-roof_radius=30;
+roof_radius=31.4;
+side_height= roof_radius*cos(asin((width/2)/roof_radius));
+echo(side_height);
 
 plank_height=2.25;
 plank_indent=0.1;
@@ -23,6 +27,7 @@ door_length=length/3;
 top_screw_holders_from_edge = 5;
 m2_thread_size=2.2;
 edge=5;
+truck_width=30;
 
 //similar but trying not the same as truck_base
 module centredCube(width,length, height){
@@ -80,6 +85,7 @@ module door(){
 }
 
 
+difference(){
 //intersect with horizontal cylinder for roof shape
 intersection(){
         
@@ -153,10 +159,10 @@ intersection(){
             
             //subtract screw holes as well
             
-        translate([-(width/2-top_screw_holders_from_edge),0,0]){
+        translate([-(truck_width/2-top_screw_holders_from_edge),0,0]){
             cylinder(r=m2_thread_size/2,h=height*2,$fn=200,center=true);
         }
-        translate([(width/2-top_screw_holders_from_edge),0,0]){
+        translate([(truck_width/2-top_screw_holders_from_edge),0,0]){
             cylinder(r=m2_thread_size/2,h=height*2,$fn=200,center=true);
         }
         
@@ -203,7 +209,36 @@ intersection(){
         translate([-width/2,-(length-door_length)/2,0]){
             centredCube(mid_support_width,mid_support_width,height*100);
         }
-        
+        section_width=(length-door_length)/2-mid_support_width;
+        cross_support_angle = atan(side_height/section_width);
+        echo(cross_support_angle);
+        //cross mid support
+        translate([width/2, door_length/2 + section_width/2 + mid_support_width,side_height/2]){
+            rotate([cross_support_angle-90,0,0]){
+                cube([mid_support_width,mid_support_width,height*2], center=true);
+            }
+        }
+        mirror([1,0,0]){
+            translate([width/2, door_length/2 + section_width/2 + mid_support_width,side_height/2]){
+                rotate([cross_support_angle-90,0,0]){
+                    cube([mid_support_width,mid_support_width,height*2], center=true);
+                }
+            }
+        }
+        rotate([0,0,180]){
+            translate([width/2, door_length/2 + section_width/2 + mid_support_width,side_height/2]){
+                rotate([cross_support_angle-90,0,0]){
+                    cube([mid_support_width,mid_support_width,height*2], center=true);
+                }
+            }
+            mirror([1,0,0]){
+            translate([width/2, door_length/2 + section_width/2 + mid_support_width,side_height/2]){
+                rotate([cross_support_angle-90,0,0]){
+                    cube([mid_support_width,mid_support_width,height*2], center=true);
+                }
+            }
+        }
+        }
         //end mid supports
         translate([(width/3)/2,-length/2,0]){
             centredCube(mid_support_width,mid_support_width,height*100);
@@ -226,13 +261,19 @@ intersection(){
         door();
     }
 
-    //lop off the bits that would stick outside the roof
+    //only include bits that wouldn't stick outside the roof
     translate([0,0,height-roof_radius]){
         rotate([90,0,0]){
             cylinder(r=roof_radius,h=length*2,center=true,$fn=200);
         }
     }
+}//end intersection with roof cylinder
+
+    translate([0,0,-50]){
+        cube([100,100,100], center=true);
     }
+
+}//end difference with chopping off floor
     
     
 
