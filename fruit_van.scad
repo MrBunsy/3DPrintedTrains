@@ -12,13 +12,16 @@ roof_radius=31.4;
 side_height= roof_radius*cos(asin((width/2)/roof_radius));
 echo(side_height);
 
-vent_height = height*0.275;
-vent_angle = 10;
+hole_for_battery_cables = true;
+cable_d=6;
 
-plank_height=2.25;
+plank_height= side_height/12;//2.25;
 plank_indent=0.1;
 support_width = 1.5;
 mid_support_width = 1.1;
+
+vent_height = plank_height*4.5;//height*0.35;
+vent_angle = 8;
 
 door_width=0.5;
 door_adornments_width=1;
@@ -43,7 +46,7 @@ module centredCube(width,length, height){
 //facing +ve x
 module door(){
     translate([width/2,0,0]){
-
+        hinges_height = side_height*0.15;
         difference(){
             centredCube(door_width,door_length,height);
             union(){
@@ -60,6 +63,19 @@ module door(){
         //centreline
         centredCube(door_adornments_width,door_adornments_width,height);
         
+        handle_length = door_adornments_width*1.5;
+        
+        translate([0,-handle_length/2,side_height/2-door_adornments_width/2]){
+            //handle/lock in the centre
+            centredCube(door_adornments_width,handle_length,door_adornments_width);
+        }
+        
+        translate([0,0,0]){
+            //handle/lock at the bottom
+            centredCube(door_adornments_width,door_adornments_width*2,door_adornments_width);
+        }
+        
+        
         //either side
         translate([0,door_length/2,0]){
             centredCube(door_adornments_width,door_adornments_width,height);
@@ -69,16 +85,16 @@ module door(){
         }
         hinge_length = door_length*0.4;
         //hinges
-        translate([0,-door_length/2+hinge_length/2,height*0.1]){
+        translate([0,-door_length/2+hinge_length/2,hinges_height-door_adornments_width/2]){
             centredCube(door_adornments_width,hinge_length,door_adornments_width);
         }
-        translate([0,-(-door_length/2+hinge_length/2),height*0.1]){
+        translate([0,-(-door_length/2+hinge_length/2),hinges_height-door_adornments_width/2]){
             centredCube(door_adornments_width,hinge_length,door_adornments_width);
         }
-        translate([0,-door_length/2+hinge_length/2,height*0.65]){
+        translate([0,-door_length/2+hinge_length/2,side_height-hinges_height-door_adornments_width/2]){
             centredCube(door_adornments_width,hinge_length,door_adornments_width);
         }
-        translate([0,-(-door_length/2+hinge_length/2),height*0.65]){
+        translate([0,-(-door_length/2+hinge_length/2),side_height-hinges_height-door_adornments_width/2]){
             centredCube(door_adornments_width,hinge_length,door_adornments_width);
         }
     }
@@ -128,7 +144,7 @@ intersection(){
         
         //subtract notches to make things look like planks
         union(){
-            for(i=[1:9]){
+            for(i=[1:20]){
                 //subtract all the bits to make it look like planks
                 translate([width/2+sqrt(2)*wall_thick/2-plank_indent,0,i*plank_height]){
                     rotate([0,45,0]){
@@ -150,7 +166,7 @@ intersection(){
             }
             
             rotate([0,0,180]){
-                  for(i=[1:9]){
+                  for(i=[1:20]){
                 //subtract all the bits to make it look like planks
                 translate([width/2+sqrt(2)*wall_thick/2-plank_indent,0,i*plank_height]){
                     rotate([0,45,0]){
@@ -331,9 +347,15 @@ intersection(){
     translate([0,0,-50]){
         cube([100,100,100], center=true);
     }
+    if(hole_for_battery_cables){
+        translate([0,length/2,cable_d/2+base_thick]){
+            rotate([90,0,0]){
+                cylinder(h=wall_thick*10,r=cable_d/2,center=true,$fn=200);
+            }
+        }
+    }
 
 }//end difference with chopping off floor
-    
     
 
 
