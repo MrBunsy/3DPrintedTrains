@@ -12,6 +12,9 @@ roof_radius=31.4;
 side_height= roof_radius*cos(asin((width/2)/roof_radius));
 echo(side_height);
 
+vent_height = height*0.275;
+vent_angle = 10;
+
 plank_height=2.25;
 plank_indent=0.1;
 support_width = 1.5;
@@ -40,11 +43,9 @@ module centredCube(width,length, height){
 //facing +ve x
 module door(){
     translate([width/2,0,0]){
-        rotate([0,0,45]){
-                  //  cube([plank_height,plank_height,height*3],center = true);
-                }
+
         difference(){
-            centredCube(door_width,door_length,height*3);
+            centredCube(door_width,door_length,height);
             union(){
                 //plank effects
                 for(i=[-5:5]){
@@ -84,6 +85,20 @@ module door(){
     
 }
 
+//facing +ve y
+module vent(width, height,angle){
+    thick = height*sin(angle);
+    difference(){
+        translate([0,thick,0]){
+            rotate([90+angle,0, 0]){
+                cube([width, height,thick]);
+            }
+        }
+        translate([0,-50,0]){
+            cube([width*2,100,100],center=true);
+        }
+    }
+}
 
 difference(){
 //intersect with horizontal cylinder for roof shape
@@ -178,36 +193,36 @@ intersection(){
         
         //posts in corners
         translate([width/2,length/2,0]){
-            centredCube(support_width,support_width,height*100);
+            centredCube(support_width,support_width,height);
         }
         //posts in corners
         translate([-width/2,length/2,0]){
-            centredCube(support_width,support_width,height*100);
+            centredCube(support_width,support_width,height);
         }
         //posts in corners
         translate([-width/2,-length/2,0]){
-            centredCube(support_width,support_width,height*100);
+            centredCube(support_width,support_width,height);
         }
         //posts in corners
         translate([width/2,-length/2,0]){
-            centredCube(support_width,support_width,height*100);
+            centredCube(support_width,support_width,height);
         }
         
         //mid supports
         translate([width/2,(length-door_length)/2,0]){
-            centredCube(mid_support_width,mid_support_width,height*100);
+            centredCube(mid_support_width,mid_support_width,height);
         }
         //mid supports
         translate([width/2,-(length-door_length)/2,0]){
-            centredCube(mid_support_width,mid_support_width,height*100);
+            centredCube(mid_support_width,mid_support_width,height);
         }
         //mid supports
         translate([-width/2,(length-door_length)/2,0]){
-            centredCube(mid_support_width,mid_support_width,height*100);
+            centredCube(mid_support_width,mid_support_width,height);
         }
         //mid supports
         translate([-width/2,-(length-door_length)/2,0]){
-            centredCube(mid_support_width,mid_support_width,height*100);
+            centredCube(mid_support_width,mid_support_width,height);
         }
         section_width=(length-door_length)/2-mid_support_width;
         cross_support_angle = atan(side_height/section_width);
@@ -239,21 +254,65 @@ intersection(){
             }
         }
         }
-        //end mid supports
+        
+        
+        //mid supports on the ends
         translate([(width/3)/2,-length/2,0]){
-            centredCube(mid_support_width,mid_support_width,height*100);
+            centredCube(mid_support_width,mid_support_width,height);
         }
         translate([(-width/3)/2,-length/2,0]){
-            centredCube(mid_support_width,mid_support_width,height*100);
+            centredCube(mid_support_width,mid_support_width,height);
         }
         translate([(width/3)/2, length/2,0]){
-            centredCube(mid_support_width,mid_support_width,height*100);
+            centredCube(mid_support_width,mid_support_width,height);
         }
         translate([(-width/3)/2, length/2,0]){
-            centredCube(mid_support_width,mid_support_width,height*100);
+            centredCube(mid_support_width,mid_support_width,height);
+        }
+        cross_support_angle_end = atan((height-vent_height)/(width/3));
+        cross_support_length_end = sqrt((height-vent_height)*(height-vent_height) + (width/3)*(width/3));
+        //vents on the ends
+        translate([width/6+mid_support_width/2,length/2, height-vent_height]){
+            vent(width/3-mid_support_width, vent_height, vent_angle);
+        }
+        
+        translate([-width/2,length/2,0]){
+            rotate([0,90-cross_support_angle_end,0]){
+                centredCube(mid_support_width,mid_support_width,cross_support_length_end);
+            }
         }
         
         
+        mirror([0,1,0]){
+            translate([width/6+mid_support_width/2,length/2,height-vent_height]){
+                vent(width/3-mid_support_width, vent_height, vent_angle);
+            }
+            translate([-width/2,length/2,0]){
+            rotate([0,90-cross_support_angle_end,0]){
+                centredCube(mid_support_width,mid_support_width,cross_support_length_end);
+            }
+        }
+        }
+        mirror([1,0,0]){
+            translate([width/6+mid_support_width/2,length/2,height-vent_height]){
+                vent(width/3-mid_support_width, vent_height, vent_angle);
+            }
+            translate([-width/2,length/2,0]){
+            rotate([0,90-cross_support_angle_end,0]){
+                centredCube(mid_support_width,mid_support_width,cross_support_length_end);
+            }
+        }
+            mirror([0,1,0]){
+                translate([width/6+mid_support_width/2,length/2,height-vent_height]){
+                    vent(width/3-mid_support_width, vent_height, vent_angle);
+                }
+                translate([-width/2,length/2,0]){
+            rotate([0,90-cross_support_angle_end,0]){
+                centredCube(mid_support_width,mid_support_width,cross_support_length_end);
+            }
+        }
+            }
+        }
         rotate([0,0,180]){
             door();
         }
