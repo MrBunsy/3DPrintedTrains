@@ -29,8 +29,9 @@ top_screw_holders_from_edge = 5;
 
 //1.7 tiny bit too tight
 //1.9 fine for the coarse thread screws, bit tight for fine 
-//2.1 seems to print fine in grey PLA, but not black... trying 2.2
-m2_thread_size=2.25;
+//2.1 seems to print fine in grey PLA, but not black... trying 2.25
+//2.25 thread slipped on one screw
+m2_thread_size=2.2;
 m2_head_size=4.5;
 
 
