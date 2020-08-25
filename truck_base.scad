@@ -30,7 +30,7 @@ top_screw_holders_from_edge = 5;
 //1.7 tiny bit too tight
 //1.9 fine for the coarse thread screws, bit tight for fine 
 //2.1 seems to print fine in grey PLA, but not black... trying 2.2
-m2_thread_size=2.2;
+m2_thread_size=2.25;
 m2_head_size=4.5;
 
 
@@ -234,8 +234,8 @@ module decorative_brake_mounts(x, length, height, lever_y, edge){
     }
     
     //lever to control brakes
-    
-        centredCube(edge-decoration_thick/2,lever_y,decoration_thick, decoration_thick, height);
+        translate([0,0,-thick/2])
+        centredCube(edge,lever_y,decoration_thick*2, decoration_thick, height+thick/2);
         
         bottom_size = decoration_thick*2;
         translate([0,0, height-decoration_thick]){
@@ -346,6 +346,32 @@ difference(){
             }
             
         }
+        //girder-bits 
+        //for the buffers
+        girder_thick=0.5;
+        centredCube(0,length/2-girder_thick/2-buffer_length,buffer_end_width,girder_thick,girder_thick);
+        translate([0,0,thick-girder_thick]){
+            centredCube(0,length/2-girder_thick/2-buffer_length,buffer_end_width,girder_thick,girder_thick);
+        }
+        rotate([0,0,180]){
+            centredCube(0,length/2-girder_thick/2-buffer_length,buffer_end_width,girder_thick,girder_thick);
+            translate([0,0,thick-girder_thick]){
+                centredCube(0,length/2-girder_thick/2-buffer_length,buffer_end_width,girder_thick,girder_thick);
+            }
+        }
+        //for the sides
+        centredCube(width/2+girder_thick/2,0,girder_thick, length,girder_thick);
+        translate([0,0,thick-girder_thick]){
+            centredCube(width/2+girder_thick/2,0,girder_thick, length,girder_thick);
+        }
+        rotate([0,0,180]){
+            centredCube(width/2+girder_thick/2,0,girder_thick, length,girder_thick);
+            translate([0,0,thick-girder_thick]){
+                centredCube(width/2+girder_thick/2,0,girder_thick, length,girder_thick);
+            }
+        }
+        
+        
         weightHolderLength=3;
         //extra bit to hold the metal weight
         centredCube(0,length/2-edge_ends - weightHolderLength/2,width-edge*2,weightHolderLength,weight_depth+1.5);
