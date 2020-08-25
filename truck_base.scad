@@ -17,7 +17,7 @@ buffer_end_height = 3.5;
 buffer_length = 1.5;
 //how far apart the centres of the buffers are
 buffer_distance = 22.2;
-buffer_holder_d = 1.7;
+buffer_holder_d = 2;//1.7;
 buffer_holder_length = 3;
 
 width=30;//28;
@@ -29,7 +29,8 @@ top_screw_holders_from_edge = 5;
 
 //1.7 tiny bit too tight
 //1.9 fine for the coarse thread screws, bit tight for fine 
-m2_thread_size=2.1;
+//2.1 seems to print fine in grey PLA, but not black... trying 2.2
+m2_thread_size=2.2;
 m2_head_size=4.5;
 
 
@@ -196,45 +197,50 @@ module decorative_brake_mounts(x, length, height, lever_y, edge){
     wonkyBitYFootprint = wonkyBitLength*cos(wonkyBitAngle);
     wonkyBitZHeight = wonkyBitLength*sin(wonkyBitAngle);
     
+    //accidentally developed on wrong side
+    mirror([1,0,0]){
+    
     //A frame with centred pillar
     translate([0,-wonkyBitYFootprint/2-decoration_thick/2,wonkyBitZHeight/2]){
         rotate([wonkyBitAngle,0,0]){
             //put it so it's inline with the surface plane
             translate([0,0,-decoration_thick]){
-                centredCube(x, 0, decoration_thick,wonkyBitLength,decoration_thick);
+                centredCube(x, 0, decoration_thick*2,wonkyBitLength,decoration_thick);
             }
         }
     }
-    centredCube(x, 0, decoration_thick,decoration_thick,height);
+    centredCube(x, 0, decoration_thick*2,decoration_thick,height);
     translate([0,wonkyBitYFootprint/2+decoration_thick/2,wonkyBitZHeight/2]){
         rotate([-wonkyBitAngle,0,0]){
             //put it so it's inline with the surface plane
             translate([0,0,-decoration_thick]){
-                centredCube(x, 0, decoration_thick,wonkyBitLength,decoration_thick);
+                centredCube(x, 0, decoration_thick*2,wonkyBitLength,decoration_thick);
             }
         }
     }
     
     //"brake pad" bits
-    centredCube(x,length/2,decoration_thick,decoration_thick,height);
-    centredCube(x,-length/2,decoration_thick,decoration_thick,height);
+    centredCube(x,length/2,decoration_thick*2,decoration_thick,height);
+    centredCube(x,-length/2,decoration_thick*2,decoration_thick,height);
     
     //levers to push brake pads
     //these should be at an angle, but not sure that will print
     translate([0,0,height*0.5]){
-        centredCube(x,-length/4,decoration_thick,length/2,decoration_thick);
+        centredCube(x,-length/4,decoration_thick*2,length/2,decoration_thick);
     }
     
     translate([0,0,height*0.7]){
-        centredCube(x,length/4,decoration_thick,length/2,decoration_thick);
+        centredCube(x,length/4,decoration_thick*2,length/2,decoration_thick);
     }
     
     //lever to control brakes
-    centredCube(edge-decoration_thick/2,lever_y,decoration_thick, decoration_thick, height);
     
-    bottom_size = decoration_thick*2;
-    translate([0,0, height-decoration_thick]){
-        centredCube(edge-bottom_size/2,lever_y-bottom_size/2,bottom_size, bottom_size, decoration_thick);
+        centredCube(edge-decoration_thick/2,lever_y,decoration_thick, decoration_thick, height);
+        
+        bottom_size = decoration_thick*2;
+        translate([0,0, height-decoration_thick]){
+            centredCube(edge-bottom_size/2,lever_y-bottom_size/2,bottom_size, bottom_size, decoration_thick);
+        }
     }
 }
 
@@ -356,7 +362,14 @@ rotate([0,0,180]){
 }   
     //arm across the middle
         centredCube(0,0,width-edge,5,thick);
-
+    
+        //decorative brake system
+        translate([0,0,thick]){
+            decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_space, axle_height*1.3,axle_distance/2+wheel_max_space*0.25, width/2);
+            rotate([0,0,180]){
+                decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_space,axle_height*1.3, axle_distance/2+wheel_max_space*0.25, width/2);
+            }
+        }
     }    
     
 //union of all the holes to punch out
@@ -439,10 +452,5 @@ translate([0,-(length/2-edge/2),thick]){
 
 axle_holder(axle_space, 20, axle_height);
 
-translate([0,0,thick]){
-    decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_space, axle_height*1.3,axle_distance/2+wheel_max_space*0.25, width/2);
-    rotate([0,0,180]){
-        decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_space,axle_height*1.3, axle_distance/2+wheel_max_space*0.25, width/2);
-    }
-}
+
 

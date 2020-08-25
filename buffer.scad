@@ -5,7 +5,8 @@ holder_diameter=2;//1.8;
 total_length=5.5;
 pole_length = 1;
 end_length=0.8;
-buffer_holder_d=1.5;
+//1.8 bit too big for the 2.0 diameter holes
+buffer_holder_d=1.7;//1.5;
 
 endplate_d = end_diameter;
 endplate_length=0.5;
