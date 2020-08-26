@@ -6,11 +6,16 @@ wall_thick=1.5;
 base_thick=2;
 height=31;
 roof_radius=31.4;
+door_length=length/3;
 
 roof_overhang=3;
 roof_thick=2;
 
 wiggle_room=1.5;
+
+
+rain_guard_r = length*1.5;
+rain_guard_from_edge = width*0.05;
 
 end_ridges_thick=0.5;
 end_ridges_wide=1;
@@ -85,7 +90,33 @@ translate([0,0,-side_height]){//get everything in line with the xy plane
             
             }
         }
-        
+        //rain guard
+        intersection(){
+        intersection(){
+            union(){
+                translate([rain_guard_r+width/2+roof_overhang-rain_guard_from_edge,0,0]){
+                    difference(){
+                        cylinder(r=rain_guard_r+rain_guard_thick, h=70,$fn=200);
+                        cylinder(r=rain_guard_r, h=100,$fn=200);
+                    }
+                }
+                mirror([1,0,0]){
+                    translate([rain_guard_r+width/2+roof_overhang-rain_guard_from_edge,0,0]){
+                    difference(){
+                        cylinder(r=rain_guard_r+rain_guard_thick, h=70,$fn=200);
+                        cylinder(r=rain_guard_r, h=100,$fn=200);
+                    }
+                }
+            }
+            }
+            
+            rotate([90,0,0]){
+                    cylinder(r=roof_radius+roof_thick+rain_guard_thick,h=length,center=true,$fn=200);
+                    }
+        }
+        //don't allow overhang beyond the roof (or too far from edges of door)
+        cube([width+roof_overhang*2,door_length*1.2,100], center=true);
+    }
         
     }
     //remove anythign below the roof
