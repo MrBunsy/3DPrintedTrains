@@ -1,10 +1,11 @@
-width=35;
+
 
 length=75;
 
 wall_thick=1.5;
 base_thick=2;
 
+width=35;
 //height of the apex of the ends
 height=31;
 //aiming for side height of 26;
@@ -13,10 +14,10 @@ side_height= roof_radius*cos(asin((width/2)/roof_radius));
 echo(side_height);
 
 hole_for_battery_cables = true;
-cable_d=6;
+cable_d=5.5;
 
 plank_height= side_height/12;//2.25;
-plank_indent=0.1;
+plank_indent=0.25;
 support_width = 1.5;
 mid_support_width = 1.1;
 
@@ -31,7 +32,9 @@ door_length=length/3;
 //from truck base
 //wall thickness + screw head size + wiggle room
 top_screw_holders_from_edge = 5;
-m2_thread_size=2.2;
+//turns out my screws weren't m2. 2.2 works for the screws provided with couplings
+//trying actually 2.0 for m2
+m2_thread_size=2.0;
 edge=5;
 truck_width=30;
 
