@@ -8,7 +8,7 @@ height=31;
 roof_radius=31.4;
 door_length=length/3;
 
-roof_overhang=3;
+roof_overhang=1;
 roof_thick=2;
 
 wiggle_room=1.5;
@@ -19,7 +19,7 @@ rain_guard_from_edge = width*0.05;
 
 end_ridges_thick=0.5;
 end_ridges_wide=1;
-rain_guard_thick=0.3;
+rain_guard_thick=0.6;
 
 side_height= roof_radius*cos(asin((roof_overhang+width/2)/roof_radius));
 side_height2 = sqrt(roof_radius*roof_radius - (width/2)*(width/2));
@@ -27,12 +27,13 @@ echo(side_height);
 echo(side_height2);
 
 difference(){
-translate([0,0,-side_height]){//get everything in line with the xy plane
+    //extra 0.2 to try and ensure sides of roof start on the plate, not floating in mid-air...
+translate([0,0,-side_height-0.3]){//get everything in line with the xy plane
     
     //inner section which will slot into the van
     intersection(){
         translate([0,0,height/2]){
-            cube([width-wiggle_room,length-wiggle_room,height*2], center=true);
+            cube([width-wall_thick*2-wiggle_room,length-wiggle_room-wall_thick*2,height*2], center=true);
         }
         rotate([90,0,0]){
                 cylinder(r=roof_radius,h=length+roof_overhang*4,center=true,$fn=200);
@@ -68,7 +69,7 @@ translate([0,0,-side_height]){//get everything in line with the xy plane
                     cube([width+roof_overhang*2,length+roof_overhang*2,100], center=true);
                 }
             
-                translate([0,length/2+roof_overhang/2+end_ridges_wide,0]){
+                translate([0,length/2+end_ridges_wide,0]){
                 rotate([90,0,0]){
                     cylinder(r=roof_radius+roof_thick+end_ridges_thick,h=end_ridges_wide,center=true,$fn=200);
                 }
@@ -82,7 +83,7 @@ translate([0,0,-side_height]){//get everything in line with the xy plane
                     cube([width+roof_overhang*2,length+roof_overhang*2,100], center=true);
                 }
             
-                translate([0,length/2+roof_overhang/2+end_ridges_wide,0]){
+                translate([0,length/2+end_ridges_wide,0]){
                 rotate([90,0,0]){
                     cylinder(r=roof_radius+roof_thick+end_ridges_thick,h=end_ridges_wide,center=true,$fn=200);
                     }
