@@ -6,12 +6,12 @@ length=75+10;
 wall_thick=1.5;
 base_thick=4;
 
-width=35;
+width=35+1;
 //height of the apex of the ends
-height=31;
+height=31+8;
 //aiming for side height of 26;
 roof_radius=31.4;
-side_height= roof_radius*cos(asin((width/2)/roof_radius));
+side_height= roof_radius*cos(asin((width/2)/roof_radius)) - (roof_radius-height);
 echo(side_height);
 //distance between the two axles (perpendicular to each axle)
 axle_distance = 40;
@@ -291,26 +291,26 @@ intersection(){
         cross_support_angle = atan(side_height/section_width);
         echo(cross_support_angle);
         //cross mid support
-        translate([width/2, door_length/2 + section_width/2 + mid_support_width,side_height/2]){
+        translate([width/2, door_length/2 + section_width/2 + mid_support_width/2,side_height/2]){
             rotate([cross_support_angle-90,0,0]){
                 cube([mid_support_width,mid_support_width,height*2], center=true);
             }
         }
         mirror([1,0,0]){
-            translate([width/2, door_length/2 + section_width/2 + mid_support_width,side_height/2]){
+            translate([width/2, door_length/2 + section_width/2 + mid_support_width/2,side_height/2]){
                 rotate([cross_support_angle-90,0,0]){
                     cube([mid_support_width,mid_support_width,height*2], center=true);
                 }
             }
         }
         rotate([0,0,180]){
-            translate([width/2, door_length/2 + section_width/2 + mid_support_width,side_height/2]){
+            translate([width/2, door_length/2 + section_width/2 + mid_support_width/2,side_height/2]){
                 rotate([cross_support_angle-90,0,0]){
                     cube([mid_support_width,mid_support_width,height*2], center=true);
                 }
             }
             mirror([1,0,0]){
-            translate([width/2, door_length/2 + section_width/2 + mid_support_width,side_height/2]){
+            translate([width/2, door_length/2 + section_width/2 + mid_support_width/2,side_height/2]){
                 rotate([cross_support_angle-90,0,0]){
                     cube([mid_support_width,mid_support_width,height*2], center=true);
                 }
