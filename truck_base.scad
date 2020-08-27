@@ -21,7 +21,7 @@ buffer_holder_d = 2;//1.7;
 buffer_holder_length = 3;
 
 width=30;//28;
-length=75;
+length=75 + 10;
 thick = 3.5;
 
 //wall thickness + screw head size + wiggle room
@@ -33,6 +33,7 @@ top_screw_holders_from_edge = 5;
 //2.25 thread slipped on one screw
 //trying 2.0 for a real m2, not whatever it was I was using before
 m2_thread_size=2.0;
+m2_thread_size_loose = 2.3;
 m2_head_size=4.5;
 
 
@@ -58,7 +59,8 @@ axle_height = 5;
 
 
 edge=5;
-edge_ends=5;
+edge_ends=15;
+coupling_from_edge=2.5;
 
 //centred in xy plane
 module centredCube(x,y,width,length, height){
@@ -422,17 +424,15 @@ rotate([0,0,180]){
         }
         
 
-        //holes for screws in centre
+        //holes for screws to hold the top half on (aligned along the x axis)
+        //these two are deliberately large holes so the screw only grips into the top
         translate([width/2-top_screw_holders_from_edge,0,screw_depth]){
             cylinder(r=m2_head_size/2,h=thick*3,$fn=200);
-            cylinder(r=m2_thread_size/2,h=thick*3,$fn=200,center=true);
+            cylinder(r=m2_thread_size_loose/2,h=thick*3,$fn=200,center=true);
         }
-        
-        
-         //holes for screws in sides
         translate([-(width/2-top_screw_holders_from_edge),0,screw_depth]){
             cylinder(r=m2_head_size/2,h=thick*3,$fn=200);
-            cylinder(r=m2_thread_size/2,h=thick*3,$fn=200,center=true);
+            cylinder(r=m2_thread_size_loose/2,h=thick*3,$fn=200,center=true);
         }
         
         //holes for buffers
@@ -468,11 +468,11 @@ rotate([0,0,180]){
 coupling_height = axle_height + wheel_diameter/2 - 2.5 - 5;
 //want to try and get bottom of coupling 5mm from top of the rails
 
-translate([0,length/2-edge/2,thick]){
+translate([0,length/2-coupling_from_edge,thick]){
     coupling_mount(coupling_height);
 }
 
-translate([0,-(length/2-edge/2),thick]){
+translate([0,-(length/2-coupling_from_edge),thick]){
     rotate([0,0,180]){
         coupling_mount(coupling_height);
     }

@@ -11,11 +11,15 @@ door_length=length/3;
 roof_overhang=1;
 roof_thick=2;
 
-wiggle_room=1.5;
+wiggle_room=0.5;
 
 
 rain_guard_r = length*1.5;
 rain_guard_from_edge = width*0.05;
+
+pi_cam_space = true;
+pi_space_length =4;
+pi_space_width = 10;
 
 end_ridges_thick=0.5;
 end_ridges_wide=1;
@@ -32,9 +36,20 @@ translate([0,0,-side_height-0.3]){//get everything in line with the xy plane
     
     //inner section which will slot into the van
     intersection(){
-        translate([0,0,height/2]){
-            cube([width-wall_thick*2-wiggle_room,length-wiggle_room-wall_thick*2,height*2], center=true);
+        difference(){
+            translate([0,0,height/2]){
+                cube([width-wall_thick*2-wiggle_room,length-wiggle_room-wall_thick*2,height*2], center=true);
+                }
+            if(pi_cam_space){
+
+            
+                translate([0,length/2-wall_thick-wiggle_room/2-pi_space_length/2,0]){
+                    cube([pi_space_width,pi_space_length,100], center=true);
+                }
+
+            
         }
+    }
         rotate([90,0,0]){
                 cylinder(r=roof_radius,h=length+roof_overhang*4,center=true,$fn=200);
             }
@@ -133,10 +148,16 @@ translate([0,0,-side_height-0.3]){//get everything in line with the xy plane
     
 
 }
-
-//lop off below the xy plane
-translate([0,0,-50]){
-    cube([100,100,100], center=true);
+union(){
+    //lop off below the xy plane
+    translate([0,0,-50]){
+        cube([100,100,100], center=true);
+    }
+   
+    
 }
 
 }
+
+
+

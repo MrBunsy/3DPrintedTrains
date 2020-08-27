@@ -1,9 +1,10 @@
 
-
-length=75;
+//75 was juuust enough for the pi + camera, but bends the cable more than I'd like
+//trying an extra centimetre
+length=75+10;
 
 wall_thick=1.5;
-base_thick=2;
+base_thick=4;
 
 width=35;
 //height of the apex of the ends
@@ -12,9 +13,33 @@ height=31;
 roof_radius=31.4;
 side_height= roof_radius*cos(asin((width/2)/roof_radius));
 echo(side_height);
+//distance between the two axles (perpendicular to each axle)
+axle_distance = 40;
+wheel_max_space = 17;
+wheel_diameter = 14.0;
+axle_space = 23.0;
+axle_height = 5;
 
 hole_for_battery_cables = true;
+hole_for_motor_cables = true;
+hole_for_pi_cam = true;
+pi_mounting = true;
+
+pi_mount_length=58;
+pi_mount_width=23;
+pi_mount_height=4.5;
+pi_mount_height2=1.5;
+pi_mount_d=2.25;//2.75-some wiggle
+pi_mount_base_d = pi_mount_d*2;
+//space for SD card
+pi_mount_from_end=6.5;
+
+//7.25+some wiggle room
+pi_cam_d = 7.5;
+pi_cam_from_top = 1.5;
+
 cable_d=5.5;
+motor_cable_d=6;
 
 plank_height= side_height/12;//2.25;
 plank_indent=0.25;
@@ -44,6 +69,25 @@ module centredCube(width,length, height){
         cube([width,length, height]);
     }
     
+}
+
+module pi_mount(height){
+    translate([pi_mount_width/2,pi_mount_length/2,0]){
+        cylinder(h=height,r=pi_mount_base_d/2,$fn=200);
+        cylinder(h=height+pi_mount_height2,r=pi_mount_d/2,$fn=200);
+    }
+    translate([pi_mount_width/2,-pi_mount_length/2,0]){
+        cylinder(h=height,r=pi_mount_base_d/2,$fn=200);
+        cylinder(h=height+pi_mount_height2,r=pi_mount_d/2,$fn=200);
+    }
+    translate([-pi_mount_width/2,pi_mount_length/2,0]){
+        cylinder(h=height,r=pi_mount_base_d/2,$fn=200);
+        cylinder(h=height+pi_mount_height2,r=pi_mount_d/2,$fn=200);
+    }
+    translate([-pi_mount_width/2,-pi_mount_length/2,0]){
+        cylinder(h=height,r=pi_mount_base_d/2,$fn=200);
+        cylinder(h=height+pi_mount_height2,r=pi_mount_d/2,$fn=200);
+    }
 }
 
 //facing +ve x
@@ -337,6 +381,9 @@ intersection(){
         }
         
         door();
+        translate([0,(length/2-pi_mount_length/2 -pi_mount_from_end-wall_thick),0]){
+            pi_mount(pi_mount_height+base_thick);
+        }
     }
 
     //only include bits that wouldn't stick outside the roof
@@ -347,6 +394,7 @@ intersection(){
     }
 }//end intersection with roof cylinder
 
+    //ensure nothing extends below floor
     translate([0,0,-50]){
         cube([100,100,100], center=true);
     }
@@ -357,6 +405,31 @@ intersection(){
             }
         }
     }
+    
+    if(hole_for_motor_cables){
+        //to one side of the camera ribbon cable
+        translate([width/3.5,-length/2,motor_cable_d/2+base_thick]){
+            rotate([90,0,0]){
+                cylinder(h=wall_thick*10,r=motor_cable_d/2,center=true,$fn=200);
+            }
+        }
+    }
+    
+    if(hole_for_pi_cam){
+         translate([0,-length/2,height-pi_cam_from_top - pi_cam_d/2]){
+            rotate([90,0,0]){
+                cylinder(h=wall_thick*10,r=pi_cam_d/2,center=true,$fn=200);
+            }
+        }
+    }
+    
+    //little bit of extra space for larger wheels
+    translate([0,-axle_distance/2,0]){
+            cube([axle_space,wheel_max_space,base_thick], center=true);
+        }
+        translate([0,axle_distance/2,0]){
+            cube([axle_space,wheel_max_space,base_thick], center=true);
+        }
 
 }//end difference with chopping off floor
     
