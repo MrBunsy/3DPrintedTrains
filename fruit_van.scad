@@ -1,14 +1,32 @@
 
-//75 was juuust enough for the pi + camera, but bends the cable more than I'd like
-//trying an extra centimetre
-length=75+10;
+//set either of these to true for the special versions
+gen_pi_cam_wagon = true;
+gen_battery_wagon = false;
+
+
+
+
+hole_for_battery_cables = gen_pi_cam_wagon ? true : gen_battery_wagon;
+hole_for_motor_cables = gen_pi_cam_wagon;
+hole_for_pi_cam = gen_pi_cam_wagon;
+pi_mounting = gen_pi_cam_wagon;
+
+
+
+
+length=gen_pi_cam_wagon ? 85 : 75;
+//height of the apex of the ends
+height=gen_pi_cam_wagon ? 31+8 : 31;
+
 
 wall_thick=1.5;
 base_thick=4;
 
-width=35+1;
-//height of the apex of the ends
-height=31+8;
+//+1 for the girder thickness
+width=gen_pi_cam_wagon ? 35+1 : gen_battery_wagon ? 29+wall_thick*2 :30+1;
+
+echo("Width: ", width, ", length: ",length, ", height: ",height);
+
 //aiming for side height of 26;
 roof_radius=31.4;
 side_height= roof_radius*cos(asin((width/2)/roof_radius)) - (roof_radius-height);
@@ -20,23 +38,21 @@ wheel_diameter = 14.0;
 axle_space = 23.0;
 axle_height = 5;
 
-hole_for_battery_cables = true;
-hole_for_motor_cables = true;
-hole_for_pi_cam = true;
-pi_mounting = true;
+
 
 pi_mount_length=58;
 pi_mount_width=23;
-pi_mount_height=4.5;
+pi_mount_height=3.5;
 pi_mount_height2=1.5;
 pi_mount_d=2.25;//2.75-some wiggle
 pi_mount_base_d = pi_mount_d*2;
+pi_mount_offset_x = -0.5;
 //space for SD card
 pi_mount_from_end=6.5;
 
 //7.25+some wiggle room
 pi_cam_d = 7.5;
-pi_cam_from_top = 1.5;
+pi_cam_from_top = -pi_cam_d/2;
 
 cable_d=5.5;
 motor_cable_d=6;
@@ -157,7 +173,7 @@ module vent(width, height,angle){
                 cube([width, height,thick]);
             }
         }
-        translate([0,-50,0]){
+        translate([0,-50-thick/2,0]){
             cube([width*2,100,100],center=true);
         }
     }
@@ -381,8 +397,10 @@ intersection(){
         }
         
         door();
-        translate([0,(length/2-pi_mount_length/2 -pi_mount_from_end-wall_thick),0]){
-            pi_mount(pi_mount_height+base_thick);
+        if(pi_mounting){
+            translate([pi_mount_offset_x,(length/2-pi_mount_length/2 -pi_mount_from_end-wall_thick),0]){
+                pi_mount(pi_mount_height+base_thick);
+            }
         }
     }
 
@@ -425,10 +443,10 @@ intersection(){
     
     //little bit of extra space for larger wheels
     translate([0,-axle_distance/2,0]){
-            cube([axle_space,wheel_max_space,base_thick], center=true);
+            cube([axle_space,wheel_max_space,base_thick+0.01], center=true);
         }
         translate([0,axle_distance/2,0]){
-            cube([axle_space,wheel_max_space,base_thick], center=true);
+            cube([axle_space,wheel_max_space,base_thick+0.01], center=true);
         }
 
 }//end difference with chopping off floor

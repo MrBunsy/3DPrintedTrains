@@ -17,7 +17,7 @@ hinge_bar_height = 2.6;
 hinge_bar_width=8+1;
 hinge_bar_y = 2.6;
 hinge_x = 9;
-hinge_y = 4.7;
+hinge_y = 4.5;
 hinge_depth = main_arm_width + 4;
 
 flange_extra = 0.5;
@@ -26,7 +26,7 @@ flange_slit = 0.5;
 flange_slit_depth_multiplier = 0.7;
 
 hook_total_height = 4.8;
-hook_inner_height = 1.55;
+//hook_inner_height = 1.55;
 hook_overhang = 1.3;
 hook_inner_x = 9.6 + midbar_width;
 hook_d = hook_total_height - topbar_height - topbar_height;

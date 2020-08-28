@@ -1,4 +1,17 @@
-//pointy bit to pointy bit of spare hornby axles
+gen_pi_cam_wagon = false;
+gen_battery_wagon = true;
+
+dapol_wheels = true;
+
+
+//for bog standard truck 75 (less than that and this design needs work for a space to contain the metal weight):
+length=gen_pi_cam_wagon ? 85 : 75;
+//minimum of body width + girder_width*2 (31 by default)
+buffer_end_width=gen_pi_cam_wagon ? 36 : gen_battery_wagon ? 32 : 31;
+
+
+
+//pointy bit to pointy bit of spare hornby axles (also works for dapol axles)
 axle_width = 25.65;
 
 //distance between the two axle holders (along the axle)
@@ -7,21 +20,62 @@ axle_space = 23.0;
 //hornby is 23.0
 //bachman 22.2
 
+//diameter around which there can be no obstructions for the wheels
+wheel_max_d = dapol_wheels ? 14+2 : 17+2;
+//max_d doesn't apply within this space in the centre of the axle
+wheel_centre_space = 12;
+
+//for height of couplings and axle mounts - diameter of the thinner bit of
+//the wheel that rests on the rails
+//13.5 for the old coach wheels, truck wheels usually smaller (13.15)
+//14.0 works for the spare hornby Mk1 coach wheels
+//wheel_diameter = 14.0;
+//12.8 for spoked dapol wheels
+wheel_diameter = dapol_wheels ? 12.8 : 14.0;
+
+//how high for axle to be from the underside of the truck
+//bachman seem to be lower than the rest at 5, hornby + lima about 6
+axle_height = 5.5;
+
+
+//hornby seems to be 7.5
+//but this model always comes out a tiny bit low (wheels resting in mounts?)
+//so raising a bit
+//7.7 seems to come out in like with bachmann and lima, but little lower than hornby
+top_of_coupling_from_top_of_rail = 7.9;
+
+
+//min length required to hold the metal weight
+//old dapol weights: 62 long. new ones: 63
+weight_length=63+2;
+//min width required to hold the metal weight
+weight_width=9.7+1;
+weight_depth=3;
+weight_ledge_length=4;
+
 //distance between the two axles (perpendicular to each axle)
-axle_distance = 40;
+axle_distance = length - 30;
 
 //width of the bar holding the buffers
-buffer_end_width = 35;
+
 buffer_end_height = 3.5;
 //length in y axis
-buffer_length = 1.5;
+buffer_length = 0.5;
 //how far apart the centres of the buffers are
 buffer_distance = 22.2;
 buffer_holder_d = 2;//1.7;
-buffer_holder_length = 3;
+buffer_holder_length = 4.5;
+girder_thick=0.5;
 
-width=30;//28;
-length=75 + 10;
+//aim to keep width same, and increase buffer width for larger payloads
+width=30;
+
+//for pi camera truck:
+//length=75+10;
+//buffer_end_width = 35;
+
+
+
 thick = 3.5;
 
 //wall thickness + screw head size + wiggle room
@@ -37,29 +91,17 @@ m2_thread_size_loose = 2.3;
 m2_head_size=4.5;
 
 
-//min length required to hold the metal weight
-weight_length=60+3;
-//min width required to hold the metal weight
-weight_width=9.7+1;
-weight_depth=3;
+
 
 //how deep below the "top" surface the head of a scre should sit
 screw_depth = 2;
 
 
-//diameter around which there can be no obstructions for the wheels
-wheel_max_space = 17;
 
-//for height of couplings and axle mounts - diameter of the thinner bit of
-//the wheel that rests on the rails
-//13.5 for the old coach wheels, truck wheels usually smaller (13.15)
-wheel_diameter = 14.0;
-
-axle_height = 5;
 
 
 edge=5;
-edge_ends=15;
+edge_ends=5;
 coupling_from_edge=2.5;
 
 //centred in xy plane
@@ -167,7 +209,7 @@ module axle_mount_decoration(width,length, axle_height, axle_depth){
                 cube([decoration_thick*extraMountRatio,bearing_mount_length*extraMountRatio,bearing_mount_height*(1/extraMountRatio)]);
             }
             //cart springs! or at least, crude representations of
-            radius = 8;
+            radius = 9;
             translate([-width-decoration_thick,0,-radius+axle_height-decoration_thick*2.2]){
                 rotate([0,90,0]){
                     difference(){
@@ -352,7 +394,7 @@ difference(){
         }
         //girder-bits 
         //for the buffers
-        girder_thick=0.5;
+        
         centredCube(0,length/2-girder_thick/2-buffer_length,buffer_end_width,girder_thick,girder_thick);
         translate([0,0,thick-girder_thick]){
             centredCube(0,length/2-girder_thick/2-buffer_length,buffer_end_width,girder_thick,girder_thick);
@@ -376,7 +418,7 @@ difference(){
         }
         
         
-        weightHolderLength=3;
+        weightHolderLength=(length - weight_length)/2 -edge_ends + weight_ledge_length;
         //extra bit to hold the metal weight
         centredCube(0,length/2-edge_ends - weightHolderLength/2,width-edge*2,weightHolderLength,weight_depth+1.5);
         centredCube(0,-(length/2-edge_ends - weightHolderLength/2),width-edge*2,weightHolderLength,weight_depth+1.5);
@@ -395,9 +437,9 @@ rotate([0,0,180]){
     
         //decorative brake system
         translate([0,0,thick]){
-            decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_space, axle_height*1.3,axle_distance/2+wheel_max_space*0.25, width/2);
+            decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_d, axle_height*1.3,axle_distance/2+wheel_max_d*0.25, width/2);
             rotate([0,0,180]){
-                decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_space,axle_height*1.3, axle_distance/2+wheel_max_space*0.25, width/2);
+                decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_d,axle_height*1.3, axle_distance/2+wheel_max_d*0.25, width/2);
             }
         }
     }    
@@ -405,11 +447,21 @@ rotate([0,0,180]){
 //union of all the holes to punch out
     union(){
         //space for wheels
-        translate([0,-axle_distance/2,0]){
-            cube([axle_space,wheel_max_space,thick*3], center=true);
+        translate([0,-axle_distance/2,axle_height+thick]){
+            rotate([0,90,0]){
+                difference(){
+                cylinder(r=wheel_max_d/2,h=axle_space-0.5,$fn=200,center=true);
+                cylinder(r=wheel_max_d/2+1,h=wheel_centre_space,$fn=200,center=true);
+                }
+            }
         }
-        translate([0,axle_distance/2,0]){
-            cube([axle_space,wheel_max_space,thick*3], center=true);
+        translate([0,axle_distance/2,axle_height+thick]){           
+            rotate([0,90,0]){
+                difference(){
+                cylinder(r=wheel_max_d/2,h=axle_space-0.5,$fn=200,center=true);
+                cylinder(r=wheel_max_d/2+1,h=wheel_centre_space,$fn=200,center=true);
+                }
+            }
         }
         //extra deep hole for couplings
         translate([0,length/2-edge/2,-thick]){
@@ -436,25 +488,25 @@ rotate([0,0,180]){
         }
         
         //holes for buffers
-        translate([-buffer_distance/2,length/2-buffer_length/2,buffer_end_height/2]){
+        translate([-buffer_distance/2,length/2,buffer_end_height/2]){
             rotate([90,0,0]){
             //holes to hold buffers
             cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
             }
         }
-        translate([buffer_distance/2,length/2-buffer_length/2,buffer_end_height/2]){
+        translate([buffer_distance/2,length/2,buffer_end_height/2]){
             rotate([90,0,0]){
             //holes to hold buffers
             cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
             }
         }
-        translate([-buffer_distance/2,-(length/2-buffer_length/2),buffer_end_height/2]){
+        translate([-buffer_distance/2,-(length/2),buffer_end_height/2]){
             rotate([90,0,0]){
             //holes to hold buffers
             cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
             }
         }
-        translate([buffer_distance/2,-(length/2-buffer_length/2),buffer_end_height/2]){
+        translate([buffer_distance/2,-(length/2),buffer_end_height/2]){
             rotate([90,0,0]){
             //holes to hold buffers
             cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
@@ -463,10 +515,10 @@ rotate([0,0,180]){
         
     }
 }
-
 //2.5 from the height of the coupling, also unhelpfully called coupling_height in the coupling .scad file
-coupling_height = axle_height + wheel_diameter/2 - 2.5 - 5;
-//want to try and get bottom of coupling 5mm from top of the rails
+coupling_height = axle_height + wheel_diameter/2 - top_of_coupling_from_top_of_rail;
+
+
 
 translate([0,length/2-coupling_from_edge,thick]){
     coupling_mount(coupling_height);
@@ -479,6 +531,4 @@ translate([0,-(length/2-coupling_from_edge),thick]){
 }
 
 axle_holder(axle_space, 20, axle_height);
-
-
 
