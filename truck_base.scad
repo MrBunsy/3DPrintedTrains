@@ -1,5 +1,5 @@
-gen_pi_cam_wagon = false;
-gen_battery_wagon = true;
+gen_pi_cam_wagon = true;
+gen_battery_wagon = false;
 
 dapol_wheels = true;
 
