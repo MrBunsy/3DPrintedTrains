@@ -1,5 +1,5 @@
 include <truck_bits.scad>
-include <hornby_bachman_style.scad>
+include <hornby_bachmann_style.scag>
 
 dapol_wheels = true;
 //cartsprings, girder at top. looks like a minitruck. Mk1 carriage or old bogie wagon style
@@ -9,7 +9,6 @@ girder_style = true;
 
 top_of_coupling_from_top_of_rail = 7.9;
 thick = 2;
-coupling_thick=1.5;
 //pointy bit to pointy bit of spare hornby axles (also works for dapol axles)
 axle_width = 25.65;
 //distance between the two axle holders (along the axle)
@@ -25,7 +24,7 @@ wheel_centre_space = 8;
 wheel_diameter = dapol_wheels ? 12.8 : 14.0;
 
 //height above thick for the coupling mount
-coupling_height = 2;
+coupling_height = 0;
 
 //how high for axle to be from the underside of the truck
 //bachman seem to be lower than the rest at 5, hornby + lima about 6
@@ -61,10 +60,6 @@ difference(){
         translate([0,axle_distance/2 + coupling_end_from_axle -coupling_from_edge,-thick]){
             cylinder(h=thick*4,r=m2_thread_size/2, $fn=200);
         }
-        //thinner inside the coupling so we odn't interfer with the hook
-        
-        centredCube(0,axle_distance/2,coupling_end_from_axle-wheel_max_d/2,10);
-        
         //m3 hole to connect to main chassis
         cylinder(h=thick*3,r=m3_thread_loose_size/2, $fn=200, center=true);
     }
@@ -72,8 +67,6 @@ difference(){
 
 axle_holder(axle_space, 20, axle_height);
 //axle_holder_decoration(axle_space, 20, axle_height);
-translate([0,axle_distance/2 + coupling_end_from_axle -coupling_from_edge,0]){
+translate([0,axle_distance/2 + coupling_end_from_axle -coupling_from_edge,thick]){
     coupling_mount(coupling_height);
-    //hornby_style_coupling(false);
 }
-
