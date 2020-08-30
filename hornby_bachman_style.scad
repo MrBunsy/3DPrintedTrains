@@ -1,6 +1,8 @@
 include <OO_large_coupling.scad>
 
 min_front_thickness = 0.8;
+module hornby_style_coupling(withMountHoles){
+
 min_thickness = 1.5;
 
 
@@ -23,14 +25,17 @@ difference() {
                 cube([main_arm_width, main_arm_length, min_thickness]);
         }
     };
+    
     //holes to punch out
    union(){
-        cylinder(h=min_thickness*3, r=hole_diameter/2, center = true, $fn=200);
-       translate([-second_hole_distance,0,0]){
-        cylinder(h=min_thickness*3, r=second_hole_diameters/2, center = true, $fn=200);
-       };
-       translate([second_hole_distance,0,0]){
-        cylinder(h=min_thickness*3, r=second_hole_diameters/2, center = true, $fn=200);
+       if(withMountHoles){
+            cylinder(h=min_thickness*3, r=hole_diameter/2, center = true, $fn=200);
+           translate([-second_hole_distance,0,0]){
+            cylinder(h=min_thickness*3, r=second_hole_diameters/2, center = true, $fn=200);
+           };
+           translate([second_hole_distance,0,0]){
+            cylinder(h=min_thickness*3, r=second_hole_diameters/2, center = true, $fn=200);
+           }
        }
    }
 }
@@ -52,3 +57,6 @@ hook_holder_y=main_arm_length - hook_base_length/2;
 anti_wobble = 3;
 
 hook_base_clip(-hook_holder_end_cap_thickness*2, -main_arm_length, main_arm_width/2, hook_base_length, hook_height, hook_holder_diameter/2, hook_holder_length, hook_holder_end_cap_thickness*2, hook_holder_height, hook_holder_y);
+
+}
+

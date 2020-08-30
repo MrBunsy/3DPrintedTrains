@@ -1,5 +1,5 @@
-gen_pi_cam_wagon = false;
-gen_battery_wagon = true;
+gen_pi_cam_wagon = true;
+gen_battery_wagon = false;
 
 //from fruit van:
 wall_thick=1.5;
