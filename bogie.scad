@@ -1,5 +1,5 @@
 include <truck_bits.scad>
-include <hornby_bachmann_style.scag>
+include <hornby_bachmann_style.scad>
 
 dapol_wheels = true;
 //cartsprings, girder at top. looks like a minitruck. Mk1 carriage or old bogie wagon style
