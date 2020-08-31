@@ -7,6 +7,26 @@ module centredCube(x,y,width,length, height){
     
 }
 
+module axle_mount_holes(width,length, axle_height, axle_depth){
+    extra_height = axle_height*0.4;
+    union(){
+                //cone for axle to rest in
+                 translate([width/2+0.01,0,axle_height]){
+                    rotate([0,-90,0]){
+                        cylinder(h=axle_depth,r1=axle_depth/2, r2=0,$fn=200);
+                    }
+                }
+                //groove to help slot axle in
+                translate([width/2,0,axle_height]){
+                    rotate([0,0,45]){
+                        centredCube(0,0,axle_depth*0.2,axle_depth*0.2,extra_height+0.01);
+                    }
+                }
+                
+            }
+    
+}
+
 //single axle mount with insertion for axle, insertion facing right (+ve x)
 module axle_mount(width,length, axle_height, axle_depth){
     //translate([width*0.5-0.01,0.1,axle_height]){
@@ -22,21 +42,7 @@ module axle_mount(width,length, axle_height, axle_depth){
         
         difference(){
             centredCube(0,0,width,length, axle_height+extra_height);
-            union(){
-                //cone for axle to rest in
-                 translate([width/2+0.01,0,axle_height]){
-                    rotate([0,-90,0]){
-                        cylinder(h=axle_depth,r1=axle_depth/2, r2=0,$fn=200);
-                    }
-                }
-                //groove to help slot axle in
-                translate([width/2,0,axle_height]){
-                    rotate([0,0,45]){
-                        centredCube(0,0,axle_depth*0.2,axle_depth*0.2,extra_height+0.01);
-                    }
-                }
-                
-            }
+            axle_mount_holes(width,length, axle_height, axle_depth);
         }
     }
     
@@ -185,26 +191,42 @@ module decorative_brake_mounts(x, length, height, lever_y, edge){
     }
 }
 
-module axle_holder(axle_space, x, axle_height,width=2.5){
+module axle_holder(axle_space, x, axle_height, just_holes=false, width=2.5){
     
     length = 5;
     axle_depth = 1+(axle_width-axle_space)/2;
     
     translate([-axle_space/2,-axle_distance/2,0]){
-        axle_mount(width,length, axle_height+thick, axle_depth);
+        if(just_holes){
+            translate([-width/2,0,0])axle_mount_holes(width,length, axle_height+thick, axle_depth);
+        }else{
+            axle_mount(width,length, axle_height+thick, axle_depth);
+        }
     }
     
     translate([-axle_space/2,axle_distance/2,0]){
-        axle_mount(width,length, axle_height+thick, axle_depth);
+        if(just_holes){
+            translate([-width/2,0,0])axle_mount_holes(width,length, axle_height+thick, axle_depth);
+        }else{
+            axle_mount(width,length, axle_height+thick, axle_depth);
+        }
     }
     
     rotate([0,0,180]){
         translate([-axle_space/2,-axle_distance/2,0]){
-            axle_mount(width,length, axle_height+thick, axle_depth);
+            if(just_holes){
+                translate([-width/2,0,0])axle_mount_holes(width,length, axle_height+thick, axle_depth);
+            }else{
+                axle_mount(width,length, axle_height+thick, axle_depth);
+            }
         }
         
         translate([-axle_space/2,axle_distance/2,0]){
-            axle_mount(width,length, axle_height+thick, axle_depth);
+            if(just_holes){
+                translate([-width/2,0,0])axle_mount_holes(width,length, axle_height+thick, axle_depth);
+            }else{
+                axle_mount(width,length, axle_height+thick, axle_depth);
+            }
         }
     }
 }

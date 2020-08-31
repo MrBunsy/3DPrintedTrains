@@ -14,7 +14,7 @@ axle_width = 25.65;
 axle_space = 23.0;
 m2_thread_size = 2;
 m3_thread_loose_size = 3.2;
-m3_hole_depth = 1;
+m3_hole_depth = 2;
 m3_hole_thick = 1.5;
 
 //diameter around which there can be no obstructions for the wheels
@@ -25,7 +25,7 @@ wheel_centre_space = 8;
 wheel_diameter = dapol_wheels ? 12.8 : 14.0;
 
 //height above thick for the coupling mount
-coupling_height = 0;
+coupling_height = 1;
 
 //how high for axle to be from the underside of the truck
 //bachman seem to be lower than the rest at 5, hornby + lima about 6
@@ -91,9 +91,9 @@ module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
     axle_mount_bottom_length = corner_r*3;
     
     //springs
-    translate([spring_r,-(axle_distance/2+corner_r*1.5-spring_r),corner_r])cylinder(r=spring_r,h=axle_mount_size);
+    translate([spring_r - (spring_r*2 - wide)/2,-(axle_distance/2+corner_r*1.5-spring_r),corner_r])cylinder(r=spring_r,h=axle_mount_size);
     
-    translate([spring_r,-(axle_distance/2-corner_r*1.5+spring_r),corner_r])cylinder(r=spring_r,h=axle_mount_size);
+    translate([spring_r - (spring_r*2 - wide)/2,-(axle_distance/2-corner_r*1.5+spring_r),corner_r])cylinder(r=spring_r,h=axle_mount_size);
     
     
     //axle mounting
@@ -113,9 +113,22 @@ module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
 
 //base at (0,0), facing +ve x
 module intermodal_bogie_cosmetics(axle_distance, wheel_diameter,wide){
-    intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide);
     
-    mirror([0,1,0]) intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide);
+    //slice_width = wide/3;
+//    translate([-(wide-slice_width),0,0]){
+      //  intersection(){
+//            union(){
+                intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide);
+        
+                mirror([0,1,0]) intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide);
+    
+    
+            //}
+            //slice in half lengthways to make thinner
+         //   translate([wide-slice_width,-50,-50])cube([100,100,100]);
+     //   }
+   // }
+        
 }
 
 difference(){
@@ -157,10 +170,17 @@ difference(){
 }
 
 axle_holder(axle_space, 20, axle_height);
-//axle_holder_decoration(axle_space, 20, axle_height);
+
 translate([0,axle_distance/2 + coupling_from_axle,thick]){
     coupling_mount(coupling_height);
 }
-
-translate([width/2,0,0]) intermodal_bogie_cosmetics(axle_distance, wheel_diameter, thick);
-mirror([1,0,0])translate([width/2,0,0]) intermodal_bogie_cosmetics(axle_distance, wheel_diameter, thick);
+difference(){
+    union(){
+        //cosmetic bits on the outside
+        translate([width/2-thick*0.8,0,0]) intermodal_bogie_cosmetics(axle_distance, wheel_diameter, thick);
+        mirror([1,0,0])translate([width/2-thick*0.8,0,0]) intermodal_bogie_cosmetics(axle_distance, wheel_diameter, thick);
+    }
+    //punch out the holes for the axle again
+    axle_holder(axle_space, 20, axle_height, true);
+    
+}
