@@ -50,12 +50,13 @@ echo("width",width,"length",length, "axle_height",axle_height, "thick",thick);
 //easier to do one half and mirror the whole lot after
 module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
     
-    corner_r = wheel_diameter/3;
+    corner_r = wheel_diameter*0.25;
     central_hole_r1 = corner_r*0.7;
     central_hole_r2 = corner_r*0.55;
     offset_hole_r1 = corner_r*0.4;
     offset_hole_r2 = corner_r*0.3;
     bar_height_above_axles = corner_r*1;
+    spring_r = wide*0.6;
     difference(){
         union(){
             //quarter of a circle for the corners
@@ -66,15 +67,18 @@ module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
             
                 //bar along the bottom
                 translate([0,-(axle_distance/2+corner_r/2),0])cube([wide,corner_r, bar_height_above_axles]);
+                
+                
+                //triangle shape with holes
             hull(){
                 translate([0,-(axle_distance/2-corner_r/2),0])cube([wide,axle_distance/2-corner_r/2, bar_height_above_axles]);
-                translate([0,0,corner_r*0.8]) rotate([0,90,0]) cylinder(h=wide,r=central_hole_r1);
+                translate([0,0,corner_r]) rotate([0,90,0]) cylinder(h=wide,r=central_hole_r1);
             }
         }
         //punch holes out
         
         union(){
-           translate([0,0,corner_r*0.8]) rotate([0,90,0]) cylinder(h=wide*3,r=central_hole_r2, center=true);
+           translate([0,0,corner_r]) rotate([0,90,0]) cylinder(h=wide*3,r=central_hole_r2, center=true);
             
             hull(){
                 translate([0,-central_hole_r1*1.6,bar_height_above_axles/2]) rotate([0,90,0]) cylinder(h=wide*3,r=offset_hole_r1, center=true);
@@ -82,8 +86,21 @@ module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
             }
         }
     }
+    axle_mount_size = corner_r*3 - spring_r*5;
+    axle_mount_bottom_length = corner_r*3;
+    
+    //springs
+    translate([spring_r,-(axle_distance/2+corner_r*1.5-spring_r),corner_r])cylinder(r=spring_r,h=axle_mount_size);
+    
+    translate([spring_r,-(axle_distance/2-corner_r*1.5+spring_r),corner_r])cylinder(r=spring_r,h=axle_mount_size);
     
     
+    //axle mounting
+    translate([0,-(axle_distance/2+axle_mount_size/2),corner_r])cube([wide,axle_mount_size, axle_mount_size]);
+    
+    //bottom of axle mount
+    
+    translate([0,-(axle_distance/2+axle_mount_bottom_length/2),corner_r+axle_mount_size])cube([wide,axle_mount_bottom_length, 1]);
 }
 
 //base at (0,0), facing +ve x
@@ -138,3 +155,4 @@ translate([0,axle_distance/2 + coupling_from_axle,thick]){
 }
 
 translate([width/2,0,0]) intermodal_bogie_cosmetics(axle_distance, wheel_diameter, thick);
+mirror([1,0,0])translate([width/2,0,0]) intermodal_bogie_cosmetics(axle_distance, wheel_diameter, thick);
