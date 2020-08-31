@@ -57,6 +57,7 @@ module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
     offset_hole_r2 = corner_r*0.3;
     bar_height_above_axles = corner_r*1;
     spring_r = wide*0.6;
+    axle_mount_ledge_thick=0.5;
     difference(){
         union(){
             //quarter of a circle for the corners
@@ -98,9 +99,16 @@ module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
     //axle mounting
     translate([0,-(axle_distance/2+axle_mount_size/2),corner_r])cube([wide,axle_mount_size, axle_mount_size]);
     
+    sphere_r = wide*2;
+    //sticky out bit on axle mount - want the tip of a sphere
+    intersection(){
+        translate([-sphere_r*0.43,-axle_distance/2,corner_r+axle_mount_size/2])sphere(r=wide*2);
+        translate([wide,-(axle_distance/2+axle_mount_size/2),corner_r])cube([wide,axle_mount_size, axle_mount_size]);
+    }
+    
     //bottom of axle mount
     
-    translate([0,-(axle_distance/2+axle_mount_bottom_length/2),corner_r+axle_mount_size])cube([wide,axle_mount_bottom_length, 1]);
+    translate([0,-(axle_distance/2+axle_mount_bottom_length/2),corner_r+axle_mount_size])cube([wide,axle_mount_bottom_length, axle_mount_ledge_thick]);
 }
 
 //base at (0,0), facing +ve x
