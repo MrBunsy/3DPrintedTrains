@@ -1,6 +1,16 @@
 include <truck_bits.scad>
 $fn=200;
+/*
 
+Aiming for something halfway between an FTA and an FSA intermodal flat.
+
+FSA have raised buffers one one end and connect via a bar in pairs.
+FTA have buffers on both ends, but I they're lower and only intended to be used with other FTAs or an FSA
+
+Since I can't reduce the height of the bogies much, the lowest I can have buffers will be at "proper" height, but also inline with the bed, so it'll look like a FTA with buffers inline with the bed, but they'll be at the "proper" height like an end of a FSA.
+I think this is good enough for my purposes.
+
+*/
 dapol_wheels = true;
 
 
@@ -12,8 +22,9 @@ top_of_buffer_from_top_of_rail = 16.0;
 width=32;
 thick=4;
 //length=240 + buffer_mount_length*2;
-length=110;
+length=240;
 m3_thread_d = 3.0;
+cube([10,110,20] ,center=true);
 
 bogie_from_end = 48/2;
 //axle_height+thick from bogie

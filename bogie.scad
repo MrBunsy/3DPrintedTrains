@@ -3,7 +3,8 @@ include <hornby_bachmann_style.scad>
 
 dapol_wheels = true;
 //cartsprings, girder at top. looks like a minitruck. Mk1 carriage or old bogie wagon style
-girder_style = true;
+girder_style = false;
+intermodal_style = true;
 
 //misc useful bits copypated from truck_base TODO consider how to abstract out
 
@@ -35,7 +36,7 @@ axle_distance = wheel_max_d*1.5;
 
 coupling_from_edge=2;
 coupling_end_from_axle = wheel_max_d/2 + 3;
-non_coupling_end_from_axle = girder_style ? wheel_max_d/2 + thick/2 : 0;
+non_coupling_end_from_axle = girder_style ? wheel_max_d/2 + thick/2 : wheel_max_d/4;
 
 
 width=axle_space+5;
