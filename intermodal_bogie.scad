@@ -50,29 +50,33 @@ echo("width",width,"length",length, "axle_height",axle_height, "thick",thick);
 //easier to do one half and mirror the whole lot after
 module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
     
+        
     corner_r = wheel_diameter*0.25;
     central_hole_r1 = corner_r*0.7;
     central_hole_r2 = corner_r*0.55;
     offset_hole_r1 = corner_r*0.4;
     offset_hole_r2 = corner_r*0.3;
-    bar_height_above_axles = corner_r*1;
+    bar_height_above_axles = corner_r*0.9;
     spring_r = wide*0.6;
     axle_mount_ledge_thick=0.5;
+    
+intersection(){
+union(){
     difference(){
         union(){
             //quarter of a circle for the corners
                 translate([0, -axle_distance/2 - corner_r/2,corner_r]) intersection(){
                     rotate([0,90,0]) cylinder(h=wide,r=corner_r);
-                    translate([0,-corner_r,-corner_r]) cube([wide,corner_r, corner_r]);
+                    translate([0,-corner_r,-corner_r]) cube([wide,corner_r, bar_height_above_axles]);
                 }
             
                 //bar along the bottom
-                translate([0,-(axle_distance/2+corner_r/2),0])cube([wide,corner_r, bar_height_above_axles]);
+                translate([0,-(axle_distance/2+corner_r/2),0])cube([wide,corner_r*1.8, bar_height_above_axles]);
                 
                 
                 //triangle shape with holes
             hull(){
-                translate([0,-(axle_distance/2-corner_r/2),0])cube([wide,axle_distance/2-corner_r/2, bar_height_above_axles]);
+                translate([0,-(axle_distance/2-corner_r*1.3),0])cube([wide,axle_distance/2-corner_r/2, bar_height_above_axles]);
                 translate([0,0,corner_r]) rotate([0,90,0]) cylinder(h=wide,r=central_hole_r1);
             }
         }
@@ -82,8 +86,8 @@ module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
            translate([0,0,corner_r]) rotate([0,90,0]) cylinder(h=wide*3,r=central_hole_r2, center=true);
             
             hull(){
-                translate([0,-central_hole_r1*1.6,bar_height_above_axles/2]) rotate([0,90,0]) cylinder(h=wide*3,r=offset_hole_r1, center=true);
-                translate([0,-central_hole_r1*2.5,bar_height_above_axles/2-offset_hole_r2*0.3]) rotate([0,90,0]) cylinder(h=wide*3,r=offset_hole_r2, center=true);
+                translate([0,-central_hole_r1*1.6,bar_height_above_axles*0.6]) rotate([0,90,0]) cylinder(h=wide*3,r=offset_hole_r1, center=true);
+                translate([0,-central_hole_r1*2.5,bar_height_above_axles*0.6-offset_hole_r2*0.3]) rotate([0,90,0]) cylinder(h=wide*3,r=offset_hole_r2, center=true);
             }
         }
     }
@@ -91,24 +95,29 @@ module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
     axle_mount_bottom_length = corner_r*3;
     
     //springs
-    translate([spring_r - (spring_r*2 - wide)/2,-(axle_distance/2+corner_r*1.5-spring_r),corner_r])cylinder(r=spring_r,h=axle_mount_size);
+    translate([spring_r - (spring_r*2 - wide)/2,-(axle_distance/2+corner_r*1.5-spring_r),bar_height_above_axles])cylinder(r=spring_r,h=axle_mount_size);
     
-    translate([spring_r - (spring_r*2 - wide)/2,-(axle_distance/2-corner_r*1.5+spring_r),corner_r])cylinder(r=spring_r,h=axle_mount_size);
+    translate([spring_r - (spring_r*2 - wide)/2,-(axle_distance/2-corner_r*1.5+spring_r),bar_height_above_axles])cylinder(r=spring_r,h=axle_mount_size);
     
     
     //axle mounting
-    translate([0,-(axle_distance/2+axle_mount_size/2),corner_r])cube([wide,axle_mount_size, axle_mount_size]);
+    translate([0,-(axle_distance/2+axle_mount_size/2),bar_height_above_axles])cube([wide,axle_mount_size, axle_mount_size]);
     
     sphere_r = wide*2;
     //sticky out bit on axle mount - want the tip of a sphere
     intersection(){
-        translate([-sphere_r*0.43,-axle_distance/2,corner_r+axle_mount_size/2])sphere(r=wide*2);
+        translate([-sphere_r*0.43,-axle_distance/2,bar_height_above_axles+axle_mount_size/2])sphere(r=wide*2);
         translate([wide,-(axle_distance/2+axle_mount_size/2),corner_r])cube([wide,axle_mount_size, axle_mount_size]);
     }
     
     //bottom of axle mount
     
-    translate([0,-(axle_distance/2+axle_mount_bottom_length/2),corner_r+axle_mount_size])cube([wide,axle_mount_bottom_length, axle_mount_ledge_thick]);
+    translate([0,-(axle_distance/2+axle_mount_bottom_length/2),bar_height_above_axles+axle_mount_size])cube([wide,axle_mount_bottom_length, axle_mount_ledge_thick]);
+    
+}//end union
+//ensure this really is only half so it doesn't overlap with its mirror
+    translate([-wide*2,-100,-50])cube([wide*4,100,100]);
+}//end intersection
 }
 
 //base at (0,0), facing +ve x
