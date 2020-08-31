@@ -14,7 +14,7 @@ axle_width = 25.65;
 axle_space = 23.0;
 m2_thread_size = 2;
 m3_thread_loose_size = 3.2;
-m3_hole_depth = 2;
+m3_hole_depth = 1;
 m3_hole_thick = 1.5;
 
 //diameter around which there can be no obstructions for the wheels
@@ -47,12 +47,51 @@ coupling_width = 17;
 echo("width",width,"length",length, "axle_height",axle_height, "thick",thick);
 
 
-//centred on (0,0), facing +ve x
-module intermodal_bogie_cosmetics(length, thick){
+//easier to do one half and mirror the whole lot after
+module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
+    
+    corner_r = wheel_diameter/3;
+    central_hole_r1 = corner_r*0.7;
+    central_hole_r2 = corner_r*0.55;
+    offset_hole_r1 = corner_r*0.4;
+    offset_hole_r2 = corner_r*0.3;
+    bar_height_above_axles = corner_r*1;
+    difference(){
+        union(){
+            //quarter of a circle for the corners
+                translate([0, -axle_distance/2 - corner_r/2,corner_r]) intersection(){
+                    rotate([0,90,0]) cylinder(h=wide,r=corner_r);
+                    translate([0,-corner_r,-corner_r]) cube([wide,corner_r, corner_r]);
+                }
+            
+                //bar along the bottom
+                translate([0,-(axle_distance/2+corner_r/2),0])cube([wide,corner_r, bar_height_above_axles]);
+            hull(){
+                translate([0,-(axle_distance/2-corner_r/2),0])cube([wide,axle_distance/2-corner_r/2, bar_height_above_axles]);
+                translate([0,0,corner_r*0.8]) rotate([0,90,0]) cylinder(h=wide,r=central_hole_r1);
+            }
+        }
+        //punch holes out
+        
+        union(){
+           translate([0,0,corner_r*0.8]) rotate([0,90,0]) cylinder(h=wide*3,r=central_hole_r2, center=true);
+            
+            hull(){
+                translate([0,-central_hole_r1*1.6,bar_height_above_axles/2]) rotate([0,90,0]) cylinder(h=wide*3,r=offset_hole_r1, center=true);
+                translate([0,-central_hole_r1*2.5,bar_height_above_axles/2-offset_hole_r2*0.3]) rotate([0,90,0]) cylinder(h=wide*3,r=offset_hole_r2, center=true);
+            }
+        }
+    }
     
     
 }
 
+//base at (0,0), facing +ve x
+module intermodal_bogie_cosmetics(axle_distance, wheel_diameter,wide){
+    intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide);
+    
+    mirror([0,1,0]) intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide);
+}
 
 difference(){
     union(){
@@ -97,3 +136,5 @@ axle_holder(axle_space, 20, axle_height);
 translate([0,axle_distance/2 + coupling_from_axle,thick]){
     coupling_mount(coupling_height);
 }
+
+translate([width/2,0,0]) intermodal_bogie_cosmetics(axle_distance, wheel_diameter, thick);

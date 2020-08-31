@@ -6,7 +6,7 @@ depths = [0, 0.2, 2.0];
 
 module wheel_segment(i){
     cylinder(r1=diameters[i]/2, r2=diameters[i+1]/2, h=depths[i], $fn=200);
-    if(i< 2){
+    if(i< len(depths)-1){
         translate([0,0, depths[i]]){
             wheel_segment(i+1);
         }
