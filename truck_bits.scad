@@ -185,9 +185,8 @@ module decorative_brake_mounts(x, length, height, lever_y, edge){
     }
 }
 
-module axle_holder(axle_space, x, axle_height){
+module axle_holder(axle_space, x, axle_height,width=2.5){
     
-    width = 2.5;
     length = 5;
     axle_depth = 1+(axle_width-axle_space)/2;
     
