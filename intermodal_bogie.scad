@@ -34,7 +34,7 @@ axle_height = top_of_coupling_from_top_of_rail + coupling_height - wheel_diamete
 
 axle_distance = wheel_max_d*1.5;
 
-coupling_from_axle = wheel_max_d/2 + 3;
+coupling_from_axle = wheel_max_d/2 + 1;
 
 
 bar_thick = 2.5;
@@ -45,6 +45,14 @@ coupling_arm_wide = 5;
 coupling_width = 17;
 
 echo("width",width,"length",length, "axle_height",axle_height, "thick",thick);
+
+
+//centred on (0,0), facing +ve x
+module intermodal_bogie_cosmetics(length, thick){
+    
+    
+}
+
 
 difference(){
     union(){
