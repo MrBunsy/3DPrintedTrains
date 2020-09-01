@@ -4,11 +4,13 @@ include<constants.scad>
 
 Aiming for something halfway between an FTA and an FSA intermodal flat.
 
-FSA have raised buffers one one end and connect via a bar in pairs.
+FSA have raised buffers one one end.
 FTA have buffers on both ends, but I they're lower and only intended to be used with other FTAs or an FSA
 
 Since I can't reduce the height of the bogies much, the lowest I can have buffers will be at "proper" height, but also inline with the bed, so it'll look like a FTA with buffers inline with the bed, but they'll be at the "proper" height like an end of a FSA.
 I think this is good enough for my purposes.
+
+TODO - since I've realised my measurements of coupling and buffer heights were wrong, the above statement might no longer be true and I might be able to do both FTA and FSA properly?
 
 
 TODO slot to insert wheel (for brakes?) on either side - both wheels are offset from the centre, but in the same place (mirror along Y axis) - so it looks different from each side
