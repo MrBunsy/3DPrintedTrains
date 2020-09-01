@@ -13,7 +13,8 @@ thick = 2;
 //distance between the two axle holders (along the axle)
 axle_space = 23.0;
 
-m3_hole_depth = 2;
+//mainly because I haven't got any shorter m3 screws, don't need quite this much stability
+m3_hole_depth = 3;
 m3_hole_thick = 1.5;
 
 wheel_max_d = getWheelMaxDiameter(dapol_wheels,spoked);
@@ -30,9 +31,9 @@ bogie_from_end = 33;
 //this should probably be adjusted for wheel size as it affects buffer height
 axle_height = top_of_coupling_from_top_of_rail + coupling_height - wheel_diameter/2;
 
-axle_distance = wheel_max_d*1.5;
+axle_distance = 23.6;//wheel_max_d*1.5;//23.6 is 1.8metres which is the "real" size
 
-coupling_from_axle = bogie_from_end - coupling_from_edge - axle_space/2;
+coupling_from_axle = bogie_from_end - coupling_from_edge - axle_distance/2;
 
 
 bar_thick = 2.5;
