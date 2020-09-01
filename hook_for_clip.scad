@@ -15,10 +15,16 @@ hinge_diameter = 2.3;
 hinge_gap = 1.5;
 hinge_bar_height = 2.6;
 hinge_bar_width=8+1;
-hinge_bar_y = 2.6;
+
 hinge_x = 9;
-hinge_y = 4.5;
-hinge_depth = main_arm_width + 4;
+coupling_hinge_height = 4;
+/*
+4 is the height of the hinge on the coupling, the hinge here needs to be
+4 below the bottom of the top arm
+*/
+hinge_y = midbar_height - topbar_height - coupling_hinge_height;
+
+hinge_bar_y = hinge_y-hinge_bar_height/2;
 
 flange_extra = 0.5;
 flange_depth = 3;
@@ -31,9 +37,7 @@ hook_overhang = 1.3;
 hook_inner_x = 9.6 + midbar_width;
 hook_d = hook_total_height - topbar_height - topbar_height;
 
-anti_wobble_height = 3;
-
-//mid bar
+//mid bar (vertical bar in centre)
 cube([midbar_width, midbar_height, thickness]);
 
 difference(){

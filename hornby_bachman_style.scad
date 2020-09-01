@@ -1,7 +1,7 @@
 include <OO_large_coupling.scad>
 
 min_front_thickness = 0.8;
-module hornby_style_coupling(withMountHoles){
+module hornby_style_coupling(withMountHoles=true){
 
 min_thickness = 1.5;
 
@@ -60,3 +60,4 @@ hook_base_clip(-hook_holder_end_cap_thickness*2, -main_arm_length, main_arm_widt
 
 }
 
+hornby_style_coupling();

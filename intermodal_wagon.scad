@@ -1,5 +1,5 @@
 include <truck_bits.scad>
-$fn=200;
+include<constants.scad>
 /*
 
 Aiming for something halfway between an FTA and an FSA intermodal flat.
@@ -12,29 +12,31 @@ I think this is good enough for my purposes.
 
 */
 dapol_wheels = true;
+spoked = false;
 
+wheel_diameter = getWheelDiameter(dapol_wheels, spoked);
 
-wheel_diameter = dapol_wheels ? 12.8 : 14.0;
 buffer_mount_length=5;
 
-top_of_buffer_from_top_of_rail = 16.0;
+//axle_space + aprox max wheel diameter + wiggle room
+bogie_length_max = 23 + 17 + 6;
 
-width=32;
+width=30;
 thick=4;
 //length=240 + buffer_mount_length*2;
 //60ft
 length=60*4;
-m3_thread_d = 3.0;
 
 
-bogie_from_end = 48/2;
+
+bogie_from_end = bogie_length_max/2 + 10;
+echo("bogie from end", bogie_from_end);
 //axle_height+thick from bogie
 axle_to_top_of_bogie = 4.5;
 
 bogie_mount_height = top_of_buffer_from_top_of_rail - wheel_diameter/2 - axle_to_top_of_bogie - thick;
-
-bogie_length_max=46;//bogie_from_end*2-thick;
-bogie_width_max = 30;
+//+ extra for cutting bits out
+bogie_width_max = 30+5;
 
 middle_length = length - bogie_length_max-bogie_from_end*2;
 underframe_height = axle_to_top_of_bogie + bogie_mount_height +thick;
