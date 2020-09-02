@@ -103,6 +103,13 @@ a_frames = 4;
 a_frame_length=container_hold_size*2 + container_hold_spacing;
 
 mid_slot_width = width*0.1;
+
+edge_slot_width = width*0.2;
+edge_slot_r = width*0.25/2;
+//holes near the buffer end. No idea what these are really for!
+hole_r = edge_slot_width*0.4;
+hole_from_end = buffer_section_length;
+
 //centredCube(0,length/2 -buffer_section_length-5,width/3,10,10);
 
 //i think distance between bogies is 11.93m -> 156.6mm
@@ -207,15 +214,12 @@ difference(){
         }
         //slots either side
         
-        edge_slot_width = width*0.2;
-        edge_slot_r = width*0.25/2;
+        
         
         main_edge_slot(edge_slot_width, edge_slot_r);
         mirror([1,0,0])main_edge_slot(edge_slot_width, edge_slot_r);
         
-        //holes near the buffer end. No idea what these are really for!
-        hole_r = edge_slot_width*0.4;
-        hole_from_end = buffer_section_length;
+        
         
         translate([(width/2 - hole_r*2),(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
         translate([-(width/2 - hole_r*2),(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
@@ -251,10 +255,35 @@ difference(){
     }
 }
 
+//box behind the brake wheel
+translate([0,0,min_thick])
+centredCube(width/2-edge_thick*1.5-edge_slot_width/2,length/2 - 20*4+edge_slot_width/2+a_frame_length/2 ,edge_slot_width+edge_thick*2,edge_slot_width,edge_slot_width);
+
+//flat bits, no idea what they're for
+translate([0,0,min_thick*2]){
+    difference(){
+        centredCube(width/2-edge_thick*1.5-edge_slot_width/2,
+        0,
+        edge_slot_width+edge_thick*2,
+        10*4-a_frame_length+container_hold_spacing,
+        thick
+        );
+        translate([0,0,-50])centredCube(0,0,width*2,a_frame_length,100);
+    }
+    
+}
+
+
+//centred on 0,0
+module iso_container_hold(container_hold_size){
+    //I'm sure I can produce something better than a cube, even at 0.5mm big
+    centredCube(0,0,container_hold_size,container_hold_size,container_hold_size);
+}
+
 //little sticking out bits to lock into base of iso containers
 module holds_on_one_side(){
     for(i=[0:len(hold_distances)-1]){
-        centredCube(width/2+container_hold_size/2,-length/2 + hold_distances[i],container_hold_size,container_hold_size,container_hold_size);
+        translate([width/2+container_hold_size/2,-length/2 + hold_distances[i]]) iso_container_hold(container_hold_size);
     }
 }
 
