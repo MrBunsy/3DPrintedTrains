@@ -27,6 +27,35 @@ wheel_diameter = getWheelDiameter(dapol_wheels, spoked);
 
 buffer_mount_length=5;
 
+//little bits that the iso containers lock into
+container_hold_size = 1;
+container_hold_spacing = 0.5;//turns out this is exactly 1.5inches, which is exactly how short of 20feet a 20foot container is
+
+//1.5" shy of twenty feet
+twentyFootContainerLength = 20*4-0.5;
+fortyFootContainerLength = 40*4;
+
+//length=240 + buffer_mount_length*2;
+//60ft
+//FSA (from markings on side) real length = 19.57m -> 256.8mm (maybe with buffers?)
+//FTA 20.54
+//will stick to this for now
+length=60*4;
+
+//from one end in y, mirrored along x axis
+//position is centre of hold in y axis
+//4mm to the foot
+//buffer end
+hold_distances=[container_hold_size/2,
+    twentyFootContainerLength-container_hold_size/2,
+   twentyFootContainerLength+container_hold_spacing+container_hold_size/2,
+   length/2 - container_hold_spacing/2 - container_hold_size/2,
+   length/2 + container_hold_spacing/2 + container_hold_size/2,
+   length - (twentyFootContainerLength+container_hold_spacing+container_hold_size/2),
+   length - (twentyFootContainerLength-container_hold_size/2),
+   length - container_hold_size/2
+  ];
+
 //axle_space + aprox max wheel diameter + wiggle room
 bogie_length_max = 23 + 17 + 1;
 
@@ -37,12 +66,7 @@ width=30;
 thick=3.5;
 thick_bogie_area = 2;
 edge_thick = 2;
-//length=240 + buffer_mount_length*2;
-//60ft
-//FSA (from markings on side) real length = 19.57m -> 256.8mm (maybe with buffers?)
-//FTA 20.54
-//will stick to this for now
-length=60*4;
+
 
 buffer_section_length = 10;
 
@@ -60,12 +84,23 @@ echo("bogie from end", bogie_from_end, "bogie height below top of buffer: ", bog
 middle_length = length - bogie_length_max-bogie_from_end*2;
 underframe_height = axle_to_top_of_bogie + bogie_mount_height +thick;
 underframe_middle_length = middle_length*0.8;
-underframe_middle_length_for_aframes = middle_length*0.9;
+
+//want 40 feet, but bogies too big
+underframe_middle_length_for_aframes = middle_length*0.9;//40*4;
+//bogies are oversized, so bodge the end aframe positions
+//underframe_middle_length_for_aframes_max = middle_length*0.9;
+a_frame_spacing = [-underframe_middle_length_for_aframes/2,
+    -10*4-container_hold_spacing/2,
+    -5*4-container_hold_spacing/4,
+    0,
+    5*4+container_hold_spacing/4,
+    10*4+container_hold_spacing/2,
+    underframe_middle_length_for_aframes/2
+   ];
 underframe_middle_width = width/3;
 underframe_middle_height = underframe_height*0.75;
 a_frames = 4;
-a_frame_length=2;
-a_frame_spacings = underframe_middle_length/4;
+a_frame_length=container_hold_size*2 + container_hold_spacing;
 
 mid_slot_width = width*0.1;
 //centredCube(0,length/2 -buffer_section_length-5,width/3,10,10);
@@ -189,12 +224,12 @@ difference(){
     }
 }
 
-//the a-frames don't get holes punched out
+//the a-frames don't get holes punched out, so do them separatly
 difference(){
     union(){
-        a_frame_spacing = underframe_middle_length_for_aframes/a_frames;
-        for(i=[0:a_frames]){
-            translate([0,-underframe_middle_length_for_aframes/2 + i*a_frame_spacing])
+        //a_frame_spacing = underframe_middle_length_for_aframes/a_frames;
+        for(i=[0:len(a_frame_spacing)]){
+            translate([0, a_frame_spacing[i]])
             hull(){
                 centredCube(0,0,underframe_middle_width,a_frame_length,underframe_middle_height);
                 centredCube(0,0,width,a_frame_length,thick);
@@ -214,4 +249,17 @@ difference(){
         translate([0,0,-0.01])centredCube(0,0, mid_slot_width,length,thick*0.5);
         translate([0,0,-1])centredCube(0,0, width-edge_thick*2,length,1);
     }
+}
+
+//little sticking out bits to lock into base of iso containers
+module holds_on_one_side(){
+    for(i=[0:len(hold_distances)-1]){
+        centredCube(width/2+container_hold_size/2,-length/2 + hold_distances[i],container_hold_size,container_hold_size,container_hold_size);
+    }
+}
+
+holds_on_one_side();
+
+mirror([1,0,0]){
+    holds_on_one_side();
 }
