@@ -133,147 +133,24 @@ module main_edge_slot(edge_slot_width, edge_slot_r){
         }
 }
 
-difference(){
-    union(){
-        difference(){
-        centredCube(0,0,width,length, thick);
-            union(){
-             //space for bogies
-                translate([0,length/2-bogie_from_end,thick_bogie_area])
-                    centredCube(0,0,bogie_width_max,bogie_length_max,thick);   
-                
-                translate([0,-(length/2-bogie_from_end),thick_bogie_area])
-                    centredCube(0,0,bogie_width_max,bogie_length_max,thick);   
-                
-                //tapered end to space for bogies
-                translate([0,length/2-buffer_section_length,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
-                mirror([0,1,0])translate([0,length/2-buffer_section_length,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
-                
-                translate([0,length/2-bogie_from_end-bogie_length_max/2,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
-                 mirror([0,1,0])translate([0,length/2-bogie_from_end-bogie_length_max/2,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
-            }
-        }
-        translate([0,length/2-bogie_from_end,0])
-            cylinder(h=bogie_mount_height+thick,r=m3_thread_d);
-        
-         translate([0,-(length/2-bogie_from_end),0])
-            cylinder(h=bogie_mount_height+thick,r=m3_thread_d);
-        
-        //a-frame like underside lengthways
-        hull(){
-            centredCube(0,0,underframe_middle_width,underframe_middle_length,underframe_height);
-            centredCube(0,0,underframe_middle_width,middle_length-thick,thick);
-        }
-        
-        
-    }
-    
-    union(){
-        //holes for bogies to screw in
-        translate([0,(length/2-bogie_from_end),0]){
-            translate([0,0,min_thick])cylinder(h=100,r=m3_thread_d/2);
-        }
-        translate([0,-(length/2-bogie_from_end),0]){
-            translate([0,0,min_thick])cylinder(h=100,r=m3_thread_d/2);
-        }
-        
-        //holes for buffers
-        translate([-buffer_distance/2,length/2,thick/2]){
-            rotate([90,0,0]){
-            //holes to hold buffers
-            cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
-            }
-        }
-        translate([buffer_distance/2,length/2,thick/2]){
-            rotate([90,0,0]){
-            //holes to hold buffers
-            cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
-            }
-        }
-        translate([-buffer_distance/2,-(length/2),thick/2]){
-            rotate([90,0,0]){
-            //holes to hold buffers
-            cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
-            }
-        }
-        translate([buffer_distance/2,-(length/2),thick/2]){
-            rotate([90,0,0]){
-            //holes to hold buffers
-            cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
-            }
-        }
-        
-        
-        //long slot down the centre
-        hull(){
-            end_r = width*0.04;
-            
-            translate([0,underframe_middle_length/2,0])cylinder(h=50,r=end_r, center=true);
-            translate([0,0,-1])centredCube(0,0,mid_slot_width,underframe_middle_length-end_r*2,50);
-            translate([0,-underframe_middle_length/2,0])cylinder(h=50,r=end_r, center=true);
-        }
-        //slots either side
-        
-        
-        
-        main_edge_slot(edge_slot_width, edge_slot_r);
-        mirror([1,0,0])main_edge_slot(edge_slot_width, edge_slot_r);
-        
-        
-        
-        translate([(width/2 - hole_r*2),(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
-        translate([-(width/2 - hole_r*2),(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
-        translate([(width/2 - hole_r*2),-(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
-        translate([-(width/2 - hole_r*2),-(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
-    }
-}
 
-//the a-frames don't get holes punched out, so do them separatly
-difference(){
-    union(){
-        //a_frame_spacing = underframe_middle_length_for_aframes/a_frames;
-        for(i=[0:len(a_frame_spacing)]){
-            translate([0, a_frame_spacing[i]])
-            hull(){
-                centredCube(0,0,underframe_middle_width,a_frame_length,underframe_middle_height);
-                centredCube(0,0,width,a_frame_length,thick);
-            }
-        }
-        //two extra in the centre
-        for(i=[0:2]){
-            translate([0,-a_frame_spacing/2 + i*a_frame_spacing/2])
-            hull(){
-                centredCube(0,0,underframe_middle_width,a_frame_length,underframe_middle_height);
-                centredCube(0,0,width,a_frame_length,thick);
-            }
-        }
-    }
-        
+module bogie_sticky_out_bit(){
+    //sticky out bit above bogies
+    bogie_sticky_out_bit_size=container_hold_size*2.5;
     hull(){
-        translate([0,0,-0.01])centredCube(0,0, mid_slot_width,length,thick*0.5);
-        translate([0,0,-1])centredCube(0,0, width-edge_thick*2,length,1);
+        centredCube(width/2+bogie_sticky_out_bit_size/2,
+        length/2-bogie_from_end-bogie_sticky_out_bit_size*0.1,
+        bogie_sticky_out_bit_size,
+        bogie_sticky_out_bit_size*2,
+        thick_bogie_area);
+        
+        centredCube(width/2+bogie_sticky_out_bit_size - bogie_sticky_out_bit_size*0.2,
+        length/2-bogie_from_end+bogie_sticky_out_bit_size,
+        bogie_sticky_out_bit_size*0.4,
+        bogie_sticky_out_bit_size,
+        thick_bogie_area);
     }
 }
-
-//box behind the brake wheel
-translate([0,0,min_thick])
-centredCube(width/2-edge_thick*1.5-edge_slot_width/2,length/2 - 20*4+edge_slot_width/2+a_frame_length/2 ,edge_slot_width+edge_thick*2,edge_slot_width,edge_slot_width);
-
-//flat bits, no idea what they're for
-translate([0,0,min_thick*2]){
-    difference(){
-        centredCube(width/2-edge_thick*1.5-edge_slot_width/2,
-        0,
-        edge_slot_width+edge_thick*2,
-        10*4-a_frame_length+container_hold_spacing,
-        thick
-        );
-        translate([0,0,-50])centredCube(0,0,width*2,a_frame_length,100);
-    }
-    
-}
-
-
 //centred on 0,0
 module iso_container_hold(container_hold_size){
     //I'm sure I can produce something better than a cube, even at 0.5mm big
@@ -286,9 +163,207 @@ module holds_on_one_side(){
         translate([width/2+container_hold_size/2,-length/2 + hold_distances[i]]) iso_container_hold(container_hold_size);
     }
 }
+difference(){
+union(){
+    //main wagon, with the slots subtracted (but no a-frames or other cosmetics)
+    difference(){
+        union(){
+            difference(){
+            centredCube(0,0,width,length, thick);
+                union(){
+                 //space for bogies
+                    translate([0,length/2-bogie_from_end,thick_bogie_area])
+                        centredCube(0,0,bogie_width_max,bogie_length_max,thick);   
+                    
+                    translate([0,-(length/2-bogie_from_end),thick_bogie_area])
+                        centredCube(0,0,bogie_width_max,bogie_length_max,thick);   
+                    
+                    //tapered end to space for bogies
+                    translate([0,length/2-buffer_section_length,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
+                    mirror([0,1,0])translate([0,length/2-buffer_section_length,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
+                    
+                    translate([0,length/2-bogie_from_end-bogie_length_max/2,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
+                     mirror([0,1,0])translate([0,length/2-bogie_from_end-bogie_length_max/2,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
+                }
+            }
+            translate([0,length/2-bogie_from_end,0])
+                cylinder(h=bogie_mount_height+thick,r=m3_thread_d);
+            
+             translate([0,-(length/2-bogie_from_end),0])
+                cylinder(h=bogie_mount_height+thick,r=m3_thread_d);
+            
+            //a-frame like underside lengthways
+            hull(){
+                centredCube(0,0,underframe_middle_width,underframe_middle_length,underframe_height);
+                centredCube(0,0,underframe_middle_width,middle_length-thick,thick);
+            }
+            
+            
+        }
+        
+        union(){
+            //holes for bogies to screw in
+            translate([0,(length/2-bogie_from_end),0]){
+                translate([0,0,min_thick])cylinder(h=100,r=m3_thread_d/2);
+            }
+            translate([0,-(length/2-bogie_from_end),0]){
+                translate([0,0,min_thick])cylinder(h=100,r=m3_thread_d/2);
+            }
+            
+            //holes for buffers
+            translate([-buffer_distance/2,length/2,thick/2]){
+                rotate([90,0,0]){
+                //holes to hold buffers
+                cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+                }
+            }
+            translate([buffer_distance/2,length/2,thick/2]){
+                rotate([90,0,0]){
+                //holes to hold buffers
+                cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+                }
+            }
+            translate([-buffer_distance/2,-(length/2),thick/2]){
+                rotate([90,0,0]){
+                //holes to hold buffers
+                cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+                }
+            }
+            translate([buffer_distance/2,-(length/2),thick/2]){
+                rotate([90,0,0]){
+                //holes to hold buffers
+                cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+                }
+            }
+            
+            
+            //long slot down the centre
+            hull(){
+                end_r = width*0.04;
+                
+                translate([0,underframe_middle_length/2,0])cylinder(h=50,r=end_r, center=true);
+                translate([0,0,-1])centredCube(0,0,mid_slot_width,underframe_middle_length-end_r*2,50);
+                translate([0,-underframe_middle_length/2,0])cylinder(h=50,r=end_r, center=true);
+            }
+            //slots either side
+            
+            
+            
+            main_edge_slot(edge_slot_width, edge_slot_r);
+            mirror([1,0,0])main_edge_slot(edge_slot_width, edge_slot_r);
+            
+            
+            
+            translate([(width/2 - hole_r*2),(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
+            translate([-(width/2 - hole_r*2),(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
+            translate([(width/2 - hole_r*2),-(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
+            translate([-(width/2 - hole_r*2),-(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
+        }
+    }
+    
+    //a frames and various additional cosmetics
 
-holds_on_one_side();
+    //the a-frames don't get holes punched out, so do them separatly
+    difference(){
+        union(){
+            //a_frame_spacing = underframe_middle_length_for_aframes/a_frames;
+            for(i=[0:len(a_frame_spacing)]){
+                translate([0, a_frame_spacing[i]])
+                hull(){
+                    centredCube(0,0,underframe_middle_width,a_frame_length,underframe_middle_height);
+                    centredCube(0,0,width,a_frame_length,thick);
+                }
+            }
+            //two extra in the centre
+            for(i=[0:2]){
+                translate([0,-a_frame_spacing/2 + i*a_frame_spacing/2])
+                hull(){
+                    centredCube(0,0,underframe_middle_width,a_frame_length,underframe_middle_height);
+                    centredCube(0,0,width,a_frame_length,thick);
+                }
+            }
+        }
+            
+        hull(){
+            translate([0,0,-0.01])centredCube(0,0, mid_slot_width,length,thick*0.5);
+            translate([0,0,-1])centredCube(0,0, width-edge_thick*2,length,1);
+        }
+    }
 
-mirror([1,0,0]){
+    //box behind the brake wheel
+    translate([0,0,min_thick])
+    centredCube(width/2-edge_thick*1.5-edge_slot_width/2,
+        length/2 - 20*4+edge_slot_width/2+a_frame_length/2,
+        edge_slot_width+edge_thick*2,
+        edge_slot_width,
+        edge_slot_width
+    );
+    //other side doesn't have one, but we need something for the wheel to slot into
+     mirror([1,0,0])   translate([0,0,min_thick])
+        centredCube(width/2-edge_thick/2,
+            length/2 - 20*4+edge_slot_width/2+a_frame_length/2,
+            edge_thick,
+            edge_slot_width,
+            edge_slot_width
+        );
+
+    //flat bits, no idea what they're for
+    translate([0,0,min_thick*2]){
+        difference(){
+            centredCube(width/2-edge_thick*1.5-edge_slot_width/2,
+            0,
+            edge_slot_width+edge_thick*2,
+            10*4-a_frame_length+container_hold_spacing,
+            thick
+            );
+            translate([0,0,-50])centredCube(0,0,width*2,a_frame_length,100);
+        }
+        
+    }
+    plaque_thick = 0.5;
+
+    //info plaques
+    centredCube(width/2-plaque_thick/2,length*0.235,plaque_thick,a_frame_length*3,thick*2);
+    mirror([1,0,0])centredCube(width/2-plaque_thick/2,length*0.235,plaque_thick,a_frame_length*3,thick*2);
+
+    mirror([0,1,0]){
+        centredCube(width/2-plaque_thick/2,length*0.235,plaque_thick,a_frame_length*3,thick*2);
+    mirror([1,0,0])centredCube(width/2-plaque_thick/2,length*0.235,plaque_thick,a_frame_length*3,thick*2);
+    }
+
+
+
+    bogie_sticky_out_bit();
+    mirror([1,0,0]) bogie_sticky_out_bit();
+    mirror([0,1,0]){
+        bogie_sticky_out_bit();
+        mirror([1,0,0]) bogie_sticky_out_bit();
+    }
+
+
     holds_on_one_side();
-}
+
+    mirror([1,0,0]){
+        holds_on_one_side();
+    }
+    
+}//end massive union
+
+    //holes for the brake wheels to be inserted
+    translate([width/2,length/2 - 20*4+edge_slot_width/2+a_frame_length/2,thick]){
+        rotate([0,90,0]){
+        //holes to hold buffers
+        cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+        }
+    }
+    
+    mirror([1,0,0]){
+        translate([width/2,length/2 - 20*4+edge_slot_width/2+a_frame_length/2,thick]){
+            rotate([0,90,0]){
+            //holes to hold buffers
+            cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+            }
+        }
+    }
+
+}//end difference
