@@ -11,7 +11,7 @@ Since I can't reduce the height of the bogies much, the lowest I can have buffer
 I think this is good enough for my purposes.
 
 TODO - since I've realised my measurements of coupling and buffer heights were wrong, the above statement might no longer be true and I might be able to do both FTA and FSA properly?
-
+- nope, only got 2mm of clearance between flange and underside of wagon. Going to have to stick with merged FSA and FTA, can't lower the buffers for an FTA any more than they currently are, and if I raise them for an FSA they'll be higher than any other rolling stock
 
 TODO slot to insert wheel (for brakes?) on either side - both wheels are offset from the centre, but in the same place (mirror along Y axis) - so it looks different from each side
 
@@ -28,27 +28,34 @@ wheel_diameter = getWheelDiameter(dapol_wheels, spoked);
 buffer_mount_length=5;
 
 //axle_space + aprox max wheel diameter + wiggle room
-bogie_length_max = 23 + 17 + 3;
+bogie_length_max = 23 + 17 + 1;
+
+//for cap over hole for m3 screws
+min_thick=0.2;
 
 width=30;
-thick=4;
+thick=3.5;
+thick_bogie_area = 2;
 edge_thick = 2;
 //length=240 + buffer_mount_length*2;
 //60ft
-//real length = 19.57m -> 256.8mm (maybe with buffers?)
+//FSA (from markings on side) real length = 19.57m -> 256.8mm (maybe with buffers?)
+//FTA 20.54
 //will stick to this for now
 length=60*4;
 
 buffer_section_length = 10;
 
 bogie_from_end = bogie_length_max/2 + buffer_section_length;
-echo("bogie from end", bogie_from_end);
-//axle_height+thick from bogie
-axle_to_top_of_bogie = 4.5;
 
-bogie_mount_height = top_of_buffer_from_top_of_rail - wheel_diameter/2 - axle_to_top_of_bogie - thick;
+//axle_height+thick from bogie
+axle_to_top_of_bogie = 5.15;//4.5;
+
+bogie_mount_height = top_of_buffer_from_top_of_rail - wheel_diameter/2 - axle_to_top_of_bogie - thick - m3_washer_thick*2;
 //+ extra for cutting bits out
 bogie_width_max = 30+5;
+
+echo("bogie from end", bogie_from_end, "bogie height below top of buffer: ", bogie_mount_height + thick, "bogie height from underside", bogie_mount_height + thick - thick_bogie_area, "m3 screw hole depth ", bogie_mount_height + thick-min_thick);
 
 middle_length = length - bogie_length_max-bogie_from_end*2;
 underframe_height = axle_to_top_of_bogie + bogie_mount_height +thick;
@@ -90,18 +97,18 @@ difference(){
         centredCube(0,0,width,length, thick);
             union(){
              //space for bogies
-                translate([0,length/2-bogie_from_end,thick/2])
+                translate([0,length/2-bogie_from_end,thick_bogie_area])
                     centredCube(0,0,bogie_width_max,bogie_length_max,thick);   
                 
-                translate([0,-(length/2-bogie_from_end),thick/2])
+                translate([0,-(length/2-bogie_from_end),thick_bogie_area])
                     centredCube(0,0,bogie_width_max,bogie_length_max,thick);   
                 
                 //tapered end to space for bogies
-                translate([0,length/2-buffer_section_length,thick/2])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
-                mirror([0,1,0])translate([0,length/2-buffer_section_length,thick/2])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
+                translate([0,length/2-buffer_section_length,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
+                mirror([0,1,0])translate([0,length/2-buffer_section_length,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
                 
-                translate([0,length/2-bogie_from_end-bogie_length_max/2,thick/2])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
-                 mirror([0,1,0])translate([0,length/2-bogie_from_end-bogie_length_max/2,thick/2])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
+                translate([0,length/2-bogie_from_end-bogie_length_max/2,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
+                 mirror([0,1,0])translate([0,length/2-bogie_from_end-bogie_length_max/2,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
             }
         }
         translate([0,length/2-bogie_from_end,0])
@@ -122,10 +129,10 @@ difference(){
     union(){
         //holes for bogies to screw in
         translate([0,(length/2-bogie_from_end),0]){
-            translate([0,0,0.2])cylinder(h=100,r=m3_thread_d/2);
+            translate([0,0,min_thick])cylinder(h=100,r=m3_thread_d/2);
         }
         translate([0,-(length/2-bogie_from_end),0]){
-            translate([0,0,0.2])cylinder(h=100,r=m3_thread_d/2);
+            translate([0,0,min_thick])cylinder(h=100,r=m3_thread_d/2);
         }
         
         //holes for buffers

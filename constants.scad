@@ -16,6 +16,10 @@ m2_thread_size_loose = 2.3;
 m2_head_size=4.5;
 m3_thread_loose_size = 3.2;
 m3_thread_d = 3.0;
+//thick enough to make a difference...
+m3_washer_thick = 0.55;
+
+
 $fn=200;
 
 //how far apart the centres of the buffers are
@@ -35,6 +39,7 @@ axle_centre_space = 8;
 //12.8 for spoked dapol wheels
 //12.5 for the 3 holes dapol wheels
 function getWheelDiameter(dapol_wheels=true, spoked = true) = dapol_wheels ?  ( spoked ? 12.8 : 12.5) : 14.0;
+//total size including flange of dapol is 13.8
 
 //diameter around which there can be no obstructions for the wheels
 function getWheelMaxDiameter(dapol_wheels=true, spoked = true) = dapol_wheels ? 14+2 : 17+2;

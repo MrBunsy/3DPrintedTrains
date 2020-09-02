@@ -2,6 +2,12 @@ include <truck_bits.scad>
 //include <hornby_bachman_style.scad>
 include<constants.scad>
 
+/*
+
+Bogie designed to look like FSA/FTA wagon bogie
+
+*/
+
 dapol_wheels = true;
 spoked = false;
 
@@ -14,21 +20,19 @@ thick = 2;
 axle_space = 23.0;
 
 //mainly because I haven't got any shorter m3 screws, don't need quite this much stability
-m3_hole_depth = 3;
+m3_hole_depth = 5;
 m3_hole_thick = 1.5;
 
 wheel_max_d = getWheelMaxDiameter(dapol_wheels,spoked);
 wheel_diameter = getWheelDiameter(dapol_wheels,spoked);
 
 //height above thick for the coupling mount
-coupling_height = 0.5;
+coupling_height = 1;
 
 //from intermodal wagon, to calculate length of arm for coupling
-bogie_from_end = 33;
+bogie_from_end = 30.5;
 
-//how high for axle to be from the underside of the truck
-//bachman seem to be lower than the rest at 5, hornby + lima about 6
-//this should probably be adjusted for wheel size as it affects buffer height
+//above the thickness, since the coupling is also above the thickness
 axle_height = top_of_coupling_from_top_of_rail + coupling_height - wheel_diameter/2;
 
 axle_distance = 23.6;//wheel_max_d*1.5;//23.6 is 1.8metres which is the "real" size
@@ -50,7 +54,7 @@ echo("width",width,"length",length, "axle_height",axle_height, "thick",thick);
 module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
     
         
-    corner_r = wheel_diameter*0.25;
+    corner_r = wheel_diameter*0.275;
     central_hole_r1 = corner_r*0.7;
     central_hole_r2 = corner_r*0.55;
     offset_hole_r1 = corner_r*0.4;
@@ -104,8 +108,9 @@ union(){
     
     sphere_r = wide*2;
     //sticky out bit on axle mount - want the tip of a sphere
+    //line up exactly with axle_height, so we can judge the size of the rest around this
     intersection(){
-        translate([-sphere_r*0.43,-axle_distance/2,bar_height_above_axles+axle_mount_size/2])sphere(r=wide*2);
+        translate([-sphere_r*0.43,-axle_distance/2,axle_height+thick])sphere(r=wide*2);
         translate([wide,-(axle_distance/2+axle_mount_size/2),corner_r])cube([wide,axle_mount_size, axle_mount_size]);
     }
     
@@ -157,7 +162,7 @@ difference(){
         centredCube(0,coupling_from_axle+axle_distance/2,coupling_width,coupling_arm_wide,thick + coupling_height);
         
         //lengthening of hole for m3 screw
-        cylinder(h=m3_hole_depth+thick, r=(m3_thread_loose_size/2)+m3_hole_thick);
+        cylinder(h=m3_hole_depth, r=(m3_thread_loose_size/2)+m3_hole_thick);
     }
     
     union(){
@@ -177,9 +182,10 @@ difference(){
     }
 }
 
+//just to be confusing, axle_holder adds thickness itself
 axle_holder(axle_space, 20, axle_height);
 
-translate([0,axle_distance/2 + coupling_from_axle,thick +  + coupling_height]){
+translate([0,axle_distance/2 + coupling_from_axle,thick +  coupling_height]){
     coupling_mount(0);
 }
 difference(){
