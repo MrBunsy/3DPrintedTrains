@@ -51,7 +51,7 @@ bogie_from_end = bogie_length_max/2 + buffer_section_length;
 //axle_height+thick from bogie
 axle_to_top_of_bogie = 5.15;//4.5;
 
-bogie_mount_height = top_of_buffer_from_top_of_rail - wheel_diameter/2 - axle_to_top_of_bogie - thick - m3_washer_thick*2;
+bogie_mount_height = top_of_buffer_from_top_of_rail - wheel_diameter/2 - axle_to_top_of_bogie - thick - m3_washer_thick;
 //+ extra for cutting bits out
 bogie_width_max = 30+5;
 
