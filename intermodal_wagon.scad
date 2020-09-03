@@ -23,6 +23,9 @@ TODO blurb plaques
 dapol_wheels = true;
 spoked = false;
 
+screwholes_for_containers = true;
+screwhole_from_edge = 5;
+
 wheel_diameter = getWheelDiameter(dapol_wheels, spoked);
 
 buffer_mount_length=5;
@@ -116,6 +119,35 @@ hole_from_end = buffer_section_length;
 
 //translate([width/2+5,length/2 -buffer_section_length+0.5,0])rotate([-45,0,0])centredCube(0,0,width/3,1,10);
 
+//to screw containers to flatbed
+module holes_for_containers(holes = true){
+    positions = [-length/2+screwhole_from_edge,
+             -length/2 + twentyFootContainerLength - screwhole_from_edge,
+             -length/2 + fortyFootContainerLength - screwhole_from_edge,
+            length/2-screwhole_from_edge,
+             length/2 - twentyFootContainerLength + screwhole_from_edge,
+             length/2 - fortyFootContainerLength + screwhole_from_edge,
+            ];
+    
+    if(holes){
+            
+        for(y = positions){
+            echo("screw hole y", y);
+            translate([0,y,0])cylinder(h=100,r=m2_thread_size_loose/2,center=true);
+            
+            translate([0,y,thick/2])cylinder(h=100,r=m2_washer_d /2);
+        }
+        
+    }else{
+        //extra padding for bits without substance to put hole in
+        for(y = positions){
+            //translate([0,y,0])cylinder(h=thick,r=m2_thread_size_loose*2/2);
+        }
+    }
+    
+    
+}
+
 module main_edge_slot(edge_slot_width, edge_slot_r){
     //main edge slot
         translate([0,0,-1])centredCube(width/2-edge_thick-edge_slot_width/2,0,edge_slot_width,underframe_middle_length_for_aframes,50);
@@ -136,7 +168,7 @@ module main_edge_slot(edge_slot_width, edge_slot_r){
 
 module bogie_sticky_out_bit(){
     //sticky out bit above bogies
-    bogie_sticky_out_bit_size=container_hold_size*2.5;
+    bogie_sticky_out_bit_size=container_hold_size*2;
     hull(){
         centredCube(width/2+bogie_sticky_out_bit_size/2,
         length/2-bogie_from_end-bogie_sticky_out_bit_size*0.1,
@@ -320,7 +352,7 @@ union(){
         }
         
     }
-    plaque_thick = 0.5;
+    plaque_thick = 1;
 
     //info plaques
     centredCube(width/2-plaque_thick/2,length*0.235,plaque_thick,a_frame_length*3,thick*2);
@@ -347,23 +379,35 @@ union(){
         holds_on_one_side();
     }
     
+    if(screwholes_for_containers){
+        //extra material for where it's needed
+                holes_for_containers(false);
+            }
+    
 }//end massive union
 
-    //holes for the brake wheels to be inserted
-    translate([width/2,length/2 - 20*4+edge_slot_width/2+a_frame_length/2,thick]){
-        rotate([0,90,0]){
-        //holes to hold buffers
-        cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
-        }
-    }
-    
-    mirror([1,0,0]){
+    union(){
+        //holes for the brake wheels to be inserted
         translate([width/2,length/2 - 20*4+edge_slot_width/2+a_frame_length/2,thick]){
             rotate([0,90,0]){
             //holes to hold buffers
             cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
             }
         }
+        
+        mirror([1,0,0]){
+            translate([width/2,length/2 - 20*4+edge_slot_width/2+a_frame_length/2,thick]){
+                rotate([0,90,0]){
+                //holes to hold buffers
+                cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+                }
+            }
+        }
+            if(screwholes_for_containers){
+                holes_for_containers(true);
+            }
+        
+        
     }
 
 }//end difference

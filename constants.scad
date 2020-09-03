@@ -7,6 +7,8 @@ coupling_from_edge=2.5;
 //again hornby seems higher than Lima and friends, but it makes my life easier so I'll take it
 //hornby seens to be 17.6, lima about 16.5. i'll go for 17
 top_of_buffer_from_top_of_rail = 17;//16.0;
+//real standard flat deck is apparently 940mm => 12.34.
+//no real way to achieve that with any of the wheels I've seen
 
 //pointy bit to pointy bit of spare hornby axles (also works for dapol axles)
 axle_width = 25.65;
@@ -14,6 +16,8 @@ axle_width = 25.65;
 m2_thread_size = 2;
 m2_thread_size_loose = 2.3;
 m2_head_size=4.5;
+//4.84, but with some extra space
+m2_washer_d = 5;
 m3_thread_loose_size = 3.2;
 m3_thread_d = 3.0;
 //thick enough to make a difference...
