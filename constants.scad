@@ -47,3 +47,20 @@ function getWheelDiameter(dapol_wheels=true, spoked = true) = dapol_wheels ?  ( 
 
 //diameter around which there can be no obstructions for the wheels
 function getWheelMaxDiameter(dapol_wheels=true, spoked = true) = dapol_wheels ? 14+2 : 17+2;
+
+
+module rounded_cube(width,length,height,r){
+    hull(){
+        corners = [
+            [r-width/2,r-length/2,0],
+            [r-width/2,length/2-r,0],
+            [width/2-r,r-length/2,0],
+            [width/2-r,length/2-r,0],
+        
+        ];
+        for(i=[0:3]){
+            translate(corners[i])cylinder(r=r,h=height,$fn=100);
+        }
+    }
+    
+}

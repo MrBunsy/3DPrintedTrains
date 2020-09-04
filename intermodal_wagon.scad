@@ -1,5 +1,5 @@
 include <truck_bits.scad>
-include<constants.scad>
+include <constants.scad>
 /*
 
 Aiming for something halfway between an FTA and an FSA intermodal flat.
@@ -31,8 +31,8 @@ wheel_diameter = getWheelDiameter(dapol_wheels, spoked);
 buffer_mount_length=5;
 
 //little bits that the iso containers lock into
-container_hold_size = 1;
-container_hold_spacing = 0.5;//turns out this is exactly 1.5inches, which is exactly how short of 20feet a 20foot container is
+container_hold_size = 1.5;
+container_hold_spacing = 1;//0.5;//turns out this is exactly 1.5inches, which is exactly how short of 20feet a 20foot container is
 
 //1.5" shy of twenty feet
 twentyFootContainerLength = 20*4-0.5;
@@ -93,17 +93,17 @@ underframe_middle_length_for_aframes = middle_length*0.9;//40*4;
 //bogies are oversized, so bodge the end aframe positions
 //underframe_middle_length_for_aframes_max = middle_length*0.9;
 a_frame_spacing = [-underframe_middle_length_for_aframes/2,
-    -10*4-container_hold_spacing/2,
-    -5*4-container_hold_spacing/4,
+    -10*4,
+    -5*4,
     0,
-    5*4+container_hold_spacing/4,
-    10*4+container_hold_spacing/2,
+    5*4,
+    10*4,
     underframe_middle_length_for_aframes/2
    ];
 underframe_middle_width = width/3;
 underframe_middle_height = underframe_height*0.75;
 a_frames = 4;
-a_frame_length=container_hold_size*2 + container_hold_spacing;
+a_frame_length= 2 + 0.5;
 
 mid_slot_width = width*0.1;
 
@@ -168,7 +168,7 @@ module main_edge_slot(edge_slot_width, edge_slot_r){
 
 module bogie_sticky_out_bit(){
     //sticky out bit above bogies
-    bogie_sticky_out_bit_size=container_hold_size*2;
+    bogie_sticky_out_bit_size=2;
     hull(){
         centredCube(width/2+bogie_sticky_out_bit_size/2,
         length/2-bogie_from_end-bogie_sticky_out_bit_size*0.1,
@@ -326,7 +326,7 @@ union(){
     //inline with bed, because just below bed printed badly
     translate([0,0,0])//min_thick
     centredCube(width/2-edge_thick*1.5-edge_slot_width/2,
-        length/2 - 20*4+edge_slot_width/2+a_frame_length/2,
+        length/2 - 20*4+edge_slot_width/2+a_frame_length/2+container_hold_spacing,
         edge_slot_width+edge_thick*2,
         edge_slot_width,
         edge_slot_width
@@ -334,7 +334,7 @@ union(){
     //other side doesn't have one, but we need something for the wheel to slot into
      mirror([1,0,0])   translate([0,0,min_thick])
         centredCube(width/2-edge_thick/2,
-            length/2 - 20*4+edge_slot_width/2+a_frame_length/2,
+            length/2 - 20*4+edge_slot_width/2+a_frame_length/2+container_hold_spacing,
             edge_thick,
             edge_slot_width,
             edge_slot_width
@@ -348,7 +348,7 @@ union(){
             centredCube(width/2-edge_thick*1.5-edge_slot_width/2,
             0,
             edge_slot_width+edge_thick*2,
-            10*4-a_frame_length+container_hold_spacing,
+            10*4-a_frame_length,
             thick
             );
             translate([0,0,-50])centredCube(0,0,width*2,a_frame_length,100);
@@ -391,7 +391,9 @@ union(){
 
     union(){
         //holes for the brake wheels to be inserted
-        translate([width/2,length/2 - 20*4+edge_slot_width/2+a_frame_length/2,thick]){
+        translate([width/2,
+                length/2 - 20*4+edge_slot_width/2+a_frame_length/2+container_hold_spacing,
+                thick]){
             rotate([0,90,0]){
             //holes to hold buffers
             cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
@@ -399,7 +401,7 @@ union(){
         }
         
         mirror([1,0,0]){
-            translate([width/2,length/2 - 20*4+edge_slot_width/2+a_frame_length/2,thick]){
+            translate([width/2,length/2 - 20*4+edge_slot_width/2+a_frame_length/2+container_hold_spacing,thick]){
                 rotate([0,90,0]){
                 //holes to hold buffers
                 cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
