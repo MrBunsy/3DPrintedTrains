@@ -317,13 +317,14 @@ union(){
         }
             
         hull(){
-            translate([0,0,-0.01])centredCube(0,0, mid_slot_width,length,thick*0.5);
+            translate([0,0,-0.01])centredCube(0,0, mid_slot_width,length,thick);
             translate([0,0,-1])centredCube(0,0, width-edge_thick*2,length,1);
         }
     }
 
     //box behind the brake wheel
-    translate([0,0,min_thick])
+    //inline with bed, because just below bed printed badly
+    translate([0,0,0])//min_thick
     centredCube(width/2-edge_thick*1.5-edge_slot_width/2,
         length/2 - 20*4+edge_slot_width/2+a_frame_length/2,
         edge_slot_width+edge_thick*2,
@@ -340,7 +341,9 @@ union(){
         );
 
     //flat bits, no idea what they're for
-    translate([0,0,min_thick*2]){
+    //wanted to make them lower than the rest of the bed, but that pritns really badly
+    flat_bits_depth = 0;
+    translate([0,0,flat_bits_depth]){
         difference(){
             centredCube(width/2-edge_thick*1.5-edge_slot_width/2,
             0,
