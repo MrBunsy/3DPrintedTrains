@@ -2,6 +2,7 @@ include <truck_bits.scad>
 //include <hornby_bachman_style.scad>
 include<constants.scad>
 
+include <threads.scad>
 /*
 
 Bogie designed to look like FSA/FTA wagon bogie
@@ -49,6 +50,37 @@ coupling_width = 17;
 
 echo("width",width,"length",length, "axle_height",axle_height, "thick",thick);
 
+//facing +ve x from 0,0
+module hubcap(axle_mount_size){
+    sphere_r = axle_mount_size;//wide*2;
+    //sticky out bit on axle mount - want the tip of a sphere on a cylinder
+    cylinder_l = axle_mount_size*0.1;
+    cylinder_r = sqrt(sphere_r*sphere_r - (sphere_r*0.95)*(sphere_r*0.95));
+    
+    bolt_r = cylinder_r*0.2;
+    bolt_distance = cylinder_r*0.8;
+    
+    translate([cylinder_l,0,0])
+    intersection(){
+        translate([-sphere_r*0.95,0,0])sphere(r=sphere_r);
+        //-(axle_distance/2+axle_mount_size/2),corner_r
+        translate([0,-50,-50])cube([100,100, 100]);
+    }
+    rotate([0,90,0])cylinder(r=cylinder_r, h=cylinder_l);
+    
+    for(i=[0:4]){
+        rotate([90*i,0,0]){
+            hull(){
+                translate([0,bolt_distance,bolt_distance])rotate([0,90,0])cylinder(r=bolt_r, h= cylinder_l);
+                
+                rotate([0,90,0])cylinder(r=bolt_r*4, h= cylinder_l);
+            }
+            translate([0,bolt_distance,bolt_distance])rotate([0,90,0])cylinder(r=bolt_r*0.6, h= cylinder_l*1.1);
+        }
+        
+    }
+    
+}
 
 //easier to do one half and mirror the whole lot after
 module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
@@ -106,28 +138,34 @@ union(){
         }
     }
     axle_mount_size = corner_r*3 - spring_r*5;
+    echo(axle_mount_size);
     axle_mount_bottom_length = corner_r*3;
     
     //springs
-    translate([spring_r - (spring_r*2 - wide)/2,-(axle_distance/2+corner_r*1.5-spring_r),bar_height_above_axles])cylinder(r=spring_r,h=axle_mount_size);
+    //a metric thread is totally a spring, right?
+    translate([spring_r - (spring_r*2 - wide)/2,-(axle_distance/2+corner_r*1.5-spring_r),bar_height_above_axles])metric_thread(diameter=spring_r*2, pitch=0.7,thread_size=0.5, groove=true, length=axle_mount_size);
     
-    translate([spring_r - (spring_r*2 - wide)/2,-(axle_distance/2-corner_r*1.5+spring_r),bar_height_above_axles])cylinder(r=spring_r,h=axle_mount_size);
+    translate([spring_r - (spring_r*2 - wide)/2,-(axle_distance/2-corner_r*1.5+spring_r),bar_height_above_axles])metric_thread(diameter=spring_r*2, thread_size=0.5, groove=true, pitch=0.7, length=axle_mount_size);
     
     
     //axle mounting
     translate([0,-(axle_distance/2+axle_mount_size/2),bar_height_above_axles])cube([wide,axle_mount_size, axle_mount_size]);
     
-    sphere_r = wide*2;
-    //sticky out bit on axle mount - want the tip of a sphere
-    //line up exactly with axle_height, so we can judge the size of the rest around this
-    intersection(){
-        translate([-sphere_r*0.43,-axle_distance/2,axle_height+thick])sphere(r=wide*2);
-        translate([wide,-(axle_distance/2+axle_mount_size/2),corner_r])cube([wide,axle_mount_size, axle_mount_size]);
-    }
+    translate([wide,-axle_distance/2,axle_height+thick]) hubcap(axle_mount_size);
     
     //bottom of axle mount
+    ledge_wide = wide*1.2;
     
-    translate([0,-(axle_distance/2+axle_mount_bottom_length/2),bar_height_above_axles+axle_mount_size])cube([wide,axle_mount_bottom_length, axle_mount_ledge_thick]);
+        translate([ledge_wide/2,-(axle_distance/2),bar_height_above_axles+axle_mount_size])
+        rounded_cube(ledge_wide,axle_mount_bottom_length, axle_mount_ledge_thick,wide*0.2);
+     
+    hull(){   
+        //triangular bit linking ledge to button of hubcap
+        //cube([ledge_wide,])
+    }
+    
+    translate([wide/2,-(axle_distance/2),bar_height_above_axles+axle_mount_size+axle_mount_ledge_thick])
+        rounded_cube(wide,axle_mount_bottom_length*0.9, axle_mount_ledge_thick,wide*0.2);
     
 }//end union
 //ensure this really is only half so it doesn't overlap with its mirror
@@ -195,5 +233,7 @@ difference(){
     axle_holder(axle_space, 20, axle_height, true);
     
 }
+/*
 r=getWheelDiameter();
 mirror_x(){color("gray")translate([0,-axle_space/2,axle_height+thick])rotate([0,90,0]) cylinder(h=axle_width*0.9, r=r/2 ,center=true);}
+*/
