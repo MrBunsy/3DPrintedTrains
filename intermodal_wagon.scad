@@ -275,7 +275,7 @@ union(){
 			[0,length/2-girder_thick/2-bogie_from_end-bogie_area_length_top/2,thick-girder_thick/2],//bottom of end of a-frames
 			[0,bogie_y-bogie_length_max/2,thick_bogie_area-girder_thick/2],//bottom of bogie area
 			[0,bogie_y+bogie_length_max/2,thick_bogie_area-girder_thick/2],//bottom of buffer end bogie area
-			[0,bogie_y+bogie_area_length_top/2+girder_thick/2,thick]//bottom of buffer area
+			[0,bogie_y+bogie_area_length_top/2+girder_thick/2,thick-girder_thick/2]//bottom of buffer area
 		]
 		, width+girder_thick*2,girder_thick);
 		
