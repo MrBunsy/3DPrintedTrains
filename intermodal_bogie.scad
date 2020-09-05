@@ -55,11 +55,18 @@ module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
     
         
     corner_r = wheel_diameter*0.275;
-    central_hole_r1 = corner_r*0.7;
-    central_hole_r2 = corner_r*0.55;
-    offset_hole_r1 = corner_r*0.4;
-    offset_hole_r2 = corner_r*0.3;
-    bar_height_above_axles = corner_r*0.9;
+    //size aroudn the hole, for the main bogie A-frame
+    central_hole_r1 = wheel_diameter*0.275*0.75;
+    //size of hole punched through
+    central_hole_r2 = wheel_diameter*0.275*0.5;
+    //size of hole raised outwards around main hole
+    hole_wider1=0.4;
+    hole_wider2=0.2;
+    hole_raised1 = 0.2;
+    hole_raised2 = 0.4;
+    offset_hole_r1 = wheel_diameter*0.275*0.4;
+    offset_hole_r2 = wheel_diameter*0.275*0.3;
+    bar_height_above_axles = wheel_diameter*0.275*0.9;
     spring_r = wide*0.6;
     axle_mount_ledge_thick=0.5;
     
@@ -82,6 +89,10 @@ union(){
                 translate([0,-(axle_distance/2-corner_r*1.3),0])cube([wide,axle_distance/2-corner_r/2, bar_height_above_axles]);
                 translate([0,0,corner_r]) rotate([0,90,0]) cylinder(h=wide,r=central_hole_r1);
             }
+            
+            //raised bit around main hole
+            translate([0,0,corner_r]) rotate([0,90,0]) cylinder(h=wide+hole_wider1,r=central_hole_r2+hole_raised1);
+            translate([0,0,corner_r]) rotate([0,90,0]) cylinder(h=wide+hole_wider2,r=central_hole_r2+hole_raised2);
         }
         //punch holes out
         
@@ -120,28 +131,14 @@ union(){
     
 }//end union
 //ensure this really is only half so it doesn't overlap with its mirror
-    translate([-wide*2,-100,-50])cube([wide*4,100,100]);
+    translate([-wide*5,-100,-50])cube([wide*10,100,100]);
 }//end intersection
 }
 
 //base at (0,0), facing +ve x
 module intermodal_bogie_cosmetics(axle_distance, wheel_diameter,wide){
     
-    //slice_width = wide/3;
-//    translate([-(wide-slice_width),0,0]){
-      //  intersection(){
-//            union(){
-                intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide);
-        
-                mirror([0,1,0]) intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide);
-    
-    
-            //}
-            //slice in half lengthways to make thinner
-         //   translate([wide-slice_width,-50,-50])cube([100,100,100]);
-     //   }
-   // }
-        
+     mirror_x() intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide);        
 }
 
 difference(){
@@ -198,3 +195,5 @@ difference(){
     axle_holder(axle_space, 20, axle_height, true);
     
 }
+r=getWheelDiameter();
+mirror_x(){color("gray")translate([0,-axle_space/2,axle_height+thick])rotate([0,90,0]) cylinder(h=axle_width*0.9, r=r/2 ,center=true);}

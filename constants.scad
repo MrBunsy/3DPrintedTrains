@@ -64,3 +64,9 @@ module rounded_cube(width,length,height,r){
     }
     
 }
+
+
+module mirror_x(){
+    children();
+    mirror([0,1,0]) children();
+}
