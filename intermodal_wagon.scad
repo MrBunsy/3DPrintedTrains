@@ -69,7 +69,7 @@ width=30;
 thick=3.5;
 thick_bogie_area = 2;
 edge_thick = 2;
-
+girder_thick = min_thick*2;
 
 buffer_section_length = 10;
 
@@ -113,11 +113,7 @@ edge_slot_r = width*0.25/2;
 hole_r = edge_slot_width*0.4;
 hole_from_end = buffer_section_length;
 
-//centredCube(0,length/2 -buffer_section_length-5,width/3,10,10);
-
 //i think distance between bogies is 11.93m -> 156.6mm
-
-//translate([width/2+5,length/2 -buffer_section_length+0.5,0])rotate([-45,0,0])centredCube(0,0,width/3,1,10);
 
 //to screw containers to flatbed
 module holes_for_containers(holes = true){
@@ -195,28 +191,46 @@ module holds_on_one_side(){
         translate([width/2+container_hold_size/2,-length/2 + hold_distances[i]]) iso_container_hold(container_hold_size);
     }
 }
+
+module bogie_space_punchout(){
+    union(){
+		 //space for bogies
+			translate([0,length/2-bogie_from_end,thick_bogie_area])
+				centredCube(0,0,bogie_width_max,bogie_length_max,thick);   
+			
+			translate([0,-(length/2-bogie_from_end),thick_bogie_area])
+				centredCube(0,0,bogie_width_max,bogie_length_max,thick);   
+			
+			//tapered end to space for bogies
+			translate([0,length/2-buffer_section_length,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
+			mirror([0,1,0])translate([0,length/2-buffer_section_length,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
+			
+			translate([0,length/2-bogie_from_end-bogie_length_max/2,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
+			 mirror([0,1,0])translate([0,length/2-bogie_from_end-bogie_length_max/2,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
+		}
+}
+
+//join dots with a bar wide and thick (used for the girder bits)
+//points = [ [x,y,z] ]
+module extendoLine(points, width, thick){
+		for(i =[0:len(points)-1]){
+			i2 = i + 1 >= len(points) ? 0 : i+1;
+			echo("i",i,"i2",i2);
+			hull(){
+				translate(points[i])translate([-width/2,-thick/2,-thick/2])cube([width,thick,thick]);
+				translate(points[i2])translate([-width/2,-thick/2,-thick/2])cube([width,thick,thick]);
+			}
+		}
+}
+
 difference(){
 union(){
     //main wagon, with the slots subtracted (but no a-frames or other cosmetics)
     difference(){
         union(){
             difference(){
-            centredCube(0,0,width,length, thick);
-                union(){
-                 //space for bogies
-                    translate([0,length/2-bogie_from_end,thick_bogie_area])
-                        centredCube(0,0,bogie_width_max,bogie_length_max,thick);   
-                    
-                    translate([0,-(length/2-bogie_from_end),thick_bogie_area])
-                        centredCube(0,0,bogie_width_max,bogie_length_max,thick);   
-                    
-                    //tapered end to space for bogies
-                    translate([0,length/2-buffer_section_length,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
-                    mirror([0,1,0])translate([0,length/2-buffer_section_length,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
-                    
-                    translate([0,length/2-bogie_from_end-bogie_length_max/2,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
-                     mirror([0,1,0])translate([0,length/2-bogie_from_end-bogie_length_max/2,thick_bogie_area])rotate([45,0,0])translate([-width,0,0])cube([width*2,20,20]);
-                }
+                centredCube(0,0,width,length, thick);
+                bogie_space_punchout();
             }
             translate([0,length/2-bogie_from_end,0])
                 cylinder(h=bogie_mount_height+thick,r=m3_thread_d);
@@ -229,6 +243,49 @@ union(){
                 centredCube(0,0,underframe_middle_width,underframe_middle_length,underframe_height);
                 centredCube(0,0,underframe_middle_width,middle_length-thick,thick);
             }
+            
+            //extra girder-like bits near buffer
+    mirror_x(){
+		bogie_area_length_top = bogie_length_max+(thick-thick_bogie_area)*2;
+		
+		bogie_y = length/2-bogie_from_end;
+
+		
+		//buffer end
+        centredCube(0,length/2-girder_thick/2,width+girder_thick*4,girder_thick,thick);
+        //bogie_area_length = (length-middle_length+thick)/2;
+		/*
+		//bottom of bogie area
+        centredCube(0,length/2-bogie_area_length/2,width+girder_thick*2,bogie_area_length,girder_thick);
+        //top of bogie area
+        translate([0,0,thick_bogie_area-girder_thick])centredCube(0,length/2-bogie_from_end,
+			width+girder_thick*2,bogie_length_max,girder_thick);
+		//from base to near aframe end
+		centredCube(0,length/2-bogie_area_length/2-bogie_area_length/2,
+			width+girder_thick*2,girder_thick,thick);
+		
+		hull(){
+			
+		}
+       */
+		extendoLine([
+			[0,length/2-girder_thick/2,thick-girder_thick/2], //bottom of buffers	 (when upright)
+			[0,length/2-girder_thick/2,girder_thick/2],//top of buffers (when upright)
+			[0,bogie_y-bogie_area_length_top/2-girder_thick/2,girder_thick/2],//top of end of a-frames
+			[0,length/2-girder_thick/2-bogie_from_end-bogie_area_length_top/2,thick-girder_thick/2],//bottom of end of a-frames
+			[0,bogie_y-bogie_length_max/2,thick_bogie_area-girder_thick/2],//bottom of bogie area
+			[0,bogie_y+bogie_length_max/2,thick_bogie_area-girder_thick/2],//bottom of buffer end bogie area
+			[0,bogie_y+bogie_area_length_top/2+girder_thick/2,thick]//bottom of buffer area
+		]
+		, width+girder_thick*2,girder_thick);
+		
+		centredCube(0,length/2-buffer_section_length/2,
+			width+girder_thick*2,girder_thick,thick);
+			centredCube(0,length/2-+thick/2,	width+girder_thick*2,thick,thick);
+			centredCube(0,length/2-buffer_section_length+thick/2,
+			width+girder_thick*2,girder_thick,thick);
+        
+    }
             
             
         }
@@ -286,10 +343,7 @@ union(){
             
             
             
-            translate([(width/2 - hole_r*2),(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
-            translate([-(width/2 - hole_r*2),(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
-            translate([(width/2 - hole_r*2),-(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
-            translate([-(width/2 - hole_r*2),-(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
+            mirror_xy()translate([(width/2 - hole_r*2),(length/2-hole_from_end),0])cylinder(r=hole_r, h=50, center=true);
         }
     }
     
@@ -368,13 +422,8 @@ union(){
     plaque_thick = 1;
 
     //info plaques
-    centredCube(width/2-plaque_thick/2,length*0.235,plaque_thick,a_frame_length*3,thick*2);
-    mirror([1,0,0])centredCube(width/2-plaque_thick/2,length*0.235,plaque_thick,a_frame_length*3,thick*2);
+    mirror_xy()centredCube(width/2-plaque_thick/2,length*0.235,plaque_thick,a_frame_length*3,thick*2);
 
-    mirror([0,1,0]){
-        centredCube(width/2-plaque_thick/2,length*0.235,plaque_thick,a_frame_length*3,thick*2);
-    mirror([1,0,0])centredCube(width/2-plaque_thick/2,length*0.235,plaque_thick,a_frame_length*3,thick*2);
-    }
 
 
 
@@ -384,13 +433,12 @@ union(){
         bogie_sticky_out_bit();
         mirror([1,0,0]) bogie_sticky_out_bit();
     }
+    
+    
+    
+    
 
-
-    holds_on_one_side();
-
-    mirror([1,0,0]){
-        holds_on_one_side();
-    }
+    mirror_x()holds_on_one_side();
     
     if(screwholes_for_containers){
         //extra material for where it's needed
