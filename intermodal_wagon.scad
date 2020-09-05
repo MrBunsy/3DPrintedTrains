@@ -69,7 +69,7 @@ width=30;
 thick=3.5;
 thick_bogie_area = 2;
 edge_thick = 2;
-girder_thick = min_thick*2;
+girder_thick = min_thick*2.5;
 
 buffer_section_length = 10;
 
@@ -424,21 +424,9 @@ union(){
     //info plaques
     mirror_xy()centredCube(width/2-plaque_thick/2,length*0.235,plaque_thick,a_frame_length*3,thick*2);
 
-
-
-
-    bogie_sticky_out_bit();
-    mirror([1,0,0]) bogie_sticky_out_bit();
-    mirror([0,1,0]){
-        bogie_sticky_out_bit();
-        mirror([1,0,0]) bogie_sticky_out_bit();
-    }
-    
-    
-    
-    
-
-    mirror_x()holds_on_one_side();
+    mirror_xy()bogie_sticky_out_bit();
+  
+    mirror_y()holds_on_one_side();
     
     if(screwholes_for_containers){
         //extra material for where it's needed
@@ -449,7 +437,7 @@ union(){
 
     union(){
         //holes for the brake wheels to be inserted
-        translate([width/2,
+        mirror_y()translate([width/2,
                 length/2 - 20*4+edge_slot_width/2+a_frame_length/2+container_hold_spacing,
                 thick]){
             rotate([0,90,0]){
@@ -457,15 +445,7 @@ union(){
             cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
             }
         }
-        
-        mirror([1,0,0]){
-            translate([width/2,length/2 - 20*4+edge_slot_width/2+a_frame_length/2+container_hold_spacing,thick]){
-                rotate([0,90,0]){
-                //holes to hold buffers
-                cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
-                }
-            }
-        }
+
             if(screwholes_for_containers){
                 holes_for_containers(true);
             }
