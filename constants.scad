@@ -49,7 +49,7 @@ function getWheelDiameter(dapol_wheels=true, spoked = true) = dapol_wheels ?  ( 
 function getWheelMaxDiameter(dapol_wheels=true, spoked = true) = dapol_wheels ? 14+2 : 17+2;
 
 
-module rounded_cube(width,length,height,r){
+module rounded_cube(width,length,height,r, $fn=50){
     hull(){
         corners = [
             [r-width/2,r-length/2,0],
@@ -59,7 +59,7 @@ module rounded_cube(width,length,height,r){
         
         ];
         for(i=[0:3]){
-            translate(corners[i])cylinder(r=r,h=height,$fn=100);
+            translate(corners[i])cylinder(r=r,h=height);
         }
     }
     
@@ -69,4 +69,13 @@ module rounded_cube(width,length,height,r){
 module mirror_x(){
     children();
     mirror([0,1,0]) children();
+}
+
+module mirror_y(){
+    children();
+    mirror([1,0,0]) children();
+}
+
+module mirror_xy(){
+    mirror_x() mirror_y() children();
 }
