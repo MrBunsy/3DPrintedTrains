@@ -324,13 +324,23 @@ union(){
 
     //box behind the brake wheel
     //inline with bed, because just below bed printed badly
-    translate([0,0,0])//min_thick
-    centredCube(width/2-edge_thick*1.5-edge_slot_width/2,
-        length/2 - 20*4+edge_slot_width/2+a_frame_length/2+container_hold_spacing,
-        edge_slot_width+edge_thick*2,
-        edge_slot_width,
-        edge_slot_width
-    );
+    difference(){
+            centredCube(width/2-edge_thick*1.5-edge_slot_width/2,
+                length/2 - 20*4+edge_slot_width/2+a_frame_length/2+container_hold_spacing,
+                edge_slot_width+edge_thick*2,
+                edge_slot_width,
+                edge_slot_width
+            );
+        //make it hollow
+        box_wall_thick = 0.5;
+        translate([0,0,thick/2])//min_thick
+            centredCube(width/2-edge_thick*1.5-edge_slot_width/2,
+                length/2 - 20*4+edge_slot_width/2+a_frame_length/2+container_hold_spacing,
+                edge_slot_width,
+                edge_slot_width-box_wall_thick*2,
+                edge_slot_width
+            );
+    }
     //other side doesn't have one, but we need something for the wheel to slot into
      mirror([1,0,0])   translate([0,0,min_thick])
         centredCube(width/2-edge_thick/2,
