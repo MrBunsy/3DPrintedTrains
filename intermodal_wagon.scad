@@ -27,7 +27,7 @@ screwholes_for_containers = true;
 screwhole_from_edge = 5;
 
 wheel_diameter = getWheelDiameter(dapol_wheels, spoked);
-
+box_wall_thick = 0.5;
 buffer_mount_length=5;
 
 //little bits that the iso containers lock into
@@ -281,8 +281,8 @@ union(){
 		
 		centredCube(0,length/2-buffer_section_length/2,
 			width+girder_thick*2,girder_thick,thick);
-			centredCube(0,length/2-+thick/2,	width+girder_thick*2,thick,thick);
-			centredCube(0,length/2-buffer_section_length+thick/2,
+		centredCube(0,length/2-+thick/2,	width+girder_thick*2,thick,thick);
+		centredCube(0,length/2-buffer_section_length+thick/2,
 			width+girder_thick*2,girder_thick,thick);
         
     }
@@ -292,47 +292,32 @@ union(){
         
         union(){
             //holes for bogies to screw in
-            translate([0,(length/2-bogie_from_end),0]){
-                translate([0,0,min_thick])cylinder(h=100,r=m3_thread_d/2);
-            }
-            translate([0,-(length/2-bogie_from_end),0]){
+            mirror_x()translate([0,(length/2-bogie_from_end),0]){
                 translate([0,0,min_thick])cylinder(h=100,r=m3_thread_d/2);
             }
             
             //holes for buffers
-            translate([-buffer_distance/2,length/2,thick/2]){
-                rotate([90,0,0]){
-                //holes to hold buffers
-                cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
-                }
-            }
-            translate([buffer_distance/2,length/2,thick/2]){
-                rotate([90,0,0]){
-                //holes to hold buffers
-                cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
-                }
-            }
-            translate([-buffer_distance/2,-(length/2),thick/2]){
-                rotate([90,0,0]){
-                //holes to hold buffers
-                cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
-                }
-            }
-            translate([buffer_distance/2,-(length/2),thick/2]){
-                rotate([90,0,0]){
-                //holes to hold buffers
-                cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
-                }
-            }
+            mirror_xy(){
+				translate([-buffer_distance/2,length/2,thick/2]){
+					rotate([90,0,0]){
+					//holes to hold buffers
+					cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+					}
+				}
+				box_size = buffer_holder_d*3;
+				//hollow out a box under the buffers
+				translate([0,0,box_wall_thick])centredCube(-buffer_distance/2,length/2-box_size/2 + -box_wall_thick*2,box_size,box_size,thick);
+			}
+
+
             
             
             //long slot down the centre
             hull(){
                 end_r = width*0.04;
                 
-                translate([0,underframe_middle_length/2,0])cylinder(h=50,r=end_r, center=true);
+                mirror_y()translate([0,underframe_middle_length/2,0])cylinder(h=50,r=end_r, center=true);
                 translate([0,0,-1])centredCube(0,0,mid_slot_width,underframe_middle_length-end_r*2,50);
-                translate([0,-underframe_middle_length/2,0])cylinder(h=50,r=end_r, center=true);
             }
             //slots either side
             
@@ -385,8 +370,8 @@ union(){
                 edge_slot_width,
                 edge_slot_width
             );
-        //make it hollow
-        box_wall_thick = 0.5;
+        //make it hollow (easier to deal with the slot-in wheels getting stuck)
+        
         translate([0,0,thick/2])//min_thick
             centredCube(width/2-edge_thick*1.5-edge_slot_width/2,
                 length/2 - 20*4+edge_slot_width/2+a_frame_length/2+container_hold_spacing,
@@ -446,10 +431,11 @@ union(){
             }
         }
 
-            if(screwholes_for_containers){
-                holes_for_containers(true);
-            }
-        
+		if(screwholes_for_containers){
+			holes_for_containers(true);
+		}
+		
+		
         
     }
 
