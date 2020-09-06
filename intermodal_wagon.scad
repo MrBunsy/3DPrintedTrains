@@ -394,7 +394,7 @@ union(){
     flat_bits_depth = 0;
     translate([0,0,flat_bits_depth]){
         difference(){
-            centredCube(width/2-edge_thick*1.5-edge_slot_width/2,
+            centredCube(-(width/2-edge_thick*1.5-edge_slot_width/2),
             0,
             edge_slot_width+edge_thick*2,
             10*4-a_frame_length,
@@ -425,6 +425,22 @@ union(){
         mirror_y()translate([width/2,
                 length/2 - 20*4+edge_slot_width/2+a_frame_length/2+container_hold_spacing,
                 thick]){
+            rotate([0,90,0]){
+            //holes to hold buffers
+            cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+            }
+        }
+		
+		cylinder_hole_spacing = 2*4;
+		//holes for the cylinder to be inserted
+		//a-frames are 5 feet apart, so middle of the one off centre
+		translate([underframe_middle_width/2, 2.5*4-cylinder_hole_spacing/2,thick+(underframe_height-thick)/2]){
+            rotate([0,90,0]){
+            //holes to hold buffers
+            cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+            }
+        }
+		translate([underframe_middle_width/2, 2.5*4+cylinder_hole_spacing/2,thick+(underframe_height-thick)/2]){
             rotate([0,90,0]){
             //holes to hold buffers
             cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
