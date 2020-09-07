@@ -1,7 +1,9 @@
 include <constants.scad>
 
-gen_brake_wheel = false;
-gen_brake_cylinder = true;
+gen_brake_wheel = true;
+gen_brake_cylinder = false;
+//only for one prototype with the wrong sized buffer holes
+gen_buffer_fixing = false;
 
 truck_fixing_d=1.7;
 
@@ -53,4 +55,21 @@ if(gen_brake_wheel){
 
 if(gen_brake_cylinder){
 	brake_cylinder();
+}
+
+if(gen_buffer_fixing){
+	wiggle = 0.2;
+	thick=3.5;
+	box_wall_thick=0.5;
+	box_size = 6;
+	difference(){
+		cube([ box_size-wiggle, box_size-wiggle, thick-box_wall_thick-wiggle]);
+		translate([box_size/2-wiggle/2,-wiggle/2,thick/2-wiggle/2]){
+			rotate([90,0,0]){
+			//holes to hold buffers
+			cylinder(h=buffer_holder_length*3, r=buffer_holder_d/2, $fn=200, center=true);
+			}
+		}
+	}
+	
 }

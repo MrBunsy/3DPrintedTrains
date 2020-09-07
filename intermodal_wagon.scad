@@ -23,12 +23,15 @@ TODO blurb plaques
 dapol_wheels = true;
 spoked = false;
 
+//make screwholes that aren't easy to see
 screwholes_for_containers = true;
+//make screwholes at either end that are visible
+screwholes_for_containers_at_front = false;
+screwholes_for_containers_at_back = false;
 screwhole_from_edge = 5;
 
 wheel_diameter = getWheelDiameter(dapol_wheels, spoked);
 box_wall_thick = 0.5;
-buffer_mount_length=5;
 
 //little bits that the iso containers lock into
 container_hold_size = 1.5;
@@ -117,14 +120,17 @@ hole_from_end = buffer_section_length;
 
 //to screw containers to flatbed
 module holes_for_containers(holes = true){
-    positions = [-length/2+screwhole_from_edge,
+    mid_holes = [
              -length/2 + twentyFootContainerLength - screwhole_from_edge,
              -length/2 + fortyFootContainerLength - screwhole_from_edge,
-            length/2-screwhole_from_edge,
+            
              length/2 - twentyFootContainerLength + screwhole_from_edge,
              length/2 - fortyFootContainerLength + screwhole_from_edge,
             ];
-    
+    front_hole = [-length/2+screwhole_from_edge];
+	back_hole = [length/2-screwhole_from_edge];
+	part1 = screwholes_for_containers_at_front ? concat(front_hole, mid_holes) : mid_holes;
+	positions = screwholes_for_containers_at_back ? concat(back_hole, part1) : part1;
     if(holes){
             
         for(y = positions){
@@ -215,7 +221,6 @@ module bogie_space_punchout(){
 module extendoLine(points, width, thick){
 		for(i =[0:len(points)-1]){
 			i2 = i + 1 >= len(points) ? 0 : i+1;
-			echo("i",i,"i2",i2);
 			hull(){
 				translate(points[i])translate([-width/2,-thick/2,-thick/2])cube([width,thick,thick]);
 				translate(points[i2])translate([-width/2,-thick/2,-thick/2])cube([width,thick,thick]);
@@ -304,9 +309,15 @@ union(){
 					cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
 					}
 				}
+				box_start_y = length/2;
+				box_end_y = length/2 - (buffer_section_length - hole_r);
+				box_length = box_start_y - box_end_y;
 				box_size = buffer_holder_d*3;
 				//hollow out a box under the buffers
-				translate([0,0,box_wall_thick])centredCube(-buffer_distance/2,length/2-box_size/2 + -box_wall_thick*2,box_size,box_size,thick);
+				translate([0,0,box_wall_thick])
+					centredCube(buffer_distance/2,box_start_y - box_length*0.6,
+				box_size,box_length/2,thick);
+				echo("buffer box:",box_size,box_size,thick-box_wall_thick);
 			}
 
 
