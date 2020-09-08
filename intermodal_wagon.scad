@@ -327,7 +327,7 @@ union(){
             hull(){
                 end_r = width*0.04;
                 
-                mirror_y()translate([0,underframe_middle_length/2,0])cylinder(h=50,r=end_r, center=true);
+                mirror_x()translate([0,underframe_middle_length/2,0])cylinder(h=50,r=end_r, center=true);
                 translate([0,0,-1])centredCube(0,0,mid_slot_width,underframe_middle_length-end_r*2,50);
             }
             //slots either side
