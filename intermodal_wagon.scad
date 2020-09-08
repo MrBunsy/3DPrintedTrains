@@ -10,14 +10,12 @@ FTA have buffers on both ends, but I they're lower and only intended to be used 
 Since I can't reduce the height of the bogies much, the lowest I can have buffers will be at "proper" height, but also inline with the bed, so it'll look like a FTA with buffers inline with the bed, but they'll be at the "proper" height like an end of a FSA.
 I think this is good enough for my purposes.
 
-TODO - since I've realised my measurements of coupling and buffer heights were wrong, the above statement might no longer be true and I might be able to do both FTA and FSA properly?
-- nope, only got 2mm of clearance between flange and underside of wagon. Going to have to stick with merged FSA and FTA, can't lower the buffers for an FTA any more than they currently are, and if I raise them for an FSA they'll be higher than any other rolling stock
+Wishlist:
 
-TODO slot to insert wheel (for brakes?) on either side - both wheels are offset from the centre, but in the same place (mirror along Y axis) - so it looks different from each side
-
-TODO insert cylinder underneath (for brakes again?) only one one side, where it is to the right of the wheel
-
-TODO blurb plaques
+ - Attempt at real coupling hook?
+ - Slight overhangs ("girder bits") on the two central arms
+ - Girder bits on teh A-frames
+ - Test if the yellow sticky out bits (look like tags) are printable
 
 */
 dapol_wheels = true;
@@ -319,6 +317,9 @@ union(){
 				box_size,box_length/2,thick);
 				echo("buffer box:",box_size,box_size,thick-box_wall_thick);
 			}
+			//holes for where real coupling hook would be
+			
+			mirror_x()translate([0,0,girder_thick])centredCube(0,length/2,width/3,girder_thick*2,thick-girder_thick*2);
 
 
             
