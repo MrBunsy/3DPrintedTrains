@@ -4,11 +4,13 @@ use <MCAD/regular_shapes.scad>
 //from metal end (without nib) to end of plastic end (with large n
 motor_length = 27.3;
 motor_width = 19.8;
+//including plastic end nib
+motor_plastic_end_length = 7.2;
 
 motor_plastic_bit_space_height = 1.8;
 //bit more than needed
-motor_plastic_bit_space_length = 6.0;
-motor_plastic_bit_space_start_y = 6.5;
+motor_plastic_bit_space_length = 5.5;
+motor_plastic_bit_space_start_y = motor_length/2 - motor_plastic_end_length;//6.5;
 
 //desired distance from end for the first gear
 motor_metal_end_gear_distance = 7.5;
@@ -19,13 +21,19 @@ motor_side_holder_platic_d = 3.1;
 motor_side_holder_platic_length = 4.9;
 motor_side_holder_metal_d = 2.2;
 
-//from base of motor
-axle_height = 12.25+0.3;
+//from base of motor to bottom of gear axle
+gear_axle_height = 12.85;//12.25+0.3;
+//space for the gear
+gear_width = 8.3;
+gear_axle_width = 11.5;
+gear_axle_d = 1.5;
+gear_distance_plastic = 6.1;
+gear_distance_metal = 8.5;
 
 wiggle = 0.1;
-thick = 0.5;
+thick = 1.5;
 
-wire_hole_r = 2;
+wire_hole_r = motor_plastic_bit_space_length/2;
 wire_hole_x = 6.3;
 
 
@@ -55,8 +63,25 @@ module motor_holder(h,r){
 }
 
 
+module gear_holder(length){
+	
+	mirror_y()difference(){
+		translate([gear_width/2+thick/2,0,0])centred_cube(thick,length,gear_axle_height+base_thick+gear_axle_d);
+		union(){
+			//hole for axle
+			translate([0,0,gear_axle_height+base_thick])rotate([0,90,0])cylinder(h=gear_axle_width,r=gear_axle_d/2,center=true);
+		}
+	}
+	
+}
+
+//motor_side_holder_platic_length-(motor_length/2 - motor_plastic_bit_space_start_y)
 //sides to hold motor
-mirror_y()translate([base_width/2-thick/2,motor_side_holder_platic_length-(motor_length/2 - motor_plastic_bit_space_start_y),0])
+mirror_y()translate([base_width/2-thick/2,0,0])
 	centred_cube(thick,motor_length,motor_height/2+motor_side_holder_platic_d/2+base_thick);
 
+//holder for plastic end
 mirror_y()translate([motor_width/2+wiggle,motor_plastic_bit_space_start_y+motor_side_holder_platic_length/2,motor_height/2+base_thick])motor_holder(motor_side_holder_platic_length,motor_side_holder_platic_d/2);
+
+translate([0,motor_length/2+gear_distance_plastic/2,0])gear_holder(gear_distance_plastic);
+translate([0,-motor_length/2-gear_distance_metal/2,0])gear_holder(gear_distance_metal);
