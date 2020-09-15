@@ -1,6 +1,10 @@
 include <constants.scad>
 use <MCAD/regular_shapes.scad>
 
+wiggle = 0.1;
+thick = 1.5;
+
+
 //from metal end (without nib) to end of plastic end (with large n
 motor_length = 27.3;
 motor_width = 19.8;
@@ -24,7 +28,7 @@ motor_side_holder_metal_d = 2.2;
 //from base of motor to bottom of gear axle
 gear_axle_height = 12.85;//12.25+0.3;
 //space for the gear
-gear_width = 8.3;
+gear_width = 8.3+wiggle;
 gear_axle_width = 11.5;
 gear_axle_d = 1.5+0.2;
 gear_distance_plastic = 6.1;
@@ -36,16 +40,14 @@ wheel_from_axle_y = 2.7;
 wheel_from_axle_z = 6.75;
 
 wheel_d = 11.4;
-wheel_holder_inner_d = 9.2;
+wheel_holder_inner_d = gear_width;//9.2;
 wheel_holder_outer_d_max = 13.5;
 wheel_holder_diameter = 2.1;
-wheel_holder_height = 3;
+wheel_holder_height = wheel_holder_diameter*0.9;
 wheel_holder_length = wheel_d/2;
 
 
 
-wiggle = 0.1;
-thick = 1.5;
 
 wire_hole_r = motor_plastic_bit_space_length/2;
 wire_hole_x = 6.3;
@@ -96,7 +98,7 @@ module wheel_holder_base(){
 			//hole for axle
 			translate([0,0,gear_axle_height+gear_axle_d/2+base_thick+wheel_from_axle_z])rotate([0,90,0])cylinder(h=wheel_holder_outer_d_max,r=wheel_holder_diameter/2,center=true);
 			//slot above 
-			translate([wheel_holder_inner_d/2+0.1,0,gear_axle_height+gear_axle_d/2+base_thick+wheel_from_axle_z])centred_cube(thick*2,wheel_holder_diameter,wheel_holder_height+0.1);
+			translate([wheel_holder_inner_d/2+0.1,0,gear_axle_height+gear_axle_d/2+base_thick+wheel_from_axle_z])centred_cube(thick*2,wheel_holder_diameter*0.6,wheel_holder_height+0.1);
 		}
 	}
 }
