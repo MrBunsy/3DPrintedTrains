@@ -35,12 +35,14 @@ gear_distance_metal = 8.5;
 wheel_from_axle_y = 2.7;
 wheel_from_axle_z = 6.75;
 
+wheel_d = 11.4;
 wheel_holder_inner_d = 9.2;
 wheel_holder_outer_d_max = 13.5;
 wheel_holder_diameter = 2.1;
 wheel_holder_height = 3;
+wheel_holder_length = wheel_d/2;
 
-wheel_d = 11.4;
+
 
 wiggle = 0.1;
 thick = 1.5;
@@ -89,7 +91,7 @@ module gear_holder(length){
 //wheel holder for the motor side (just a slot for the axle)
 module wheel_holder_base(){
 	mirror_y()difference(){
-		translate([wheel_holder_inner_d/2+thick/2,0,0])centred_cube(thick,wheel_d/2,gear_axle_height+gear_axle_d/2+base_thick+wheel_from_axle_z+wheel_holder_height);
+		translate([wheel_holder_inner_d/2+thick/2,0,0])centred_cube(thick,wheel_holder_length,gear_axle_height+gear_axle_d/2+base_thick+wheel_from_axle_z+wheel_holder_height);
 		union(){
 			//hole for axle
 			translate([0,0,gear_axle_height+gear_axle_d/2+base_thick+wheel_from_axle_z])rotate([0,90,0])cylinder(h=wheel_holder_outer_d_max,r=wheel_holder_diameter/2,center=true);
@@ -98,41 +100,66 @@ module wheel_holder_base(){
 		}
 	}
 }
-difference(){
+
+intersection(){
+	difference(){
+		
+		union(){
+			
+			//base for motor with space for sticky out bit with wires
+			difference(){
+				union(){
+					centred_cube(base_width, motor_length, base_thick);
+					centred_cube(wheel_holder_inner_d, base_length, base_thick);
+				}
+				union(){
+					//cut out space for the plastic bit of the motor with the wires
+					translate([-motor_width/2-wiggle,motor_plastic_bit_space_start_y,thick])cube([motor_width+wiggle*2, motor_plastic_bit_space_length, motor_plastic_bit_space_height+1]);
+					//holes for wires
+					mirror_y()translate([wire_hole_x,motor_plastic_bit_space_start_y+wire_hole_r,-0.1])cylinder(h=thick*4, r=wire_hole_r);
+				}
+			}
+			
+			
+			
+			
+			//motor_side_holder_platic_length-(motor_length/2 - motor_plastic_bit_space_start_y)
+			//sides to hold motor
+			mirror_y()translate([base_width/2-thick/2,0,0])
+				centred_cube(thick,motor_length,motor_height/2+motor_side_holder_platic_d/2+base_thick);
+
+			//holder for plastic end
+			mirror_y()translate([motor_width/2+wiggle,motor_plastic_bit_space_start_y+motor_side_holder_platic_length/2,motor_height/2+base_thick])motor_holder(motor_side_holder_platic_length,motor_side_holder_platic_d/2);
+
+			translate([0,motor_length/2+gear_distance_plastic,0])gear_holder(gear_distance_plastic*2);
+			translate([0,-motor_length/2-gear_distance_metal,0])gear_holder(gear_distance_metal*2);
+
+			translate([0,motor_length/2+gear_distance_plastic+wheel_from_axle_y,0])wheel_holder_base();
+			translate([0,-motor_length/2-gear_distance_metal-wheel_from_axle_y,0])wheel_holder_base();
+		}
+		//punch out various holes
+		union(){
+			translate([0,motor_length/2+gear_distance_plastic,0])gear_holder_holes(gear_distance_plastic*2);
+			translate([0,-motor_length/2-gear_distance_metal,0])gear_holder_holes(gear_distance_metal*2);
+			
+			//screwholes
+			mirror_xy()translate([screwhole_x_distance/2,screwhole_y_distance/2,0])cylinder(h=base_thick*10,r=m2_thread_size_loose/2, center=true);
+			
+			//lop off the end that's a bit too long
+			//translate([0,-motor_length/2-gear_distance_metal-wheel_from_axle_y-100/2-wheel_holder_length/4,0])cube([base_width,100,100], center=true);
+		}
+	}//end difference
 	
 	union(){
+		plastic_end_wheel = gear_distance_plastic+wheel_from_axle_y+wheel_holder_length/2;
+		metal_end_wheel = gear_distance_metal+wheel_from_axle_y + wheel_holder_length/2;
+		wheelToWheel = motor_length + plastic_end_wheel + metal_end_wheel;
 		
-		difference(){
-			centred_cube(base_width, base_length, base_thick);
-			union(){
-				//cut out space for the plastic bit of the motor with the wires
-				translate([-motor_width/2-wiggle,motor_plastic_bit_space_start_y,thick])cube([motor_width+wiggle*2, motor_plastic_bit_space_length, motor_plastic_bit_space_height+1]);
-				//holes for wires
-				mirror_y()translate([wire_hole_x,motor_plastic_bit_space_start_y+wire_hole_r,-0.1])cylinder(h=thick*4, r=wire_hole_r);
-			}
-		}
-		
-		
-		//motor_side_holder_platic_length-(motor_length/2 - motor_plastic_bit_space_start_y)
-		//sides to hold motor
-		mirror_y()translate([base_width/2-thick/2,0,0])
-			centred_cube(thick,motor_length,motor_height/2+motor_side_holder_platic_d/2+base_thick);
-
-		//holder for plastic end
-		mirror_y()translate([motor_width/2+wiggle,motor_plastic_bit_space_start_y+motor_side_holder_platic_length/2,motor_height/2+base_thick])motor_holder(motor_side_holder_platic_length,motor_side_holder_platic_d/2);
-
-		translate([0,motor_length/2+gear_distance_plastic,0])gear_holder(gear_distance_plastic*2);
-		translate([0,-motor_length/2-gear_distance_metal,0])gear_holder(gear_distance_metal*2);
-
-		translate([0,motor_length/2+gear_distance_plastic+wheel_from_axle_y,0])wheel_holder_base();
-		translate([0,-motor_length/2-gear_distance_metal-wheel_from_axle_y,0])wheel_holder_base();
+		//wheel holders (longest bit)
+		translate([0,(plastic_end_wheel-metal_end_wheel)/2,0])cube([wheel_holder_inner_d+thick*2,wheelToWheel,100], center=true);
+		//motor holder (shortened)
+		cube([base_width,motor_length*0.7,100], center=true);
 	}
-	//punch out various holes
-	union(){
-		translate([0,motor_length/2+gear_distance_plastic,0])gear_holder_holes(gear_distance_plastic*2);
-		translate([0,-motor_length/2-gear_distance_metal,0])gear_holder_holes(gear_distance_metal*2);
-		
-		//screwholes
-		mirror_xy()translate([screwhole_x_distance/2,screwhole_y_distance/2,0])cylinder(h=base_thick*10,r=m2_thread_size_loose/2, center=true);
-	}
-}
+	
+	
+}//end intersection
