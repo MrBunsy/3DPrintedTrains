@@ -15,6 +15,7 @@ axle_width = 25.65;
 
 m2_thread_size = 2;
 m2_thread_size_loose = 2.3;
+//actually 3.9, but this allows space
 m2_head_size=4.5;
 //4.84, but with some extra space
 m2_washer_d = 5;
