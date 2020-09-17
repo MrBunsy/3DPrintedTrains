@@ -229,16 +229,26 @@ module axle_holder_decoration(axle_space, x, axle_height){
         }
     }  
 }
+coupling_mount_length=0.85*6;
 
-module coupling_mount(height){
+module coupling_mount(height, base_thick = 0){
    
     side_holders_top_r = 0.85;
+	side_holders_base_r = 2.5/2;
     top_r_distance=14+side_holders_top_r;
+	base_width = top_r_distance+side_holders_base_r*2;
+	base_length = side_holders_top_r*6;
+	
     difference(){
-        cylinder(h=height,r=4.8/2, $fn=200);
+		union(){
+			cylinder(h=height,r=side_holders_top_r*6/2, $fn=200);
+			if(base_thick > 0){
+		translate([-base_width/2,-base_length/2,-base_thick])cube([base_width,base_length,base_thick]);
+	}
+		}
        
         translate([0,0,-0.1]){
-            cylinder(h=height*2,r=m2_thread_size/2, $fn=200);
+            cylinder(h=(height+base_thick)*2,r=m2_thread_size/2, $fn=200, center=true);
         }
     }
     
@@ -251,11 +261,13 @@ module coupling_mount(height){
     }
     translate([-top_r_distance/2,0]){
         cylinder(h=height+1.2,r=side_holders_top_r,$fn=200);
-        cylinder(h=height,r=2.5/2,$fn=200);
+        cylinder(h=height,r=side_holders_base_r,$fn=200);
         translate([-side_holders_top_r/2,0,0]){
             cube([side_holders_top_r,side_holders_top_r*3,height]);
         }
     }
+	
+	
     
     
 }

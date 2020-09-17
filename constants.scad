@@ -89,3 +89,11 @@ function m2mm(m) = m * 1000 / SCALE;
 module centred_cube(width,length,height, centreZ = false){
 	translate([-width/2, -length/2, centreZ ? -height/2 : 0])cube([width,length,height]);
 }
+
+module optional_translate(position, doTranslate = true){
+	if(doTranslate){
+		translate(position)children();
+	}else{
+		children();
+	}
+}

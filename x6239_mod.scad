@@ -1,12 +1,20 @@
 include <constants.scad>
+include <truck_bits.scad>
 use <MCAD/regular_shapes.scad>
+
+GEN_BASE = true;
+GEN_WHEEL_CLIP = false;
+GEN_COSMETICS = false;
+GEN_COUPLING_ARM = true;
+GEN_IN_PLACE = true;
 
 wiggle = 0.1;
 thick = 1.5;
 min_thick=0.2;
 
-coupling_arm_thick = thick;
-
+coupling_arm_thick = thick*2;
+//TODO
+coupling_arm_length = 5;
 
 
 //the axle with tyres actually seems to be slightly less, without slightly more.
@@ -37,7 +45,8 @@ gear_axle_height = 12.85;//12.25+0.3;
 //space for the gear
 gear_width = 8.3+wiggle;
 gear_axle_width = 11.5;
-gear_axle_d = 1.5+0.2;
+//1.7 works but sliiightly too tight when printed at 0.2mm layer height
+gear_axle_d = 1.5+0.25;
 gear_distance_plastic = 6.1;
 gear_distance_metal = 8.5;
 
@@ -49,9 +58,10 @@ wheel_from_axle_z = 6.75;
 wheel_d = 11.4;
 wheel_holder_inner_d = gear_width;//9.2;
 wheel_holder_outer_d_max = 13.5;
-wheel_holder_diameter = 2.1;
+//2.1 is a bit tight, but not sure I want it too loose either.
+wheel_holder_diameter = 2.15;//+0.1;
 //height above centre of wheel axle, making this just taller than the non-toothed bit of the wheel's gear (4mm diameter)
-wheel_holder_height = 2+wiggle;
+wheel_holder_height = 2+0.3;
 
 //space needed for the wheel's gear to not be obstructed
 wheel_gear_space_d = 10;
@@ -59,6 +69,7 @@ wheel_gear_space_d = 10;
 wheel_holder_length = wheel_gear_space_d;
 gear_space_d = 8;
 
+wheel_end_width = wheel_holder_inner_d+thick*2;
 
 
 
@@ -128,7 +139,7 @@ module wheel_holder_base(){
 //upwards facing, side mounted screw hole, assuming latched onto a surface facing +ve y
 //screwhole inline with xy plane
 //height is of longest edge
-module side_screwhole(thread_size, height){
+module side_screwhole(thread_size, height, angled_base=true){
 	size = thread_size*2;
 	difference(){
 		union(){
@@ -137,12 +148,18 @@ module side_screwhole(thread_size, height){
 			
 		}
 		union(){
+			if(angled_base){
 			translate([-size,size,size-height])rotate([-(90+45),0,0])cube([size*2,size*2,size*2]);
 			translate([0,size/2,-height])cylinder(r=thread_size/2,h=height*3,center=true);
+			}
 		}
 		
 	}
 }
+
+//the main body to be printed, powers the wheels from the motor
+//but needs coupling arm and base clip and cosmetics to be complete
+module motor_and_wheels_holder(){
 
 intersection(){
 	difference(){
@@ -182,10 +199,10 @@ intersection(){
 			translate([0,-motor_length/2-gear_distance_metal-wheel_from_axle_y,0])wheel_holder_base();
 			
 			//ends
-			translate([0,motor_length/2 + plastic_end_wheel+thick/2,0])centred_cube(wheel_holder_inner_d+thick*2,thick,wheel_z+wheel_holder_height);
-			translate([0,-motor_length/2 -metal_end_wheel-thick/2,0])centred_cube(wheel_holder_inner_d+thick*2,thick,wheel_z+wheel_holder_height);
+			translate([0,motor_length/2 + plastic_end_wheel+thick/2,0])centred_cube(wheel_end_width,thick,wheel_z+wheel_holder_height);
+			translate([0,-motor_length/2 -metal_end_wheel-thick/2,0])centred_cube(wheel_end_width,thick,wheel_z+wheel_holder_height);
 			//screw holes for coupling arm (and one end of wheel holder)
-			mirror_y()translate([(wheel_holder_inner_d+thick*2)/2 -m2_thread_size,motor_length/2 + plastic_end_wheel+thick,wheel_z+wheel_holder_height-top_of_coupling_arm_from_wheel_holder_height-coupling_arm_thick])side_screwhole(m2_thread_size, 10);
+			mirror_y()translate([(wheel_end_width)/2 -m2_thread_size,motor_length/2 + plastic_end_wheel+thick,wheel_z+wheel_holder_height-top_of_coupling_arm_from_wheel_holder_height-coupling_arm_thick])side_screwhole(m2_thread_size, 10);
 			
 			translate([0,-(motor_length/2 + metal_end_wheel+thick),wheel_z+wheel_holder_height])mirror([0,1,0])side_screwhole(m2_thread_size, 10);
 			
@@ -196,7 +213,7 @@ intersection(){
 			translate([0,-motor_length/2-gear_distance_metal,0])gear_holder_holes(gear_distance_metal*2);
 			
 			//screwholes
-			mirror_xy()translate([screwhole_x_distance/2,screwhole_y_distance/2,0])cylinder(h=base_thick*10,r=m2_thread_size_loose/2, center=true);
+			//mirror_xy()translate([screwhole_x_distance/2,screwhole_y_distance/2,0])cylinder(h=base_thick*10,r=m2_thread_size_loose/2, center=true);
 			
 			
 			//keep the ends separate from the axle holders, so the holders can bend
@@ -210,7 +227,7 @@ intersection(){
 		
 		
 		//wheel holders (longest bit)
-		translate([0,(plastic_end_wheel-metal_end_wheel)/2,0])cube([wheel_holder_inner_d+thick*2,wheelToWheel*3,100], center=true);
+		translate([0,(plastic_end_wheel-metal_end_wheel)/2,0])cube([wheel_end_width,wheelToWheel*3,100], center=true);
 		//motor holder (shortened)
 		cube([base_width,motor_length*0.7,100], center=true);
 	}
@@ -218,4 +235,36 @@ intersection(){
 	
 }//end intersection
 
+}//end module
 
+//facing +ve y, (0,0) is between the screwholes
+module coupling_arm(){
+	difference(){
+		centred_cube(wheel_end_width,m2_thread_size*2,coupling_arm_thick);
+		mirror_y()translate([(wheel_end_width)/2-m2_thread_size,0,0])cylinder(h=100,r=m2_thread_size/2,center=true);
+	}
+	
+	coupling_arm_width = wheel_end_width/2;
+	translate([-coupling_arm_width/2,m2_thread_size,0])cube([coupling_arm_width,coupling_arm_length,coupling_arm_thick]);
+	
+	translate([0,coupling_arm_length+m2_thread_size+coupling_mount_length/2,coupling_arm_thick])coupling_mount(1,coupling_arm_thick);
+	
+	size=m2_thread_size*2;
+	height = top_of_coupling_arm_from_wheel_holder_height+coupling_arm_thick;
+	difference(){
+		union(){
+			translate([0,-size/4,0])centred_cube(size,size/2,height);
+			translate([0,0,0])cylinder(r=size/2,h=height);
+		}
+		translate([0,0,0])cylinder(r=m2_thread_size/2,h=height*4,center=true);
+	}
+
+}
+
+if(GEN_BASE){
+	motor_and_wheels_holder();
+}
+	
+if(GEN_COUPLING_ARM){
+	optional_translate([0,motor_length/2 + plastic_end_wheel+thick + m2_thread_size,wheel_z+wheel_holder_height-top_of_coupling_arm_from_wheel_holder_height-coupling_arm_thick],GEN_IN_PLACE)coupling_arm();
+}
