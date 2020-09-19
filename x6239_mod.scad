@@ -5,12 +5,13 @@ use <MCAD/regular_shapes.scad>
 GEN_BASE = true;
 GEN_WHEEL_CLIP = false;
 GEN_COSMETICS = false;
-GEN_COUPLING_ARM = true;
+GEN_COUPLING_ARM = false;
 GEN_IN_PLACE = true;
 
 wiggle = 0.1;
 thick = 1.5;
 min_thick=0.2;
+clip_thick=thick;
 
 coupling_arm_thick = thick*2;
 //TODO
@@ -44,9 +45,10 @@ motor_side_holder_metal_d = 2.2;
 gear_axle_height = 12.85;//12.25+0.3;
 //space for the gear
 gear_width = 8.3+wiggle;
+gear_length = 10;
 gear_axle_width = 11.5;
 //1.7 works but sliiightly too tight when printed at 0.2mm layer height
-gear_axle_d = 1.5+0.25;
+gear_axle_d = 1.5+0.2;//5;
 gear_distance_plastic = 6.1;
 gear_distance_metal = 8.5;
 
@@ -59,13 +61,13 @@ wheel_d = 11.4;
 wheel_holder_inner_d = gear_width;//9.2;
 wheel_holder_outer_d_max = 13.5;
 //2.1 is a bit tight, but not sure I want it too loose either.
-wheel_holder_diameter = 2.15;//+0.1;
+wheel_holder_diameter = 2.1;//5;//+0.1;
 //height above centre of wheel axle, making this just taller than the non-toothed bit of the wheel's gear (4mm diameter)
 wheel_holder_height = 2+0.3;
 
 //space needed for the wheel's gear to not be obstructed
 wheel_gear_space_d = 10;
-
+wheel_gear_space_width = 3;
 wheel_holder_length = wheel_gear_space_d;
 gear_space_d = 8;
 
@@ -91,7 +93,7 @@ wheel_z = gear_axle_height+gear_axle_d/2+base_thick+wheel_from_axle_z;
 
 plastic_end_wheel = gear_distance_plastic+wheel_from_axle_y+wheel_holder_length/2;
 metal_end_wheel = gear_distance_metal+wheel_from_axle_y + wheel_holder_length/2;
-wheelToWheel = motor_length + plastic_end_wheel + metal_end_wheel;
+endToEnd = motor_length + plastic_end_wheel + metal_end_wheel;
 
 top_of_coupling_arm_from_wheel_holder_height = wheel_holder_height - wheel_diameter/2 + top_of_coupling_from_top_of_rail;
 
@@ -107,7 +109,7 @@ module motor_holder(h,r){
 }
 module gear_holder_holes(length){
 //hole for axle
-			translate([0,0,gear_axle_height+base_thick+gear_axle_d/2])rotate([0,90,0])cylinder(h=gear_axle_width*2,r=gear_axle_d/2,center=true);
+			translate([0,0,gear_axle_height+base_thick+gear_axle_d/2])rotate([0,90,0])cylinder(h=gear_axle_width*2,r=gear_axle_d/2+wiggle,center=true);
 }
 
 module gear_holder(length){
@@ -127,7 +129,7 @@ module wheel_holder_base(){
 		translate([wheel_holder_inner_d/2+thick/2,0,0])centred_cube(thick,wheel_holder_length,wheel_z+wheel_holder_height);
 		union(){
 			//hole for axle
-			translate([0,0,gear_axle_height+gear_axle_d/2+base_thick+wheel_from_axle_z])rotate([0,90,0])cylinder(h=wheel_holder_outer_d_max,r=wheel_holder_diameter/2,center=true);
+			translate([0,0,gear_axle_height+gear_axle_d/2+base_thick+wheel_from_axle_z])rotate([0,90,0])cylinder(h=wheel_holder_outer_d_max,r=wheel_holder_diameter/2+wiggle,center=true);
 			//slot above 
 			translate([wheel_holder_inner_d/2+0.1,0,wheel_z])centred_cube(thick*2,wheel_holder_diameter,wheel_holder_height+0.1);
 		}
@@ -227,7 +229,7 @@ intersection(){
 		
 		
 		//wheel holders (longest bit)
-		translate([0,(plastic_end_wheel-metal_end_wheel)/2,0])cube([wheel_end_width,wheelToWheel*3,100], center=true);
+		translate([0,(plastic_end_wheel-metal_end_wheel)/2,0])cube([wheel_end_width,endToEnd*3,100], center=true);
 		//motor holder (shortened)
 		cube([base_width,motor_length*0.7,100], center=true);
 	}
@@ -247,7 +249,7 @@ module coupling_arm(){
 	coupling_arm_width = wheel_end_width/2;
 	translate([-coupling_arm_width/2,m2_thread_size,0])cube([coupling_arm_width,coupling_arm_length,coupling_arm_thick]);
 	
-	translate([0,coupling_arm_length+m2_thread_size+coupling_mount_length/2,coupling_arm_thick])coupling_mount(1,coupling_arm_thick);
+	translate([0,coupling_arm_length+m2_thread_size+coupling_mount_length/2,coupling_arm_thick])coupling_mount(0,coupling_arm_thick);
 	
 	size=m2_thread_size*2;
 	height = top_of_coupling_arm_from_wheel_holder_height+coupling_arm_thick;
@@ -261,10 +263,35 @@ module coupling_arm(){
 
 }
 
+module wheel_clip(){
+	
+	middle_length = endToEnd+thick*2;
+	wheel_axle_spacing = motor_length+gear_distance_plastic + gear_distance_metal+wheel_from_axle_y*2;
+	difference(){
+		hull(){
+			centred_cube(wheel_end_width,middle_length,clip_thick);
+			mirror_x()translate([0,middle_length/2+m2_thread_size])cylinder(r=m2_thread_size,h=clip_thick);
+		}
+		union(){
+			//screwholes for ends
+			mirror_x()translate([0,middle_length/2+m2_thread_size])cylinder(r=m2_thread_size/2,h=clip_thick*3,center=true);
+			//wheel holes
+			mirror_x()translate([0,wheel_axle_spacing/2,-0.1])centred_cube(wheel_gear_space_width,wheel_gear_space_d,clip_thick*3);
+		}
+	}
+	
+	mirror_xy()translate([wheel_end_width/2-thick/2,endToEnd/2-wheel_holder_length/2,clip_thick])centred_cube(thick,wheel_holder_diameter-wiggle*2,wheel_holder_height-wheel_holder_diameter/2-wiggle);
+}
+
 if(GEN_BASE){
 	motor_and_wheels_holder();
 }
 	
 if(GEN_COUPLING_ARM){
 	optional_translate([0,motor_length/2 + plastic_end_wheel+thick + m2_thread_size,wheel_z+wheel_holder_height-top_of_coupling_arm_from_wheel_holder_height-coupling_arm_thick],GEN_IN_PLACE)coupling_arm();
+}
+
+if(GEN_WHEEL_CLIP){
+	//arm (or bar?) to hole wheels in place and give cosmetics somewhere to attach
+	optional_translate([0,(plastic_end_wheel-metal_end_wheel)/2,wheel_z+wheel_holder_height+clip_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)wheel_clip();
 }

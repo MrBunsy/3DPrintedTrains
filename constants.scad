@@ -97,3 +97,11 @@ module optional_translate(position, doTranslate = true){
 		children();
 	}
 }
+
+module optional_rotate(rotation, doRotate = true){
+	if(doRotate){
+		rotate(rotation)children();
+	}else{
+		children();
+	}
+}
