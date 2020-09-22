@@ -1,6 +1,6 @@
 //diameters = [15,15, 12.7, 12.6];//not much gradient on the wheel part with this
 diameters = [16.5,16.5, 14.4, 13.9];
-depths = [0.3, 0.2, 2.0];
+depths = [0.3, 0.2, 2.6];
 //might need to make first dpeth longer to reduce wobble?
 
 

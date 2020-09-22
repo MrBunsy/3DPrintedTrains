@@ -26,3 +26,8 @@ difference(){
 	cylinder(r=hub_d/2,h=hub_height);
 	cylinder(r=bore_d/2,h=hub_height*3,center=true);
 }
+
+translate([0,0,-hub_height+gear_height])difference(){
+	cylinder(r=hub_d/2,h=hub_height);
+	cylinder(r=bore_d/2,h=hub_height*3,center=true);
+}
