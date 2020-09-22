@@ -23,7 +23,7 @@ m3_thread_loose_size = 3.2;
 m3_thread_d = 3.0;
 //thick enough to make a difference...
 m3_washer_thick = 0.55;
-
+axle_space=23;
 
 $fn=200;
 
