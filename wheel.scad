@@ -1,8 +1,10 @@
 //diameters = [15,15, 12.7, 12.6];//not much gradient on the wheel part with this
 diameters = [16.5,16.5, 14.4, 13.9];
-depths = [0.3, 0.2, 2.6];
+depths = [0.4, 0.3, 2.7];//total 3.4
 //might need to make first dpeth longer to reduce wobble?
+$fn=1000;
 
+//intended for a 2mm brass rod of length 21.2mm (better slightly shorter, so it doesn't stick out the ends and therefore is easy to use in a clamp)
 
 
 module wheel_segment(i){
@@ -14,6 +16,9 @@ module wheel_segment(i){
     }
 }
 
+//2mm rod
+axle_r=1;
+
 difference(){
     wheel_segment(0);
     //2.1 radius was perfect for m4
@@ -21,6 +26,13 @@ difference(){
     //2.2 still a bit tight
     //2.3 still too tight?!
 	
-	//2mm rod
-    cylinder(h=10, r=2/2, $fn=200, center=true);
+	union(){
+		//2mm rod
+		cylinder(h=10, r=axle_r, center=true);
+		
+		difference(){
+			translate([0,0,2.9])cylinder(h=10, r=diameters[len(diameters)-1]/2-0.75);
+			cylinder(h=10, r=axle_r*2, center=true);
+		}
+	}
 }

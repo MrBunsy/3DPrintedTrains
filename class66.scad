@@ -1,11 +1,11 @@
 include <truck_bits.scad>
 include <constants.scad>
 
-GEN_BASE = true;
+GEN_BASE = false;
 GEN_WALLS = false;
 GEN_ROOF = false;
 GEN_BOGIES = true;
-GEN_IN_PLACE = true;
+GEN_IN_PLACE = false;
 
 
 //wiki says 21.4metre long, but oes this include buffers?
@@ -28,6 +28,11 @@ top_of_bogie_from_rails = 15;
 //measurement of wheels
 bogie_wheel_d = 14.0;
 
+bogie_axle_d = 2;
+wheel_holder_width = 13.8;
+wheel_holder_arm_width = 12;//10.4;
+	
+	
 axle_to_top_of_bogie = top_of_bogie_from_rails - bogie_wheel_d/2;
 
 
@@ -90,14 +95,42 @@ module base(){
 	}
 }
 
+module bogie_axle_holder(axle_height){
+	
+	
+	difference(){
+		union(){
+			mirror_y()translate([wheel_holder_arm_width/2-bogie_thick/2,0,0])centred_cube(bogie_thick,bogie_wheel_d*0.5,axle_height+bogie_axle_d);
+			translate([0,0,axle_height])rotate([0,90,0])cylinder(h=wheel_holder_width,r=bogie_axle_d, center=true );
+		}
+		
+		union(){
+			translate([0,0,axle_height])rotate([0,90,0])cylinder(h=100,r=bogie_axle_d/2 + 0.15, center=true );
+			translate([0,0,axle_height])centred_cube(100,bogie_axle_d+0.1,100);
+			
+			centred_cube(wheel_holder_arm_width-bogie_thick*2,100,100);
+		}
+	}
+	
+}
+
 module bogies(){
 	bogie_arm_length = bogie_wheel_d*0.75;
+	bogie_cosmetic_arm_length = bogie_wheel_d*0.5;
 	
-	centred_cube(bogie_arm_length,bogie_end_axles_distance/2,bogie_thick);
 	
-	//centred_cube(bogie_width,bogie_arm_length,bogie_thick);
+	difference(){
+		//main arm to hold bogie together
+		centred_cube(wheel_holder_arm_width,bogie_end_axles_distance+bogie_wheel_d/2,bogie_thick);
+		cylinder(r=m3_thread_loose_size/2,h=100,center=true);
+	}
+	bogie_axle_holder(axle_to_top_of_bogie);
 	
-	mirror_x()translate([0,bogie_end_axles_distance/4,0])centred_cube(bogie_width,bogie_arm_length,bogie_thick );
+	mirror_x()translate([0,bogie_end_axles_distance/2,0])bogie_axle_holder(axle_to_top_of_bogie);
+	//centred_cube(wheel_holder_arm_width+10,bogie_arm_length,bogie_thick);
+	
+	//arms to hold cosmetics
+	mirror_x()translate([0,bogie_end_axles_distance/4,0])centred_cube(bogie_width,bogie_cosmetic_arm_length,bogie_thick );
 }
 
 if(GEN_BASE){
