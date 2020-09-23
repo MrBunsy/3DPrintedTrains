@@ -1,11 +1,11 @@
 include <truck_bits.scad>
 include <constants.scad>
 
-GEN_BASE = false;
+GEN_BASE = true;
 GEN_WALLS = false;
 GEN_ROOF = false;
 GEN_BOGIES = true;
-GEN_IN_PLACE = false;
+GEN_IN_PLACE = true;
 
 
 //wiki says 21.4metre long, but oes this include buffers?
@@ -105,9 +105,11 @@ module bogie_axle_holder(axle_height){
 		}
 		
 		union(){
-			translate([0,0,axle_height])rotate([0,90,0])cylinder(h=100,r=bogie_axle_d/2 + 0.15, center=true );
+			//hole to hold axle
+			translate([0,0,axle_height])rotate([0,90,0])cylinder(h=100,r=bogie_axle_d/2 + 0.25, center=true );
+			//slot to insert axle
 			translate([0,0,axle_height])centred_cube(100,bogie_axle_d+0.1,100);
-			
+			//punch out centre
 			centred_cube(wheel_holder_arm_width-bogie_thick*2,100,100);
 		}
 	}
@@ -124,7 +126,8 @@ module bogies(){
 		centred_cube(wheel_holder_arm_width,bogie_end_axles_distance+bogie_wheel_d/2,bogie_thick);
 		cylinder(r=m3_thread_loose_size/2,h=100,center=true);
 	}
-	bogie_axle_holder(axle_to_top_of_bogie);
+	//center axle slightly lower (or higher from the final position), so as the bogie flexes it doesn't put all the weight on the centre wheels
+	bogie_axle_holder(axle_to_top_of_bogie-1);
 	
 	mirror_x()translate([0,bogie_end_axles_distance/2,0])bogie_axle_holder(axle_to_top_of_bogie);
 	//centred_cube(wheel_holder_arm_width+10,bogie_arm_length,bogie_thick);
