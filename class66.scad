@@ -1,12 +1,12 @@
 include <truck_bits.scad>
 include <constants.scad>
 
-GEN_BASE = false;
-GEN_WALLS = false;
+GEN_BASE = true;
+GEN_WALLS = true;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = true;
-GEN_IN_PLACE = false;
+GEN_IN_PLACE = true;
 
 //dummy model has no motor
 DUMMY = false;
@@ -19,6 +19,9 @@ width = m2mm(2.65);
 //
 height = m2mm(3.9);
 
+wall_hight = 18.6;
+wall_thick = 1;
+
 base_bottom_width = width-2;
 base_top_width = width;
 //needs to be smaller than top width but larger than bottom width
@@ -30,7 +33,7 @@ buffer_box_length_bottom = 3;
 buffer_box_bottom_height = 1.5;
 buffer_box_height = 3;
 
-wall_thick = 2;
+//wall_thick = 2;
 motor_length = 70;
 motor_centre_from_end = 45;
 //todo think if this is right
@@ -48,7 +51,6 @@ wheel_holder_arm_width = 12;//10.4;
 wheel_mount_length = bogie_wheel_d*0.5;
 	
 axle_to_top_of_bogie = top_of_bogie_from_rails - bogie_wheel_d/2;
-axle_to_bottom_of_coupling_arm = top_of_coupling_from_top_of_rail - bogie_axle_d /2;
 
 bogie_width = width-2;
 bogie_thick = 2.5;
@@ -191,7 +193,9 @@ module bogies(){
 	mirror_x()translate([0,bogie_end_axles_distance/4,0])centred_cube(bogie_width,bogie_cosmetic_arm_length,bogie_thick );
 	
 	coupling_arm_length = coupling_arm_from_mount - bogie_end_axles_distance/2 + wheel_mount_length/2;
-	coupling_arm_z = axle_to_top_of_bogie-axle_to_bottom_of_coupling_arm+bogie_thick;
+	
+	//adding centre_bogie_wheel_offset/2 to make up for when teh bogie bends under the weight of the loco and raises the height of the coupling
+	coupling_arm_z = axle_to_top_of_bogie+bogie_wheel_d/2 -bogie_thick-top_of_coupling_from_top_of_rail +centre_bogie_wheel_offset/2;
 	
 	//arm to hold coupling
 	translate([0,-(coupling_arm_from_mount-coupling_arm_length/2-coupling_mount_length/2),coupling_arm_z])centred_cube(coupling_arm_width,coupling_arm_length-coupling_mount_length,bogie_thick);
@@ -201,6 +205,11 @@ module bogies(){
 	translate([0,-(coupling_arm_from_mount-coupling_mount_length/2),coupling_arm_z+bogie_thick])coupling_mount(0,bogie_thick);
 }
 
+module walls(){
+	
+	mirror_y()translate([width/2-wall_thick/2,0,0])centred_cube(wall_thick,length,wall_hight);
+}
+
 if(GEN_BASE){
 	optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)base();
 
@@ -208,5 +217,8 @@ if(GEN_BASE){
 
 if(GEN_BOGIES){
 	optional_translate([0,-(length/2 - motor_centre_from_end),base_height_above_track-bogie_mount_height-m3_washer_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)bogies();
+}
 
+if(GEN_WALLS){
+	optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)walls();
 }
