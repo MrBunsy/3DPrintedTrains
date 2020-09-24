@@ -27,6 +27,11 @@ base_top_width = width;
 //needs to be smaller than top width but larger than bottom width
 buffer_width = width-1;
 
+//the girder bits extend further downwards in the middle
+base_arch_top_length = 90;
+base_arch_bottom_length = 75;
+base_arch_height = 7;
+
 //TODO check this won't get in the way of couplings
 buffer_box_length_top = 5;
 buffer_box_length_bottom = 3;
@@ -130,8 +135,25 @@ module base(){
 				//second bogie mount
 				translate([0,(length/2 - motor_centre_from_end),0])cylinder(h=base_thick+bogie_mount_height,r=m3_thread_d);
 			}
+					
+			//bottom girder bits (where the arch isn't)
+			mirror_x()translate([0,(length/2-base_arch_top_length/2)/2+base_arch_top_length/2,base_thick-girder_thick])centred_cube(base_bottom_width,length/2-base_arch_top_length/2,girder_thick);
 			
-			translate([0,0,base_thick-girder_thick])centred_cube(base_bottom_width,length,girder_thick);
+			//bottom arch bit
+			hull(){
+				mirror_x()translate([0,base_arch_top_length/2,base_thick-girder_thick])centred_cube(base_top_width-base_pipe_space*2,girder_thick,girder_thick);
+				
+				mirror_x()translate([0,base_arch_bottom_length/2,base_arch_height-girder_thick])centred_cube(base_top_width-base_pipe_space*2,girder_thick,girder_thick);
+			}
+			//bottom arch girders
+			//sloping bits of girders
+			mirror_x()hull(){
+				translate([0,base_arch_top_length/2,base_thick-girder_thick])centred_cube(base_bottom_width,girder_thick,girder_thick);
+				
+				translate([0,base_arch_bottom_length/2,base_arch_height-girder_thick])centred_cube(base_bottom_width,girder_thick,girder_thick);
+			}
+			
+			translate([0,0,base_arch_height-girder_thick])centred_cube(base_bottom_width,base_arch_bottom_length,girder_thick);
 		}
 		
 		
@@ -146,6 +168,7 @@ module base(){
 				translate([0,(length/2 - motor_centre_from_end),0])cylinder(h=100,r=m3_thread_d/2,center=true);
 			}
 			//thinner area for bogie?
+			//TODO space for batteries
 		}
 		
 	}
