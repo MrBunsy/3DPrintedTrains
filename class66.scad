@@ -19,9 +19,10 @@ width = m2mm(2.65);
 //
 height = m2mm(3.9);
 
-wall_hight = 18.6;
+wall_height = 18.6;
 wall_thick = 1;
 
+coupling_arm_thick = 1.5;
 base_thick = 3;
 girder_thick = 0.4;
 //how deep the pipe space in the side of the base is, from base_top_width
@@ -113,8 +114,8 @@ module buffers(){
 		union(){
 			//front face
 			hull(){
-				translate([0,-girder_thick/2,0])centred_cube(base_top_width,girder_thick,girder_thick);
-				translate([0,-girder_thick/2,base_thick-girder_thick])centred_cube(buffer_width,girder_thick,girder_thick);
+				translate([0,-girder_thick,0])centred_cube(base_top_width,girder_thick*2,girder_thick);
+				translate([0,-girder_thick,base_thick-girder_thick])centred_cube(buffer_width,girder_thick*2,girder_thick);
 				
 			}
 			
@@ -212,31 +213,36 @@ module base(){
 			
 				
 			//thinner area for bogie?
-			//hollow out fuel tank for batteries
-			translate([0,(fuel_tank_length-base_arch_bottom_length)/2,-0.01])centred_cube(battery_space_width,fuel_tank_length-wall_thick*2,base_arch_height+fuel_tank_height-wall_thick);
-			//hollow out half the underside box
-			//translate([battery_space_width/4,0,-0.01])centred_cube(battery_space_width/2,base_arch_bottom_length-wall_thick*2,base_arch_height+underside_box_height-wall_thick);
-		}
-		switch_base_z = -4;
-		switch_x = -battery_space_width/4;
-		socket_x = (base_top_width-base_pipe_space*2)/2-dc_socket_space_d/2-wall_thick;
-		
+			
+			if(!DUMMY){
+				//hollow out fuel tank for batteries
+				translate([0,(fuel_tank_length-base_arch_bottom_length)/2,-0.01])centred_cube(battery_space_width,fuel_tank_length-wall_thick*2,base_arch_height+fuel_tank_height-wall_thick);
+				//hollow out half the underside box
+				//translate([battery_space_width/4,0,-0.01])centred_cube(battery_space_width/2,base_arch_bottom_length-wall_thick*2,base_arch_height+underside_box_height-wall_thick);
+			
+			
+				switch_base_z = -4;
+				switch_x = -battery_space_width/4;
+				socket_x = (base_top_width-base_pipe_space*2)/2-dc_socket_space_d/2-wall_thick;
+				
 
-		translate([socket_x,underside_box_y,0])cylinder(r=dc_socket_d/2,h=100);
-		
-		translate([socket_x,underside_box_y,-0.01])cylinder(r=dc_socket_space_d/2,h=base_arch_height+underside_box_height-dc_socket_thread_height);
-		
-		translate([socket_x,underside_box_y,base_arch_height+underside_box_height-dc_socket_thread_height+dc_socket_switch_nut_height])cylinder(r=dc_socket_nut_space_d/2,h=100);
-		
-		//switch_base_z = -(rs_switch_height - rs_switch_nut_height - base_arch_height-underside_box_height);
-		
-		
-		
-		translate([switch_x,underside_box_y,switch_base_z])rotate([0,0,90])rs_switch(1.05,10);
-		
-		translate([switch_x,underside_box_y,switch_base_z+rs_switch_height-rs_switch_nut_height])cylinder(r=rs_switch_nut_space_d/2+0.5,h=10);
-		
-		
+				translate([socket_x,underside_box_y,0])cylinder(r=dc_socket_d/2,h=100);
+				
+				translate([socket_x,underside_box_y,-0.01])cylinder(r=dc_socket_space_d/2,h=base_arch_height+underside_box_height-dc_socket_thread_height);
+				
+				translate([socket_x,underside_box_y,base_arch_height+underside_box_height-dc_socket_thread_height+dc_socket_switch_nut_height])cylinder(r=dc_socket_nut_space_d/2,h=100);
+				
+				//switch_base_z = -(rs_switch_height - rs_switch_nut_height - base_arch_height-underside_box_height);
+				
+				
+				
+				translate([switch_x,underside_box_y,switch_base_z])rotate([0,0,90])rs_switch(1.05,10);
+				
+				translate([switch_x,underside_box_y,switch_base_z+rs_switch_height-rs_switch_nut_height])cylinder(r=rs_switch_nut_space_d/2+0.5,h=10);
+			}else{
+				//TODO coin holders for weight?
+			}
+		}
 	}
 }
 
@@ -283,20 +289,21 @@ module bogies(){
 	
 	coupling_arm_length = coupling_arm_from_mount - bogie_end_axles_distance/2 + wheel_mount_length/2;
 	
+	
 	//adding centre_bogie_wheel_offset/2 to make up for when teh bogie bends under the weight of the loco and raises the height of the coupling
-	coupling_arm_z = axle_to_top_of_bogie+bogie_wheel_d/2 -bogie_thick-top_of_coupling_from_top_of_rail +centre_bogie_wheel_offset/2;
+	coupling_arm_z = axle_to_top_of_bogie+bogie_wheel_d/2 -coupling_arm_thick-top_of_coupling_from_top_of_rail +centre_bogie_wheel_offset/2;
 	
 	//arm to hold coupling
-	translate([0,-(coupling_arm_from_mount-coupling_arm_length/2-coupling_mount_length/2),coupling_arm_z])centred_cube(coupling_arm_width,coupling_arm_length-coupling_mount_length,bogie_thick);
+	translate([0,-(coupling_arm_from_mount-coupling_arm_length/2-coupling_mount_length/2),coupling_arm_z])centred_cube(coupling_arm_width,coupling_arm_length-coupling_mount_length,coupling_arm_thick);
 	//fill in gap under coupling arm
 	translate([0,-bogie_end_axles_distance/2,0])centred_cube(coupling_arm_width,wheel_mount_length,coupling_arm_z);
 	
-	translate([0,-(coupling_arm_from_mount-coupling_mount_length/2),coupling_arm_z+bogie_thick])coupling_mount(0,bogie_thick);
+	translate([0,-(coupling_arm_from_mount-coupling_mount_length/2),coupling_arm_z+coupling_arm_thick])coupling_mount(0,coupling_arm_thick);
 }
 
 module walls(){
 	
-	mirror_y()translate([width/2-wall_thick/2,0,0])centred_cube(wall_thick,length,wall_hight);
+	mirror_y()translate([width/2-wall_thick/2,0,0])centred_cube(wall_thick,length,wall_height);
 }
 
 if(GEN_BASE){
@@ -305,7 +312,8 @@ if(GEN_BASE){
 }
 
 if(GEN_BOGIES){
-	optional_translate([0,-(length/2 - motor_centre_from_end),base_height_above_track-bogie_mount_height-m3_washer_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)bogies();
+	mirror_x(GEN_IN_PLACE && DUMMY)optional_translate([0,-(length/2 - motor_centre_from_end),base_height_above_track-bogie_mount_height-m3_washer_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)bogies();
+	
 }
 
 if(GEN_WALLS){

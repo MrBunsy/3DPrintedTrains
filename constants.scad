@@ -67,18 +67,22 @@ module rounded_cube(width,length,height,r, $fn=50){
 }
 
 
-module mirror_x(){
+module mirror_x(doMirror=true){
     children();
-    mirror([0,1,0]) children();
+	if(doMirror){
+		mirror([0,1,0]) children();
+	}
 }
 
-module mirror_y(){
+module mirror_y(doMirror=true){
     children();
-    mirror([1,0,0]) children();
+	if(doMirror){
+		mirror([1,0,0]) children();
+	}
 }
 
-module mirror_xy(){
-    mirror_x() mirror_y() children();
+module mirror_xy(doMirror=true){
+    mirror_x(doMirror) mirror_y(doMirror) children();
 }
 
 SCALE = 76.2;
