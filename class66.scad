@@ -23,13 +23,16 @@ wall_hight = 18.6;
 wall_thick = 1;
 
 base_thick = 3;
-girder_thick = 0.2;
+girder_thick = 0.4;
 //how deep the pipe space in the side of the base is, from base_top_width
 base_pipe_space = 2;
 
 battery_space_width = 27;
 dc_socket_d = 8.1;
+dc_socket_thread_height = 5.6;
 dc_socket_space_d = 11.2;
+dc_socket_nut_space_d = 12.5;
+dc_socket_switch_nut_height = 1.6;
 
 base_bottom_width = width-2;
 base_top_width = width;
@@ -156,6 +159,7 @@ module underside_box(){
 }
 
 module base(){
+	underside_box_y = base_arch_bottom_length/2-(base_arch_bottom_length-fuel_tank_length)/2;
 	difference(){
 		union(){
 			centred_cube(base_top_width,length,girder_thick);
@@ -191,7 +195,7 @@ module base(){
 			
 			translate([0,(fuel_tank_length-base_arch_bottom_length)/2,base_arch_height])fuel_tank();
 			
-			translate([0,base_arch_bottom_length/2-(base_arch_bottom_length-fuel_tank_length)/2,base_arch_height])underside_box();
+			translate([0,underside_box_y,base_arch_height])underside_box();
 		}
 		
 		
@@ -213,18 +217,24 @@ module base(){
 			//hollow out half the underside box
 			//translate([battery_space_width/4,0,-0.01])centred_cube(battery_space_width/2,base_arch_bottom_length-wall_thick*2,base_arch_height+underside_box_height-wall_thick);
 		}
+		switch_base_z = -4;
+		switch_x = -battery_space_width/4;
+		socket_x = (base_top_width-base_pipe_space*2)/2-dc_socket_space_d/2-wall_thick;
 		
-		translate([(base_top_width-base_pipe_space*2)/2-dc_socket_space_d/2-wall_thick,base_arch_bottom_length/2-wall_thick-dc_socket_space_d/2,0])cylinder(r=dc_socket_d/2,h=100);
+
+		translate([socket_x,underside_box_y,0])cylinder(r=dc_socket_d/2,h=100);
 		
-		translate([(base_top_width-base_pipe_space*2)/2-dc_socket_space_d/2-wall_thick,base_arch_bottom_length/2-wall_thick-dc_socket_space_d/2,-0.01])cylinder(r=dc_socket_space_d/2,h=base_arch_height+underside_box_height-wall_thick);
+		translate([socket_x,underside_box_y,-0.01])cylinder(r=dc_socket_space_d/2,h=base_arch_height+underside_box_height-dc_socket_thread_height);
+		
+		translate([socket_x,underside_box_y,base_arch_height+underside_box_height-dc_socket_thread_height+dc_socket_switch_nut_height])cylinder(r=dc_socket_nut_space_d/2,h=100);
 		
 		//switch_base_z = -(rs_switch_height - rs_switch_nut_height - base_arch_height-underside_box_height);
 		
-		switch_base_z = -3;
 		
-		translate([-battery_space_width/6,base_arch_bottom_length/2-wall_thick-dc_socket_space_d/2,switch_base_z])rotate([0,0,90])rs_switch(1.05,10);
 		
-		translate([-battery_space_width/6,base_arch_bottom_length/2-wall_thick-dc_socket_space_d/2,switch_base_z+rs_switch_height-rs_switch_nut_height])cylinder(r=rs_switch_nut_space_d/2+0.5,h=10);
+		translate([switch_x,underside_box_y,switch_base_z])rotate([0,0,90])rs_switch(1.05,10);
+		
+		translate([switch_x,underside_box_y,switch_base_z+rs_switch_height-rs_switch_nut_height])cylinder(r=rs_switch_nut_space_d/2+0.5,h=10);
 		
 		
 	}

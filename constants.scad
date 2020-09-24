@@ -109,7 +109,7 @@ rs_switch_body_height = 8.89;
 rs_switch_thread_height = 8.89;
 rs_switch_height = rs_switch_body_height + rs_switch_thread_height;
 rs_switch_nut_height = 1.6;
-rs_switch_nut_space_d = 10;
+rs_switch_nut_space_d = 11;
 //space model to use to subtract away for a space to hold an RS 734-7097 switch
 //switch facing upwards, 0,0 at base of switch ignoring metal solder tags
 module rs_switch(scale_switch=1, extra_height=0){
