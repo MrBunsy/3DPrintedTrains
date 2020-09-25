@@ -1,13 +1,15 @@
 include <truck_bits.scad>
 include <constants.scad>
 
+//TODO the front is slightly narrower than the main body, it tapers from about the cab side of the door
+
 //non-dummy base needs scaffolding
 GEN_BASE = true;
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = false;
-GEN_IN_PLACE = false;
+GEN_BOGIES = true;
+GEN_IN_PLACE = true;
 
 //dummy model has no motor
 DUMMY = false;
@@ -237,6 +239,22 @@ module bogie_chain_mount(){
 }
 }
 
+module fuel_pump(){
+	centre_height = 0.5;
+	centre_z = base_arch_height*0.35;
+	mirror_y()hull(){
+		
+		//top of triangle
+		translate([width/2-base_pipe_space-girder_thick/2,0,0])centred_cube(base_pipe_space,fuel_pump_length,girder_thick);
+		
+		//most outward bit of triangle
+		translate([width/2-base_pipe_space/2,0,centre_z-centre_height/2])centred_cube(base_pipe_space,fuel_pump_length,centre_height);
+		
+		//bottom bit
+		translate([base_bottom_width/2-girder_thick/2,0,base_arch_height-girder_thick*2])centred_cube(girder_thick,girder_thick,girder_thick);
+	}
+}
+
 module base(){
 	underside_box_y = base_arch_bottom_length/2-(base_arch_bottom_length-fuel_tank_length)/2;
 	difference(){
@@ -277,6 +295,9 @@ module base(){
 				
 				//underside box in the +ve y direction
 				translate([0,underside_box_y,base_arch_height])underside_box();
+				
+				translate([0,-base_arch_bottom_length/2+a_frame_spacing*1,0])fuel_pump();
+				translate([0,-base_arch_bottom_length/2+a_frame_spacing*3,0])fuel_pump();
 				
 				//a-frames in the arch
 				for(i=[0:4]){
