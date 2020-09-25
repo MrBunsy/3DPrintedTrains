@@ -1,12 +1,13 @@
 include <truck_bits.scad>
 include <constants.scad>
 
+//non-dummy base needs scaffolding
 GEN_BASE = true;
-GEN_WALLS = true;
+GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = true;
-GEN_IN_PLACE = true;
+GEN_BOGIES = false;
+GEN_IN_PLACE = false;
 
 //dummy model has no motor
 DUMMY = false;
@@ -24,10 +25,11 @@ wall_thick = 1;
 
 coupling_arm_thick = 1.5;
 base_thick = 3;
-girder_thick = 0.4;
+girder_thick = 0.5;
 front_end_thick = 0.6;
 //how deep the pipe space in the side of the base is, from base_top_width
 base_pipe_space = 2;
+crane_mount_box_length = 2;
 
 battery_space_width = 27;
 dc_socket_d = 8.1;
@@ -67,9 +69,15 @@ buffer_box_height = 3;
 //wall_thick = 2;
 motor_length = 70;
 motor_centre_from_end = 45;
+door_centre_from_end = 28;
+door_length = 7;
+ladder_length = 6.5;
 //todo think if this is right
 coupling_arm_from_mount = motor_centre_from_end;
 coupling_arm_width = 8;
+
+bogie_chain_mount_length = 3;
+bogie_chain_mount_height = base_thick/2;
 
 //statement of intent
 top_of_bogie_from_rails = 15;
@@ -191,7 +199,43 @@ module springs(){
 	
 	mirror_y()translate([spring_width/2-bottom_width,0,base_thick-girder_thick])cylinder(h=girder_thick,r=bottom_width);
 }
+
+//the bit of the ladder in the base
+module ladder_base(){
+	rung_z = base_thick*0.7;
+	mirror_y(){
+		mirror_x()translate([width/2-base_pipe_space/2,door_length/2+girder_thick])centred_cube(base_pipe_space,girder_thick,base_thick);
+		
+		//filled-in ladder bit
+		translate([width/2-base_pipe_space/2-girder_thick/2,0])centred_cube(base_pipe_space-girder_thick,ladder_length,rung_z);
+		//ladder rung
+		translate([width/2-base_pipe_space/2,0,rung_z-girder_thick])centred_cube(base_pipe_space,ladder_length,girder_thick);
+	}
+}
+module crane_mount_box(){
 	
+	mirror_y()translate([width/2-base_pipe_space/2-girder_thick/2,0])centred_cube(base_pipe_space,crane_mount_box_length,base_thick);
+}
+
+
+module bogie_chain_mount(){
+	
+	mirror_y(){
+	translate([width/2-base_pipe_space/2,0])centred_cube(base_pipe_space,bogie_chain_mount_length,bogie_chain_mount_height);
+	
+	mirror_x()hull(){
+		translate([width/2-base_pipe_space/2,bogie_chain_mount_length/2 - girder_thick/2,0])centred_cube(base_pipe_space,girder_thick,bogie_chain_mount_height);
+		
+		
+		bottom_width = base_pipe_space - (base_top_width/2-base_bottom_width/2);
+		
+		translate([base_bottom_width/2-bottom_width/2,bogie_chain_mount_length/2 - girder_thick/2,base_thick-girder_thick*2])centred_cube(bottom_width,girder_thick,girder_thick);
+	}
+	sphere_r = bogie_chain_mount_height/4;
+	translate([width/2,0,bogie_chain_mount_height/2+sphere_r/2])sphere(r=sphere_r, $fn=20);
+	
+}
+}
 
 module base(){
 	underside_box_y = base_arch_bottom_length/2-(base_arch_bottom_length-fuel_tank_length)/2;
@@ -246,8 +290,18 @@ module base(){
 				//springs for bogies
 				mirror_x(){
 					translate([0,length/2 - motor_centre_from_end - bogie_wheel_d*1.6])springs();
-					translate([0,length/2 - motor_centre_from_end + bogie_wheel_d*1.2])springs();
+					//line up with the edge of the ladder exactly
+					translate([0,length/2 - door_centre_from_end - door_length/2-girder_thick])springs();
 				}
+				
+				//sticky out box thing (mounts for loco to be crane-lifted?)
+				mirror_x()translate([0,length/2 - door_centre_from_end + door_length/2+girder_thick*2 + crane_mount_box_length/2, 0])crane_mount_box();
+				
+				//chain holder that links to the bogie
+				mirror_x()translate([0,length/2 - motor_centre_from_end, 0])bogie_chain_mount();
+				
+				//ladder
+				mirror_x()translate([0,length/2-door_centre_from_end,0])ladder_base();
 				
 			}//end additive union
 		
