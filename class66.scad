@@ -287,9 +287,11 @@ module base(){
 					mirror_x()translate([0,-base_arch_bottom_length/2 + a_frame_spacing/2 + (i+5)*a_frame_spacing])a_frame(false);
 				}
 				
+				mirror_x()translate([0,length/2-13])a_frame(false);
+				
 				//springs for bogies
 				mirror_x(){
-					translate([0,length/2 - motor_centre_from_end - bogie_wheel_d*1.6])springs();
+					translate([0,length/2 - motor_centre_from_end - bogie_wheel_d*1])springs();
 					//line up with the edge of the ladder exactly
 					translate([0,length/2 - door_centre_from_end - door_length/2-girder_thick])springs();
 				}
