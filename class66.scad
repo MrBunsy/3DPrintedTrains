@@ -2,11 +2,11 @@ include <truck_bits.scad>
 include <constants.scad>
 
 GEN_BASE = true;
-GEN_WALLS = false;
+GEN_WALLS = true;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = false;
-GEN_IN_PLACE = false;
+GEN_BOGIES = true;
+GEN_IN_PLACE = true;
 
 //dummy model has no motor
 DUMMY = false;
@@ -25,6 +25,7 @@ wall_thick = 1;
 coupling_arm_thick = 1.5;
 base_thick = 3;
 girder_thick = 0.4;
+front_end_thick = 0.6;
 //how deep the pipe space in the side of the base is, from base_top_width
 base_pipe_space = 2;
 
@@ -45,9 +46,14 @@ base_arch_top_length = 90;
 base_arch_bottom_length = 75;
 base_arch_height = 7;
 
+
 fuel_tank_height = 11;
 //butted up to the end of the arch on one side
 fuel_tank_length = 60;
+a_frame_spacing = fuel_tank_length/4;
+//I've decided the triangle things are fuel pumps. Wild guess.
+fuel_pump_from_tank_ends = 16.5;
+fuel_pump_length = a_frame_spacing - girder_thick;
 underside_box_height = 9.5;
 underside_box_length = dc_socket_space_d+wall_thick*2;
 underside_box_width = base_bottom_width-base_pipe_space/2;
@@ -114,8 +120,8 @@ module buffers(){
 		union(){
 			//front face
 			hull(){
-				translate([0,-girder_thick,0])centred_cube(base_top_width,girder_thick*2,girder_thick);
-				translate([0,-girder_thick,base_thick-girder_thick])centred_cube(buffer_width,girder_thick*2,girder_thick);
+				translate([0,-front_end_thick/2,0])centred_cube(base_top_width,front_end_thick,girder_thick);
+				translate([0,-front_end_thick/2,base_thick-girder_thick])centred_cube(buffer_width,front_end_thick,girder_thick);
 				
 			}
 			
@@ -159,57 +165,103 @@ module underside_box(){
 	centred_cube(underside_box_width,underside_box_length,underside_box_height);
 }
 
+
+module a_frame(arch = true){
+	mirror_y()hull(){
+		
+		bottom_width = base_pipe_space - (base_top_width/2-base_bottom_width/2);
+		
+		translate([base_top_width/2-base_pipe_space/2,0,0])centred_cube(base_pipe_space,girder_thick,girder_thick);
+		translate([base_bottom_width/2-bottom_width/2,0,(arch ? base_arch_height : base_thick)-girder_thick*2])centred_cube(bottom_width,girder_thick,girder_thick);
+	}
+}
+
+//a-frame like bits that would hold the bogie suspension on a real train
+module springs(){
+	spring_width = width - girder_thick;
+	bottom_width = base_pipe_space - (base_top_width/2-spring_width/2);
+	//a-frame like bit
+	mirror_y()hull(){
+		
+		
+		
+		translate([base_top_width/2-base_pipe_space/2,0,0])centred_cube(base_pipe_space,girder_thick,girder_thick);
+		translate([spring_width/2-bottom_width/2,0,base_thick-girder_thick*2])centred_cube(bottom_width,girder_thick,girder_thick);
+	}
+	
+	mirror_y()translate([spring_width/2-bottom_width,0,base_thick-girder_thick])cylinder(h=girder_thick,r=bottom_width);
+}
+	
+
 module base(){
 	underside_box_y = base_arch_bottom_length/2-(base_arch_bottom_length-fuel_tank_length)/2;
 	difference(){
 		union(){
-			centred_cube(base_top_width,length,girder_thick);
-			centred_cube(base_top_width-base_pipe_space*2,length,base_thick);
-			
-			mirror_x()translate([0,length/2,0])buffers();
-			
-			//bogie mount
-			translate([0,-(length/2 - motor_centre_from_end),0])cylinder(h=base_thick+bogie_mount_height,r=m3_thread_d);
-			if(DUMMY){
-				//second bogie mount
+				centred_cube(base_top_width,length,girder_thick);
+				centred_cube(base_top_width-base_pipe_space*2,length,base_thick);
+				
+				mirror_x()translate([0,length/2,0])buffers();
+				
+				//bogie mount
 				translate([0,(length/2 - motor_centre_from_end),0])cylinder(h=base_thick+bogie_mount_height,r=m3_thread_d);
-			}
+				if(DUMMY){
+					//second bogie mount
+					translate([0,-(length/2 - motor_centre_from_end),0])cylinder(h=base_thick+bogie_mount_height,r=m3_thread_d);
+				}
+						
+				//bottom girder bits (where the arch isn't)
+				mirror_x()translate([0,(length/2-base_arch_top_length/2)/2+base_arch_top_length/2,base_thick-girder_thick])centred_cube(base_bottom_width,length/2-base_arch_top_length/2,girder_thick);
+				
+				//bottom arch bit
+				hull(){
+					mirror_x()translate([0,base_arch_top_length/2,base_thick-girder_thick])centred_cube(base_top_width-base_pipe_space*2,girder_thick,girder_thick);
 					
-			//bottom girder bits (where the arch isn't)
-			mirror_x()translate([0,(length/2-base_arch_top_length/2)/2+base_arch_top_length/2,base_thick-girder_thick])centred_cube(base_bottom_width,length/2-base_arch_top_length/2,girder_thick);
-			
-			//bottom arch bit
-			hull(){
-				mirror_x()translate([0,base_arch_top_length/2,base_thick-girder_thick])centred_cube(base_top_width-base_pipe_space*2,girder_thick,girder_thick);
+					mirror_x()translate([0,base_arch_bottom_length/2,base_arch_height-girder_thick])centred_cube(base_top_width-base_pipe_space*2,girder_thick,girder_thick);
+				}
+				//bottom arch girders
+				//sloping bits of girders
+				mirror_x()hull(){
+					translate([0,base_arch_top_length/2,base_thick-girder_thick])centred_cube(base_bottom_width,girder_thick,girder_thick);
+					
+					translate([0,base_arch_bottom_length/2,base_arch_height-girder_thick])centred_cube(base_bottom_width,girder_thick,girder_thick);
+				}
 				
-				mirror_x()translate([0,base_arch_bottom_length/2,base_arch_height-girder_thick])centred_cube(base_top_width-base_pipe_space*2,girder_thick,girder_thick);
-			}
-			//bottom arch girders
-			//sloping bits of girders
-			mirror_x()hull(){
-				translate([0,base_arch_top_length/2,base_thick-girder_thick])centred_cube(base_bottom_width,girder_thick,girder_thick);
+				translate([0,0,base_arch_height-girder_thick])centred_cube(base_bottom_width,base_arch_bottom_length,girder_thick);
 				
-				translate([0,base_arch_bottom_length/2,base_arch_height-girder_thick])centred_cube(base_bottom_width,girder_thick,girder_thick);
-			}
-			
-			translate([0,0,base_arch_height-girder_thick])centred_cube(base_bottom_width,base_arch_bottom_length,girder_thick);
-			
-			translate([0,(fuel_tank_length-base_arch_bottom_length)/2,base_arch_height])fuel_tank();
-			
-			translate([0,underside_box_y,base_arch_height])underside_box();
-		}
+				//fuel tank is in the -ve y direction
+				translate([0,(fuel_tank_length-base_arch_bottom_length)/2,base_arch_height])fuel_tank();
+				
+				//underside box in the +ve y direction
+				translate([0,underside_box_y,base_arch_height])underside_box();
+				
+				//a-frames in the arch
+				for(i=[0:4]){
+					translate([0,-base_arch_bottom_length/2 + a_frame_spacing/2 + i*a_frame_spacing])a_frame(true);
+				}
+				//rest of the a-frames
+				for(i=[0:1]){
+					mirror_x()translate([0,-base_arch_bottom_length/2 + a_frame_spacing/2 + (i+5)*a_frame_spacing])a_frame(false);
+				}
+				
+				//springs for bogies
+				mirror_x(){
+					translate([0,length/2 - motor_centre_from_end - bogie_wheel_d*1.6])springs();
+					translate([0,length/2 - motor_centre_from_end + bogie_wheel_d*1.2])springs();
+				}
+				
+			}//end additive union
 		
 		
 		union(){
 			if(!DUMMY){
 				//space for motor
-				translate([0,length/2 - motor_centre_from_end,0])motor_space();
+				translate([0,-(length/2 - motor_centre_from_end),0])motor_space();
 			}else{
 				//second bogie
-				translate([0,(length/2 - motor_centre_from_end),0])cylinder(h=100,r=m3_thread_d/2,center=true);
+				translate([0,-(length/2 - motor_centre_from_end),0])cylinder(h=100,r=m3_thread_d/2,center=true);
 			}
 			//screwhole for bogie
-			translate([0,-(length/2 - motor_centre_from_end),0])cylinder(h=100,r=m3_thread_d/2,center=true);
+			translate([0,(length/2 - motor_centre_from_end),0])cylinder(h=100,r=m3_thread_d/2,center=true);
 			
 				
 			//thinner area for bogie?
@@ -217,10 +269,11 @@ module base(){
 			if(!DUMMY){
 				//hollow out fuel tank for batteries
 				translate([0,(fuel_tank_length-base_arch_bottom_length)/2,-0.01])centred_cube(battery_space_width,fuel_tank_length-wall_thick*2,base_arch_height+fuel_tank_height-wall_thick);
-				//hollow out half the underside box
-				//translate([battery_space_width/4,0,-0.01])centred_cube(battery_space_width/2,base_arch_bottom_length-wall_thick*2,base_arch_height+underside_box_height-wall_thick);
+
+				//TODO custom battery holder, I think we can hold eight batteries in here if they're at the right angle or position.
+				//for now, I'll leave it as it is to get the whole loco working then come back and improve this
 			
-			
+				//slots for DC socket and switch in the underside box
 				switch_base_z = -4;
 				switch_x = -battery_space_width/4;
 				socket_x = (base_top_width-base_pipe_space*2)/2-dc_socket_space_d/2-wall_thick;
@@ -242,7 +295,7 @@ module base(){
 			}else{
 				//TODO coin holders for weight?
 			}
-		}
+		}//end subtractive union
 	}
 }
 
