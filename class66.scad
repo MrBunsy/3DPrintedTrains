@@ -6,11 +6,11 @@ include <constants.scad>
 
 //non-dummy base needs scaffolding
 GEN_BASE = true;
-GEN_WALLS = false;
+GEN_WALLS = true;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = false;
-GEN_IN_PLACE = false;
+GEN_BOGIES = true;
+GEN_IN_PLACE = true;
 
 //dummy model has no motor
 DUMMY = false;
@@ -254,11 +254,11 @@ module bogie_chain_mount(){
 
 module fuel_pump(){
 	centre_height = 0.5;
-	centre_z = base_arch_height*0.35;
+	centre_z = base_arch_height*0.5;
 	mirror_y()hull(){
 		
 		//top of triangle
-		translate([width/2-base_pipe_space-girder_thick/2,0,0])centred_cube(base_pipe_space,fuel_pump_length,girder_thick);
+		translate([base_top_width/2-base_pipe_space*1.5,0,girder_thick*2])centred_cube(base_pipe_space,fuel_pump_length,girder_thick);
 		
 		//most outward bit of triangle
 		translate([width/2-base_pipe_space/2,0,centre_z-centre_height/2])centred_cube(base_pipe_space,fuel_pump_length,centre_height);
@@ -459,7 +459,14 @@ module bogies(){
 
 module walls(){
 	
-	mirror_y()translate([width/2-wall_thick/2,0,0])centred_cube(wall_thick,length,wall_height);
+	mirror_y()translate([width/2-wall_thick/2,0,0])centred_cube(wall_thick,length-end_width_start*2,wall_height);
+	
+	mirror_xy(){
+		hull(){
+			translate([width/2-wall_thick/2,length/2-end_width_start,0])centred_cube(wall_thick,wall_thick,wall_height);
+			translate([end_width/2-wall_thick/2,length/2-wall_thick/2,0])centred_cube(wall_thick,wall_thick,wall_height);
+		}
+	}
 }
 
 if(GEN_BASE){
