@@ -2,14 +2,15 @@ include <truck_bits.scad>
 include <constants.scad>
 
 //TODO the front is slightly narrower than the main body, it tapers from about the cab side of the door
+//TODO the doors aren't symetric
 
 //non-dummy base needs scaffolding
 GEN_BASE = true;
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = true;
-GEN_IN_PLACE = true;
+GEN_BOGIES = false;
+GEN_IN_PLACE = false;
 
 //dummy model has no motor
 DUMMY = false;
@@ -19,11 +20,16 @@ DUMMY = false;
 //n-gauge model without buffers -> 20.3m, so assuming without buffers
 length = m2mm(21.4-1);
 width = m2mm(2.65);
-//
+end_width = width-1;
 height = m2mm(3.9);
 
 wall_height = 18.6;
 wall_thick = 1;
+
+
+
+//distance from end that the taper starts twoards the narrorer end width
+end_width_start = 22;
 
 coupling_arm_thick = 1.5;
 base_thick = 3;
@@ -43,7 +49,7 @@ dc_socket_switch_nut_height = 1.6;
 base_bottom_width = width-2;
 base_top_width = width;
 //needs to be smaller than top width but larger than bottom width
-buffer_width = width-1;
+buffer_width = width-2;
 
 //the girder bits extend further downwards in the middle
 base_arch_top_length = 90;
@@ -71,7 +77,9 @@ buffer_box_height = 3;
 //wall_thick = 2;
 motor_length = 70;
 motor_centre_from_end = 45;
-door_centre_from_end = 28;
+//doors are different at each end
+door_centre_from_fuel_end = 28;
+door_centre_from_box_end = 36;
 door_length = 7;
 ladder_length = 6.5;
 //todo think if this is right
@@ -116,6 +124,11 @@ bogie_end_axles_distance = 55;
 //called axle_space in some places
 bogie_axle_mount_width = 23;
 
+screwhole_from_edge = 5;
+//to be mirrored in x and y
+base_wall_screwholes = [[width/2-screwhole_from_edge,base_arch_top_length/2+screwhole_from_edge/2,0],[width/2-5,length/2-screwhole_from_edge*1.5,0]];
+
+
 module motor_space(){
 	intersection(){
 		cylinder(r=motor_length/2,h=100,center=true);
@@ -130,7 +143,7 @@ module buffers(){
 		union(){
 			//front face
 			hull(){
-				translate([0,-front_end_thick/2,0])centred_cube(base_top_width,front_end_thick,girder_thick);
+				translate([0,-front_end_thick/2,0])centred_cube(end_width,front_end_thick,girder_thick);
 				translate([0,-front_end_thick/2,base_thick-girder_thick])centred_cube(buffer_width,front_end_thick,girder_thick);
 				
 			}
@@ -138,7 +151,7 @@ module buffers(){
 			//buffer holders
 			hull(){
 				//top half of buffer box
-				translate([0,-buffer_box_length_top/2,base_thick])centred_cube(buffer_width,buffer_box_length_top,buffer_box_bottom_height );
+				translate([0,-buffer_box_length_top/2,base_thick-girder_thick])centred_cube(buffer_width,buffer_box_length_top,buffer_box_bottom_height+girder_thick );
 				//sloping bit at top of box
 				translate([0,-buffer_box_length_top/2-girder_thick/2,base_thick/2])centred_cube(base_bottom_width-base_pipe_space,buffer_box_length_top-girder_thick,buffer_box_height);
 				//bottom half of box
@@ -176,12 +189,12 @@ module underside_box(){
 }
 
 
-module a_frame(arch = true){
+module a_frame(arch = true, top_width = base_top_width){
 	mirror_y()hull(){
 		
-		bottom_width = base_pipe_space - (base_top_width/2-base_bottom_width/2);
+		bottom_width = base_pipe_space - (top_width/2-base_bottom_width/2);
 		
-		translate([base_top_width/2-base_pipe_space/2,0,0])centred_cube(base_pipe_space,girder_thick,girder_thick);
+		translate([top_width/2-base_pipe_space/2,0,0])centred_cube(base_pipe_space,girder_thick,girder_thick);
 		translate([base_bottom_width/2-bottom_width/2,0,(arch ? base_arch_height : base_thick)-girder_thick*2])centred_cube(bottom_width,girder_thick,girder_thick);
 	}
 }
@@ -259,7 +272,10 @@ module base(){
 	underside_box_y = base_arch_bottom_length/2-(base_arch_bottom_length-fuel_tank_length)/2;
 	difference(){
 		union(){
-				centred_cube(base_top_width,length,girder_thick);
+				hull(){
+					centred_cube(base_top_width,length-end_width_start*2,girder_thick);
+					mirror_x()translate([0,length/2-end_width_start/2,0])centred_cube(end_width,end_width_start,girder_thick);
+				}
 				centred_cube(base_top_width-base_pipe_space*2,length,base_thick);
 				
 				mirror_x()translate([0,length/2,0])buffers();
@@ -308,23 +324,25 @@ module base(){
 					mirror_x()translate([0,-base_arch_bottom_length/2 + a_frame_spacing/2 + (i+5)*a_frame_spacing])a_frame(false);
 				}
 				
-				mirror_x()translate([0,length/2-13])a_frame(false);
+				//end a-frames under the cab TODO should calculate top width properly
+				mirror_x()translate([0,length/2-end_width_start/2-girder_thick])a_frame(false,(base_top_width+end_width)/2);
 				
 				//springs for bogies
 				mirror_x(){
 					translate([0,length/2 - motor_centre_from_end - bogie_wheel_d*1])springs();
 					//line up with the edge of the ladder exactly
-					translate([0,length/2 - door_centre_from_end - door_length/2-girder_thick])springs();
+					translate([0,length/2 - door_centre_from_fuel_end - door_length/2-girder_thick])springs();
 				}
 				
 				//sticky out box thing (mounts for loco to be crane-lifted?)
-				mirror_x()translate([0,length/2 - door_centre_from_end + door_length/2+girder_thick*2 + crane_mount_box_length/2, 0])crane_mount_box();
+				mirror_x()translate([0,length/2 - door_centre_from_fuel_end + door_length/2+girder_thick*2 + crane_mount_box_length/2, 0])crane_mount_box();
 				
 				//chain holder that links to the bogie
 				mirror_x()translate([0,length/2 - motor_centre_from_end, 0])bogie_chain_mount();
 				
 				//ladder
-				mirror_x()translate([0,length/2-door_centre_from_end,0])ladder_base();
+				translate([0,-(length/2-door_centre_from_fuel_end),0])ladder_base();
+				translate([0,(length/2-door_centre_from_box_end),0])ladder_base();
 				
 			}//end additive union
 		
@@ -372,6 +390,14 @@ module base(){
 			}else{
 				//TODO coin holders for weight?
 			}
+			
+			
+			//screwholes to hold walls to base
+			
+			translate([0,0,-1])mirror_xy()for(pos = base_wall_screwholes){
+				translate(pos)cylinder(r=m2_thread_size/2,h=100,$fn=50);
+			}
+			
 		}//end subtractive union
 	}
 }
