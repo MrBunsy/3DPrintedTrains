@@ -471,12 +471,16 @@ module bogies(){
 	translate([0,-(coupling_arm_from_mount-coupling_mount_length/2),coupling_arm_z+coupling_arm_thick])coupling_mount(0,coupling_arm_thick);
 }
 
+//hmm not right.
+roof_top_from_walls_base = height - bogie_mount_height- bogie_wheel_d/2-axle_to_top_of_bogie - m3_washer_thick;
+
+roof_top_from_walls = 11;
 function lesswide(total_width) = width!=total_width ? (width - total_width)/2 : 0;
 
 //function roof_corners(total_width) = for(i=[1,-1])[ for(j=[[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-12,0,7],[-2.5,0,11]]) [j*i] ];
 
-function roof_corners(total_width) = [[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-12,0,7],[-2.5,0,11],
-			[2.5,0,11],[12-lesswide(total_width),0,7],[15-lesswide(total_width),0,4],[total_width/2-wall_thick/2,0,0]];
+function roof_corners(total_width) = [[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-12,0,7],[-2.5,0,roof_top_from_walls],
+			[2.5,0,roof_top_from_walls],[12-lesswide(total_width),0,7],[15-lesswide(total_width),0,4],[total_width/2-wall_thick/2,0,0]];
 
 module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 	less_wideness = (width - total_width)/2;
@@ -490,9 +494,19 @@ module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 	
 	if(solid){
 		hull(){
-			for(corner=corners){
-				translate(corner)rotate([90,0,0])cylinder(r=wall_thick/2,h=long,$fn=10,center=true);
+			for(i=[0:len(corners0)-2]){
+			corners0 = [corners0[i],corners0[i+1]];
+			corners1 = [corners1[i],corners1[i+1]];
+			hull(){
+				for(corner=corners0){
+					translate([0,0.05-long/2,0])translate(corner)rotate([90,0,0])cylinder(r=wall_thick/2,h=0.1,$fn=50,center=true);
+				}
+				
+				for(corner = corners1){
+					translate([0,long/2-0.05,0])translate(corner)rotate([90,0,0])cylinder(r=wall_thick/2,h=0.1,$fn=50,center=true);
+				}
 			}
+		}
 			
 		}
 	}else{
@@ -551,28 +565,54 @@ module walls(){
 			//extra-thick front
 			mirror_x(){
 			
-			intersection(){
-			hull(){
-					mirror_y()translate([end_width/2-wall_thick/2,length/2-wall_thick/2,0])centred_cube(wall_thick,wall_thick,front_height);
-					translate([0,length/2+wall_front_midsection_y-wall_thick/2,wall_front_midsection_bottom_z])centred_cube(wall_front_midsection_width,wall_thick,wall_front_midsection_height);
-				}
-			
-			//intersection with cylinder
-			translate([0,0,front_top_r_z])rotate([90,0,0])cylinder(r=front_top_r,h=length*2,center=true);
-				}
-		}
-		//main section of roof
+				intersection(){
+				hull(){
+					//wall inside the cab
+						mirror_y()translate([end_width/2-wall_thick/2,length/2-wall_thick/2,0])centred_cube(wall_thick,wall_thick,front_height);
+					//flat bit in the middle
+						translate([0,length/2+wall_front_midsection_y-wall_thick/2,wall_front_midsection_bottom_z])centred_cube(wall_front_midsection_width,wall_thick,wall_front_midsection_height);
+					}
+				
+				//intersection with cylinder
+				translate([0,0,front_top_r_z])rotate([90,0,0])cylinder(r=front_top_r,h=length*2,center=true);
+					}
+			}
+			//main section of roof
 			translate([0,0,wall_height])roof_shape(length-end_width_start*2);
-		//tapered section of roof
-		mirror_x(){
-				translate([0,length/2-end_width_start/2+roof_front_overhang/2,wall_height])roof_shape(end_width_start+roof_front_overhang,false,width,end_width);
+			//tapered section of roof
+			mirror_x(){
+				//note-deliberatetly leaving the front end wider than it should be for a tiny bit of side overhang
+				difference(){
+					union(){
+						//roof top
+						translate([0,length/2-end_width_start/2+roof_front_overhang/2,wall_height])roof_shape(end_width_start+roof_front_overhang,false,width,end_width);
+						//filled in roof at front only
+						intersection(){
+							translate([0,length/2-end_width_start/2+roof_front_overhang/2,wall_height])roof_shape(end_width_start+roof_front_overhang,true,width,end_width);
+							translate([0,length/2+50,0])centred_cube(100,100,100);
+						}
+					}
+					union(){
+						//a shape that goes from the bottom edge of the roof to the overhang at the top, to chop off the overhanging bits of roof that aren't wanted
+						hull(){
+							translate([0,width/2+length/2+1,wall_height-wall_thick*1.5])centred_cube(width*2,width,wall_thick);
+							
+							translate([0,width/2+length/2+roof_front_overhang,wall_height+roof_top_from_walls])centred_cube(width*2,width,wall_thick);
+						}
+						
+						//also lop off anything that would be too low (copy pasted from front walls intersection)
+						//intersection with cylinder
+						translate([0,0,front_top_r_z])rotate([90,0,0])cylinder(r=front_top_r,h=length*2,center=true);
+							
+					}
+				}
 
-		}
+			}
 		}
 			
 		
 		
-		//windows
+		//subtract windows
 		union(){
 			mirror_xy()translate([front_window_x,0,front_window_z])rotate([90,0,0])rounded_cube(front_window_width,front_window_height,length,front_window_r,$fn);
 		
