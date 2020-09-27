@@ -20,14 +20,18 @@ DUMMY = false;
 //n-gauge model without buffers -> 20.3m, so assuming without buffers
 length = m2mm(21.4-1);
 width = m2mm(2.65);
-end_width = width-1;
+end_width = width-2;
 height = m2mm(3.9);
 
 wall_height = 18.6;
 wall_thick = 1;
 
-
-
+//the height of the flat bit in the middle of the front
+wall_front_midsection_height = 2.6;
+//z height of the bottom of this section
+wall_front_midsection_bottom_z = 5.5;
+//how far out from the main body the front nose sticks
+wall_front_midsection_y = 1.8;
 //distance from end that the taper starts twoards the narrorer end width
 end_width_start = 22;
 
@@ -46,10 +50,10 @@ dc_socket_space_d = 11.2;
 dc_socket_nut_space_d = 12.5;
 dc_socket_switch_nut_height = 1.6;
 
-base_bottom_width = width-2;
+base_bottom_width = width-3;
 base_top_width = width;
 //needs to be smaller than top width but larger than bottom width
-buffer_width = width-2;
+buffer_width = width-3;
 
 //the girder bits extend further downwards in the middle
 base_arch_top_length = 90;
@@ -82,6 +86,7 @@ door_centre_from_fuel_end = 28;
 door_centre_from_box_end = 36;
 door_length = 7;
 ladder_length = 6.5;
+ladder_rung_height = 0.2;
 //todo think if this is right
 coupling_arm_from_mount = motor_centre_from_end;
 coupling_arm_width = 8;
@@ -224,12 +229,18 @@ module ladder_base(){
 		//filled-in ladder bit
 		translate([width/2-base_pipe_space/2-girder_thick/2,0])centred_cube(base_pipe_space-girder_thick,ladder_length,rung_z);
 		//ladder rung
-		translate([width/2-base_pipe_space/2,0,rung_z-girder_thick])centred_cube(base_pipe_space,ladder_length,girder_thick);
+		translate([width/2-base_pipe_space/2,0,rung_z-ladder_rung_height])centred_cube(base_pipe_space,ladder_length,ladder_rung_height);
 	}
 }
 module crane_mount_box(){
 	
-	mirror_y()translate([width/2-base_pipe_space/2-girder_thick/2,0])centred_cube(base_pipe_space,crane_mount_box_length,base_thick);
+	mirror_y()translate([width/2-base_pipe_space/2-girder_thick/2,0])difference(){
+		
+		centred_cube(base_pipe_space,crane_mount_box_length,base_thick);
+		
+		translate([girder_thick+0.01,0,base_thick/2])centred_cube(base_pipe_space-girder_thick*2,crane_mount_box_length-girder_thick*2,base_thick/2-girder_thick);
+		
+	}
 }
 
 
@@ -393,9 +404,12 @@ module base(){
 			
 			
 			//screwholes to hold walls to base
-			
 			translate([0,0,-1])mirror_xy()for(pos = base_wall_screwholes){
-				translate(pos)cylinder(r=m2_thread_size/2,h=100,$fn=50);
+				translate(pos)cylinder(r=m2_thread_size_loose/2,h=100,$fn=50);
+			}
+			
+			translate([0,0,base_thick-m2_head_length])mirror_xy()for(pos = base_wall_screwholes){
+				translate(pos)cylinder(r=m2_head_size/2,h=100,$fn=50);
 			}
 			
 		}//end subtractive union
@@ -457,15 +471,113 @@ module bogies(){
 	translate([0,-(coupling_arm_from_mount-coupling_mount_length/2),coupling_arm_z+coupling_arm_thick])coupling_mount(0,coupling_arm_thick);
 }
 
+function lesswide(total_width) = width!=total_width ? (width - total_width)/2 : 0;
+
+//function roof_corners(total_width) = for(i=[1,-1])[ for(j=[[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-12,0,7],[-2.5,0,11]]) [j*i] ];
+
+function roof_corners(total_width) = [[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-12,0,7],[-2.5,0,11],
+			[2.5,0,11],[12-lesswide(total_width),0,7],[15-lesswide(total_width),0,4],[total_width/2-wall_thick/2,0,0]];
+
+module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
+	less_wideness = (width - total_width)/2;
+	
+	
+	
+	//corners = [[wall_thick/2-total_width/2,0,0],[less_wideness-15,0,4],[less_wideness-12,0,7],[-2.5,0,11],
+	//		[2.5,0,11],[12-less_wideness,0,7],[15-less_wideness,0,4],[total_width/2-wall_thick/2,0,0]];
+	corners0 = roof_corners(total_width);
+	corners1 = roof_corners(total_width2);
+	
+	if(solid){
+		hull(){
+			for(corner=corners){
+				translate(corner)rotate([90,0,0])cylinder(r=wall_thick/2,h=long,$fn=10,center=true);
+			}
+			
+		}
+	}else{
+		for(i=[0:len(corners0)-2]){
+			corners0 = [corners0[i],corners0[i+1]];
+			corners1 = [corners1[i],corners1[i+1]];
+			hull(){
+				for(corner=corners0){
+					translate([0,0.05-long/2,0])translate(corner)rotate([90,0,0])cylinder(r=wall_thick/2,h=0.1,$fn=50,center=true);
+				}
+				
+				for(corner = corners1){
+					translate([0,long/2-0.05,0])translate(corner)rotate([90,0,0])cylinder(r=wall_thick/2,h=0.1,$fn=50,center=true);
+				}
+			}
+		}
+	}
+}
+
 module walls(){
 	
-	mirror_y()translate([width/2-wall_thick/2,0,0])centred_cube(wall_thick,length-end_width_start*2,wall_height);
+	front_window_width = 13.5;
+	front_window_height = 10.5;
+	front_window_r = 2;
+	front_window_z = 14;
+	front_window_x = 8;
+	//seems like a reasonable aproximation
+	front_top_r_z = -4;
+	//ensure circle terminates at the top of the wall
+	front_top_r = sqrt((wall_height-front_top_r_z)*(wall_height-front_top_r_z) + end_width*end_width/4);//height + base_thick;
+	roof_front_overhang = 2.5;
 	
-	mirror_xy(){
-		hull(){
-			translate([width/2-wall_thick/2,length/2-end_width_start,0])centred_cube(wall_thick,wall_thick,wall_height);
-			translate([end_width/2-wall_thick/2,length/2-wall_thick/2,0])centred_cube(wall_thick,wall_thick,wall_height);
+	front_height = front_top_r+front_top_r_z;
+	
+	difference(){
+
+		union(){
+			
+			//main straight sections on either side
+			mirror_y()translate([width/2-wall_thick/2,0,0])centred_cube(wall_thick,length-end_width_start*2,wall_height);
+			
+			//tapered bits towards the fronts
+			mirror_xy(){
+				hull(){
+					//might result in a slightly wrong wall thickness, but the outside will look fine, so meh
+					translate([width/2-wall_thick/2,length/2-end_width_start-wall_thick/2,0])centred_cube(wall_thick,wall_thick,wall_height);
+					translate([end_width/2-wall_thick/2,length/2-wall_thick/2,0])centred_cube(wall_thick,wall_thick,wall_height);
+				}
+			}
+			//angle of taper of walls
+			width_per_length = (width - end_width)/end_width_start;
+			//angle of taper of top half of front
+			//y_per_height = wall_front_midsection_y/(wall_height - wall_front_midsection_bottom_z-wall_front_midsection_height);
+			
+			wall_front_midsection_width = end_width - width_per_length*wall_front_midsection_y;
+			//extra-thick front
+			mirror_x(){
+			
+			intersection(){
+			hull(){
+					mirror_y()translate([end_width/2-wall_thick/2,length/2-wall_thick/2,0])centred_cube(wall_thick,wall_thick,front_height);
+					translate([0,length/2+wall_front_midsection_y-wall_thick/2,wall_front_midsection_bottom_z])centred_cube(wall_front_midsection_width,wall_thick,wall_front_midsection_height);
+				}
+			
+			//intersection with cylinder
+			translate([0,0,front_top_r_z])rotate([90,0,0])cylinder(r=front_top_r,h=length*2,center=true);
+				}
 		}
+		//main section of roof
+			translate([0,0,wall_height])roof_shape(length-end_width_start*2);
+		//tapered section of roof
+		mirror_x(){
+				translate([0,length/2-end_width_start/2+roof_front_overhang/2,wall_height])roof_shape(end_width_start+roof_front_overhang,false,width,end_width);
+
+		}
+		}
+			
+		
+		
+		//windows
+		union(){
+			mirror_xy()translate([front_window_x,0,front_window_z])rotate([90,0,0])rounded_cube(front_window_width,front_window_height,length,front_window_r,$fn);
+		
+		}
+	
 	}
 }
 

@@ -17,6 +17,7 @@ m2_thread_size = 2;
 m2_thread_size_loose = 2.3;
 //actually 3.9, but this allows space
 m2_head_size=4.5;
+m2_head_length=1.7;
 //4.84, but with some extra space
 m2_washer_d = 5;
 m3_thread_loose_size = 3.2;
