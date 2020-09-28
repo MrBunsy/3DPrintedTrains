@@ -499,11 +499,11 @@ module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 			corners1 = [corners1[i],corners1[i+1]];
 			hull(){
 				for(corner=corners0){
-					translate([0,0.05-long/2,0])translate(corner)rotate([90,0,0])cylinder(r=roof_corners_r,h=0.1,$fn=50,center=true);
+					translate([0,-long/2,0])translate(corner)rotate([90,0,0])sphere(r=roof_corners_r, $fn=20);
 				}
 				
 				for(corner = corners1){
-					translate([0,long/2-0.05,0])translate(corner)rotate([90,0,0])cylinder(r=roof_corners_r,h=0.1,$fn=50,center=true);
+					translate([0,long/2,0])translate(corner)rotate([90,0,0])sphere(r=roof_corners_r, $fn=20);
 				}
 			}
 		}
@@ -515,11 +515,11 @@ module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 			corners1 = [corners1[i],corners1[i+1]];
 			hull(){
 				for(corner=corners0){
-					translate([0,0.05-long/2,0])translate(corner)rotate([90,0,0])cylinder(r=roof_corners_r,h=0.1,$fn=50,center=true);
+					translate([0,-long/2,0])translate(corner)rotate([90,0,0])sphere(r=roof_corners_r, $fn=20);
 				}
 				
 				for(corner = corners1){
-					translate([0,long/2-0.05,0])translate(corner)rotate([90,0,0])cylinder(r=roof_corners_r,h=0.1,$fn=50,center=true);
+					translate([0,long/2])translate(corner)rotate([90,0,0])sphere(r=roof_corners_r, $fn=20);
 				}
 			}
 		}
