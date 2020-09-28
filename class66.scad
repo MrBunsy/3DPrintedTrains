@@ -133,6 +133,13 @@ screwhole_from_edge = 5;
 base_wall_screwholes = [[width/2-screwhole_from_edge,base_arch_top_length/2+screwhole_from_edge/2,0],[width/2-5,length/2-screwhole_from_edge*1.5,0]];
 
 
+//for calculating roof shape at the front
+//seems like a reasonable aproximation
+front_top_r_z = -4;
+//ensure circle terminates at the top of the wall
+front_top_r = sqrt((wall_height-front_top_r_z)*(wall_height-front_top_r_z) + end_width*end_width/4);//height + base_thick;
+roof_front_overhang = 2.5;
+
 module motor_space(){
 	intersection(){
 		cylinder(r=motor_length/2,h=100,center=true);
@@ -471,9 +478,37 @@ module bogies(){
 }
 
 //hmm not right.
-roof_top_from_walls_base = height - bogie_mount_height- bogie_wheel_d/2-axle_to_top_of_bogie - m3_washer_thick;
+//roof_top_from_walls_base = height - bogie_mount_height- bogie_wheel_d/2-axle_to_top_of_bogie - m3_washer_thick;
 
 roof_top_from_walls = 10;
+
+module horn_grill(){
+	corner_r = 0.5;
+	mid_width = 12;
+	top = wall_height +roof_top_from_walls-corner_r-0.2;
+	bottom = front_top_r_z + front_top_r+corner_r+0.2;
+	
+	clip_width = 1;
+	clip_distance = 7.5;
+	clip_height = 0.2;
+	corners = [[-10.5/2,0,bottom],[-mid_width/2,0,top-2],[-3.5/2,0,top],
+				[3.5/2,0,top],[mid_width/2,0,top-2],[10.5/2,0,bottom]];
+	
+	color("blue")
+	difference(){
+		union(){
+			hull(){
+				for(corner=corners){
+					translate([0,length/2,0])translate(corner)rotate([-90,0,0])cylinder(r=corner_r,h=roof_front_overhang*2,$fn=20);
+				}
+			}
+			mirror_y()translate([clip_distance/2,length/2+roof_front_overhang*1.5,bottom-clip_height-corner_r])centred_cube(clip_width,roof_front_overhang*2,clip_height);
+		}
+		translate([0,girder_thick,0])roof_front_chop();
+	}
+}
+
+
 function lesswide(total_width) = width!=total_width ? (width - total_width)/2 : 0;
 
 //function roof_corners(total_width) = for(i=[1,-1])[ for(j=[[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-12,0,7],[-2.5,0,11]]) [j*i] ];
@@ -525,7 +560,23 @@ module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 		}
 	}
 }
-
+//shape to subtract from a long roof to create the overhanging bit of roof
+module roof_front_chop(){
+	union(){
+			//a shape that goes from the bottom edge of the roof to the overhang at the top, to chop off the overhanging bits of roof that aren't wanted				
+			
+			hull(){
+				translate([0,50+length/2+0.75,wall_height-wall_thick*1])centred_cube(100,100,wall_thick);
+				
+				translate([0,width/2+length/2+roof_front_overhang,wall_height+roof_top_from_walls])centred_cube(width*2,width,wall_thick);
+			}
+			
+			//also lop off anything that would be too low (copy pasted from front walls intersection)
+			//intersection with cylinder
+			translate([0,length/2,front_top_r_z])rotate([-90,0,0])cylinder(r=front_top_r,h=length*2);
+				
+		}
+}
 module shell(){
 	
 	front_window_width = 13.5;
@@ -533,11 +584,7 @@ module shell(){
 	front_window_r = 2;
 	front_window_z = 14;
 	front_window_x = 8;
-	//seems like a reasonable aproximation
-	front_top_r_z = -4;
-	//ensure circle terminates at the top of the wall
-	front_top_r = sqrt((wall_height-front_top_r_z)*(wall_height-front_top_r_z) + end_width*end_width/4);//height + base_thick;
-	roof_front_overhang = 2.5;
+	
 	
 	front_height = front_top_r+front_top_r_z;
 	
@@ -601,21 +648,10 @@ module shell(){
 								translate([0,length/2+50-wall_thick,0])centred_cube(100,100,100);
 						}
 					}
-					union(){
-						//a shape that goes from the bottom edge of the roof to the overhang at the top, to chop off the overhanging bits of roof that aren't wanted				
-						
-						hull(){
-							translate([0,width/2+length/2+1,wall_height-wall_thick*1.5])centred_cube(width*2,width,wall_thick);
-							
-							translate([0,width/2+length/2+roof_front_overhang,wall_height+roof_top_from_walls])centred_cube(width*2,width,wall_thick);
-						}
-						
-						//also lop off anything that would be too low (copy pasted from front walls intersection)
-						//intersection with cylinder
-						translate([0,length/2,front_top_r_z])rotate([-90,0,0])cylinder(r=front_top_r,h=length*2);
-							
-					}
+					roof_front_chop();
 				}
+				
+				horn_grill();
 
 			}
 		}
