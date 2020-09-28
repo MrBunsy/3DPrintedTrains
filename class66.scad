@@ -615,7 +615,14 @@ module shell(){
 	front_window_r = 2;
 	front_window_z = 14;
 	front_window_x = 8;
-	
+	side_window_length = 12;
+	side_window_height = 9.5;
+	side_window_z = 8.3;
+	side_window_y = 4.9;
+	side_window_bottom_corner_r=1.2;
+	side_window_bottom_corner_z=side_window_z+1.9;
+	side_window_bottom_corner_y=2.8;
+	side_window_top_corner_y=2.15;
 	
 	front_height = front_top_r+front_top_r_z;
 	
@@ -686,7 +693,18 @@ module shell(){
 		
 		//subtract windows
 		union(){
+			//front windows
 			mirror_xy()translate([front_window_x,0,front_window_z])rotate([90,0,0])rounded_cube(front_window_width,front_window_height,length,front_window_r,$fn);
+			
+			//side windows
+			mirror_x()hull(){
+				//main square bit
+				translate([0,side_window_y+length/2-end_width_start+side_window_length/2,side_window_z])centred_cube(width*2,side_window_length,side_window_height);
+				//top of front edge
+				translate([0,side_window_y+length/2-end_width_start+side_window_length+side_window_top_corner_y,side_window_z+side_window_height-side_window_bottom_corner_r])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=width*2,center=true);
+				//bottom of front end
+				translate([0,side_window_y+length/2-end_width_start+side_window_length+side_window_bottom_corner_y,side_window_bottom_corner_z])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=width*2,center=true);
+			}
 		
 		}
 	
