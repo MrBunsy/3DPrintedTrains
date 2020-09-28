@@ -5,12 +5,11 @@ include <constants.scad>
 //TODO the doors aren't symetric
 
 //non-dummy base needs scaffolding
-GEN_BASE = true;
-GEN_WALLS = true;
-GEN_ROOF = false;
+GEN_BASE = false;
+GEN_SHELL = true;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = true;
-GEN_IN_PLACE = true;
+GEN_BOGIES = false;
+GEN_IN_PLACE = false;
 
 //dummy model has no motor
 DUMMY = false;
@@ -474,13 +473,13 @@ module bogies(){
 //hmm not right.
 roof_top_from_walls_base = height - bogie_mount_height- bogie_wheel_d/2-axle_to_top_of_bogie - m3_washer_thick;
 
-roof_top_from_walls = 11;
+roof_top_from_walls = 10;
 function lesswide(total_width) = width!=total_width ? (width - total_width)/2 : 0;
 
 //function roof_corners(total_width) = for(i=[1,-1])[ for(j=[[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-12,0,7],[-2.5,0,11]]) [j*i] ];
 
-function roof_corners(total_width) = [[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-12,0,7],[-2.5,0,roof_top_from_walls],
-			[2.5,0,roof_top_from_walls],[12-lesswide(total_width),0,7],[15-lesswide(total_width),0,4],[total_width/2-wall_thick/2,0,0]];
+function roof_corners(total_width) = [[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-12,0,7],[-1.5,0,roof_top_from_walls],
+			[1.5,0,roof_top_from_walls],[12-lesswide(total_width),0,7],[15-lesswide(total_width),0,4],[total_width/2-wall_thick/2,0,0]];
 
 module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 	less_wideness = (width - total_width)/2;
@@ -491,6 +490,7 @@ module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 	//		[2.5,0,11],[12-less_wideness,0,7],[15-less_wideness,0,4],[total_width/2-wall_thick/2,0,0]];
 	corners0 = roof_corners(total_width);
 	corners1 = roof_corners(total_width2);
+	roof_corners_r = wall_thick/2;
 	
 	if(solid){
 		hull(){
@@ -499,11 +499,11 @@ module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 			corners1 = [corners1[i],corners1[i+1]];
 			hull(){
 				for(corner=corners0){
-					translate([0,0.05-long/2,0])translate(corner)rotate([90,0,0])cylinder(r=wall_thick/2,h=0.1,$fn=50,center=true);
+					translate([0,0.05-long/2,0])translate(corner)rotate([90,0,0])cylinder(r=roof_corners_r,h=0.1,$fn=50,center=true);
 				}
 				
 				for(corner = corners1){
-					translate([0,long/2-0.05,0])translate(corner)rotate([90,0,0])cylinder(r=wall_thick/2,h=0.1,$fn=50,center=true);
+					translate([0,long/2-0.05,0])translate(corner)rotate([90,0,0])cylinder(r=roof_corners_r,h=0.1,$fn=50,center=true);
 				}
 			}
 		}
@@ -515,18 +515,18 @@ module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 			corners1 = [corners1[i],corners1[i+1]];
 			hull(){
 				for(corner=corners0){
-					translate([0,0.05-long/2,0])translate(corner)rotate([90,0,0])cylinder(r=wall_thick/2,h=0.1,$fn=50,center=true);
+					translate([0,0.05-long/2,0])translate(corner)rotate([90,0,0])cylinder(r=roof_corners_r,h=0.1,$fn=50,center=true);
 				}
 				
 				for(corner = corners1){
-					translate([0,long/2-0.05,0])translate(corner)rotate([90,0,0])cylinder(r=wall_thick/2,h=0.1,$fn=50,center=true);
+					translate([0,long/2-0.05,0])translate(corner)rotate([90,0,0])cylinder(r=roof_corners_r,h=0.1,$fn=50,center=true);
 				}
 			}
 		}
 	}
 }
 
-module walls(){
+module shell(){
 	
 	front_window_width = 13.5;
 	front_window_height = 10.5;
@@ -551,9 +551,14 @@ module walls(){
 			//tapered bits towards the fronts
 			mirror_xy(){
 				hull(){
-					//might result in a slightly wrong wall thickness, but the outside will look fine, so meh
-					translate([width/2-wall_thick/2,length/2-end_width_start-wall_thick/2,0])centred_cube(wall_thick,wall_thick,wall_height);
-					translate([end_width/2-wall_thick/2,length/2-wall_thick/2,0])centred_cube(wall_thick,wall_thick,wall_height);
+					translate([width/2-wall_thick/2,length/2-end_width_start,0])cylinder(r=wall_thick/2,h=wall_height);
+					translate([end_width/2-wall_thick/2,length/2,0]){
+						//semi-circle with flat side facing forwards
+						difference(){
+							cylinder(r=wall_thick/2,h=wall_height);
+							translate([0,wall_thick])centred_cube(wall_thick*2,wall_thick*2,100);
+						}
+					}
 				}
 			}
 			//angle of taper of walls
@@ -562,6 +567,7 @@ module walls(){
 			//y_per_height = wall_front_midsection_y/(wall_height - wall_front_midsection_bottom_z-wall_front_midsection_height);
 			
 			wall_front_midsection_width = end_width - width_per_length*wall_front_midsection_y;
+			roof_front_overhang_width = end_width - width_per_length*roof_front_overhang;
 			//extra-thick front
 			mirror_x(){
 			
@@ -580,20 +586,24 @@ module walls(){
 			//main section of roof
 			translate([0,0,wall_height])roof_shape(length-end_width_start*2);
 			//tapered section of roof
+			//TODO where roof starts to taper and where walls start to taper aren't identical - suspect I need to consider spheres for the roof_section and place them in exactly the right place
 			mirror_x(){
 				//note-deliberatetly leaving the front end wider than it should be for a tiny bit of side overhang
 				difference(){
 					union(){
 						//roof top
-						translate([0,length/2-end_width_start/2+roof_front_overhang/2,wall_height])roof_shape(end_width_start+roof_front_overhang,false,width,end_width);
+						translate([0,length/2-end_width_start/2+roof_front_overhang/2,wall_height])roof_shape(end_width_start+roof_front_overhang,false,width,roof_front_overhang_width);
 						//filled in roof at front only
 						intersection(){
-							translate([0,length/2-end_width_start/2+roof_front_overhang/2,wall_height])roof_shape(end_width_start+roof_front_overhang,true,width,end_width);
-							translate([0,length/2+50,0])centred_cube(100,100,100);
+							//big block o' roof
+							translate([0,length/2-end_width_start/2+roof_front_overhang/2,wall_height])roof_shape(end_width_start+roof_front_overhang,true,width,roof_front_overhang_width);
+							//only keep what's in line with the front wall
+								translate([0,length/2+50-wall_thick,0])centred_cube(100,100,100);
 						}
 					}
 					union(){
-						//a shape that goes from the bottom edge of the roof to the overhang at the top, to chop off the overhanging bits of roof that aren't wanted
+						//a shape that goes from the bottom edge of the roof to the overhang at the top, to chop off the overhanging bits of roof that aren't wanted				
+						
 						hull(){
 							translate([0,width/2+length/2+1,wall_height-wall_thick*1.5])centred_cube(width*2,width,wall_thick);
 							
@@ -602,7 +612,7 @@ module walls(){
 						
 						//also lop off anything that would be too low (copy pasted from front walls intersection)
 						//intersection with cylinder
-						translate([0,0,front_top_r_z])rotate([90,0,0])cylinder(r=front_top_r,h=length*2,center=true);
+						translate([0,length/2,front_top_r_z])rotate([-90,0,0])cylinder(r=front_top_r,h=length*2);
 							
 					}
 				}
@@ -631,8 +641,8 @@ if(GEN_BOGIES){
 	
 }
 
-if(GEN_WALLS){
-	optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)walls();
+if(GEN_SHELL){
+	optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)shell();
 }
 
 
