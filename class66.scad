@@ -131,7 +131,7 @@ bogie_axle_mount_width = 23;
 screwhole_from_edge = 5;
 //to be mirrored in x and y
 base_wall_screwholes = [[width/2-screwhole_from_edge,base_arch_top_length/2+screwhole_from_edge/2,0],[width/2-5,length/2-screwhole_from_edge*1.5,0]];
-
+shell_screwhole_thick = 2;
 
 //for calculating roof shape at the front
 //seems like a reasonable aproximation
@@ -577,6 +577,37 @@ module roof_front_chop(){
 				
 		}
 }
+
+//for +ve x side
+module shell_screwhole(from_edge=screwhole_from_edge){
+	
+	difference(){
+		union(){
+			cylinder(r=m2_thread_size,h=shell_screwhole_thick);
+			translate([from_edge/2,0,0])centred_cube(from_edge,m2_thread_size*2,shell_screwhole_thick);
+		}
+		cylinder(r=m2_thread_size/2,h=shell_screwhole_thick*3,center=true);
+		
+	}
+}
+module basic_shell_walls(){
+	//main straight sections on either side
+		mirror_y()translate([width/2-wall_thick/2,0,0])centred_cube(wall_thick,length-end_width_start*2,wall_height);
+		
+		//tapered bits towards the fronts
+		mirror_xy(){
+			hull(){
+				translate([width/2-wall_thick/2,length/2-end_width_start,0])cylinder(r=wall_thick/2,h=wall_height);
+				translate([end_width/2-wall_thick/2,length/2,0]){
+					//semi-circle with flat side facing forwards
+					difference(){
+						cylinder(r=wall_thick/2,h=wall_height);
+						translate([0,wall_thick])centred_cube(wall_thick*2,wall_thick*2,100);
+					}
+				}
+			}
+		}
+}
 module shell(){
 	
 	front_window_width = 13.5;
@@ -588,26 +619,21 @@ module shell(){
 	
 	front_height = front_top_r+front_top_r_z;
 	
+	mirror_xy(){
+		intersection(){
+			for(screw=base_wall_screwholes){
+				translate(screw)shell_screwhole();
+			}
+			//only keep what's inside the walls
+			hull()basic_shell_walls();
+		}
+	}
+	
 	difference(){
 
 		union(){
+			basic_shell_walls();
 			
-			//main straight sections on either side
-			mirror_y()translate([width/2-wall_thick/2,0,0])centred_cube(wall_thick,length-end_width_start*2,wall_height);
-			
-			//tapered bits towards the fronts
-			mirror_xy(){
-				hull(){
-					translate([width/2-wall_thick/2,length/2-end_width_start,0])cylinder(r=wall_thick/2,h=wall_height);
-					translate([end_width/2-wall_thick/2,length/2,0]){
-						//semi-circle with flat side facing forwards
-						difference(){
-							cylinder(r=wall_thick/2,h=wall_height);
-							translate([0,wall_thick])centred_cube(wall_thick*2,wall_thick*2,100);
-						}
-					}
-				}
-			}
 			//angle of taper of walls
 			width_per_length = (width - end_width)/end_width_start;
 			//angle of taper of top half of front
