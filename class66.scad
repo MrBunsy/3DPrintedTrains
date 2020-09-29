@@ -1,12 +1,14 @@
 include <truck_bits.scad>
 include <constants.scad>
 
-//TODO the front is slightly narrower than the main body, it tapers from about the cab side of the door
-//TODO the doors aren't symetric
+//IDEA - filling in the top bit of the roof might help print without scaffolding - since then the most shallow angle is printed on top of a bridged area.
+//downside is slightly less space inside
+//the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body
+
 
 //non-dummy base needs scaffolding
-GEN_BASE = true;
-GEN_SHELL = false;
+GEN_BASE = false;
+GEN_SHELL = true;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
 GEN_IN_PLACE = false;
@@ -37,6 +39,7 @@ end_width_start = 22;
 coupling_arm_thick = 1.5;
 base_thick = 3;
 girder_thick = 0.5;
+handrail_thick = girder_thick;
 front_end_thick = 0.6;
 //how deep the pipe space in the side of the base is, from base_top_width
 base_pipe_space = 2;
@@ -84,6 +87,8 @@ motor_centre_from_end = 45;
 door_centre_from_fuel_end = 28;
 door_centre_from_box_end = 36;
 door_length = 7;
+door_handrail_height = 15.6;
+door_handrail_z = 3;
 ladder_length = 6.5;
 ladder_rung_height = 0.2;
 //todo think if this is right
@@ -139,6 +144,17 @@ front_top_r_z = -4;
 //ensure circle terminates at the top of the wall
 front_top_r = sqrt((wall_height-front_top_r_z)*(wall_height-front_top_r_z) + end_width*end_width/4);//height + base_thick;
 roof_front_overhang = 2.5;
+
+//there's a small ridge along teh sides from door to door
+side_base_ridge_height = 1.5;
+//fuel end grill is a double grill with relatively thin ridges
+side_fuel_grill_height = 12.5;
+side_fuel_grill_length = 38;
+//box end grill is a single grill with wider ridges
+side_box_grill_height = 12.3;
+side_box_grill_length = 34;
+//when facing side with fuel tank on the left, one grill is next to the left door above the base ridge
+//when facing side with fuel tank on the right, one grill is next to the left grill, just below roof start, and another grill is to the right next to the door and just above the base ridge. This one is a mirror on the y axis with the other side
 
 module motor_space(){
 	intersection(){
@@ -608,6 +624,36 @@ module basic_shell_walls(){
 			}
 		}
 }
+
+//if subtract is true, this is a space to be removed before inserting the object
+module door_handrail(subtract=false){
+	if(subtract){
+		mirror_y(){
+			translate([width/2-handrail_thick+5,0,door_handrail_z])centred_cube(10,handrail_thick*3,door_handrail_height);
+		}
+	}else{
+		radius = 1;
+		mid_handrail_height = door_handrail_height-handrail_thick*2;
+		mirror_y(){
+			translate([width/2,0,door_handrail_z+handrail_thick+radius])centred_cube(handrail_thick*2,handrail_thick,mid_handrail_height-radius*2);
+			translate([width/2-radius+handrail_thick,0,door_handrail_z+handrail_thick+radius])rotate([90,0,0])cylinder(r=radius,h=handrail_thick,center=true);
+			
+			translate([width/2-radius+handrail_thick,0,door_handrail_z+mid_handrail_height+handrail_thick-radius])rotate([90,0,0])cylinder(r=radius,h=handrail_thick,center=true);
+		}
+	}
+}
+
+module door_handrail_pair(subtract=false){
+	mirror_x()translate([0,door_length/2+handrail_thick*2,0])door_handrail(subtract);
+}
+
+//in final positions
+module door_handrails(subtract=false){
+	translate([0,-length/2+door_centre_from_fuel_end,0])door_handrail_pair(subtract);
+	
+	translate([0,length/2-door_centre_from_box_end,0])door_handrail_pair(subtract);
+}
+
 module shell(){
 	
 	front_window_width = 13.5;
@@ -705,10 +751,13 @@ module shell(){
 				//bottom of front end
 				translate([0,side_window_y+length/2-end_width_start+side_window_length+side_window_bottom_corner_y,side_window_bottom_corner_z])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=width*2,center=true);
 			}
-		
+			door_handrails(true);
+			
 		}
 	
 	}
+	//things to add after subtractions
+	door_handrails(false);
 }
 
 if(GEN_BASE){

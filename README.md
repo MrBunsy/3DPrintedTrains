@@ -8,6 +8,17 @@ I've had some success at producing an equivilant to Hornby's X8031. This is comp
 
 Still TODO hornby/dapol X9660 style.
 
+## Class 66
+
+Print at 51 degrees.
+
+For base: print settings->Infil->bridging angle to 231 to get bridging for battery holder at shortest angle
+settings->Infil->fill angle to 51
+
+brim and no skirt for base and shell, need support for the socket and switch holes. need to investigate distance for brim - hard to remove cleanly on last print
+
+Shell didn't print roof without support. not tried with support yet - but possibly upside down will need less support?
+
 ## Intermodal Wagon
 
 Based on an amalgamation of an FTA and FSA intermodal flat wagon. It was hard to get buffer heights correct for OO, so the mix seemed the best compromise. ISO containers (see my fork of phrxmd's container) can optionally be fixed to the wagon with m2 screws and washers. Visible holes at either end for the containers are optional, and not needed unless you want a 20ft container at either end. I'd like to experiment with friction or magnetic ways to hold the containers in place.
