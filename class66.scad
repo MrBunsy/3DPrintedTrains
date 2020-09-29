@@ -5,8 +5,8 @@ include <constants.scad>
 //TODO the doors aren't symetric
 
 //non-dummy base needs scaffolding
-GEN_BASE = false;
-GEN_SHELL = true;
+GEN_BASE = true;
+GEN_SHELL = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
 GEN_IN_PLACE = false;
@@ -23,7 +23,7 @@ end_width = width-2;
 height = m2mm(3.9);
 
 wall_height = 18.6;
-wall_thick = 1;
+wall_thick = 1.5;
 
 //the height of the flat bit in the middle of the front
 wall_front_midsection_height = 2.6;
@@ -480,12 +480,12 @@ module bogies(){
 //hmm not right.
 //roof_top_from_walls_base = height - bogie_mount_height- bogie_wheel_d/2-axle_to_top_of_bogie - m3_washer_thick;
 
-roof_top_from_walls = 10;
+roof_top_from_walls = 11-wall_thick/2;
 
 module horn_grill(){
 	corner_r = 0.5;
 	mid_width = 12;
-	top = wall_height +roof_top_from_walls-corner_r-0.2;
+	top = wall_height +roof_top_from_walls-wall_thick/2+0.6;
 	bottom = front_top_r_z + front_top_r+corner_r+0.2;
 	
 	clip_width = 1;
@@ -513,8 +513,8 @@ function lesswide(total_width) = width!=total_width ? (width - total_width)/2 : 
 
 //function roof_corners(total_width) = for(i=[1,-1])[ for(j=[[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-12,0,7],[-2.5,0,11]]) [j*i] ];
 
-function roof_corners(total_width) = [[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-12,0,7],[-1.5,0,roof_top_from_walls],
-			[1.5,0,roof_top_from_walls],[12-lesswide(total_width),0,7],[15-lesswide(total_width),0,4],[total_width/2-wall_thick/2,0,0]];
+function roof_corners(total_width) = [[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-11,0,8-wall_thick/3],[-1.5,0,roof_top_from_walls],
+			[1.5,0,roof_top_from_walls],[11-lesswide(total_width),0,8-wall_thick/3],[15-lesswide(total_width),0,4],[total_width/2-wall_thick/2,0,0]];
 
 module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 	less_wideness = (width - total_width)/2;
@@ -583,8 +583,8 @@ module shell_screwhole(from_edge=screwhole_from_edge){
 	
 	difference(){
 		union(){
-			cylinder(r=m2_thread_size,h=shell_screwhole_thick);
-			translate([from_edge/2,0,0])centred_cube(from_edge,m2_thread_size*2,shell_screwhole_thick);
+			cylinder(r=m2_thread_size*1.5,h=shell_screwhole_thick);
+			translate([from_edge/2,0,0])centred_cube(from_edge,m2_thread_size*3,shell_screwhole_thick);
 		}
 		cylinder(r=m2_thread_size/2,h=shell_screwhole_thick*3,center=true);
 		
