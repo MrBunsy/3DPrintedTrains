@@ -25,7 +25,7 @@ end_width = width-2;
 height = m2mm(3.9);
 
 wall_height = 18.6;
-wall_thick = 1.5;
+wall_thick = 1.2;
 
 //the height of the flat bit in the middle of the front
 wall_front_midsection_height = 2.6;
@@ -532,7 +532,8 @@ function lesswide(total_width) = width!=total_width ? (width - total_width)/2 : 
 function roof_corners(total_width=width) = [[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-11,0,8-wall_thick/3],[-1.5,0,roof_top_from_walls],
 			[1.5,0,roof_top_from_walls],[11-lesswide(total_width),0,8-wall_thick/3],[15-lesswide(total_width),0,4],[total_width/2-wall_thick/2,0,0]];
 
-module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
+//if printable, it's partially solid with the most shallow bits filled in
+module roof_shape(long=1,solid=false,total_width=width,total_width2=width,printable=true){
 	less_wideness = (width - total_width)/2;
 	
 	
@@ -562,7 +563,7 @@ module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 		}
 	}else{
 		//as an experiment, I've made the top bit of the roof filled in. this should make it printable without support, because it's on top of a bridge.
-		for(i=[0,1,2,5,6]){
+		for(i=printable ? [0,1,2,5,6] : [0:len(corners0)-2]){
 			corners0 = [corners0[i],corners0[i+1]];
 			corners1 = [corners1[i],corners1[i+1]];
 			hull(){
@@ -575,22 +576,23 @@ module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 				}
 			}
 		}
-		
-		hull(){
-			for(i=[2,3,4]){
-			corners0 = [corners0[i],corners0[i+1]];
-			corners1 = [corners1[i],corners1[i+1]];
+		if(printable){
 			hull(){
-				for(corner=corners0){
-					translate([0,-long/2,0])translate(corner)rotate([90,0,0])sphere(r=roof_corners_r, $fn=20);
-				}
-				
-				for(corner = corners1){
-					translate([0,long/2,0])translate(corner)rotate([90,0,0])sphere(r=roof_corners_r, $fn=20);
+				for(i=[2,3,4]){
+				corners0 = [corners0[i],corners0[i+1]];
+				corners1 = [corners1[i],corners1[i+1]];
+				hull(){
+					for(corner=corners0){
+						translate([0,-long/2,0])translate(corner)rotate([90,0,0])sphere(r=roof_corners_r, $fn=20);
+					}
+					
+					for(corner = corners1){
+						translate([0,long/2,0])translate(corner)rotate([90,0,0])sphere(r=roof_corners_r, $fn=20);
+					}
 				}
 			}
-		}
-			
+				
+			}
 		}
 	}
 }
@@ -654,9 +656,17 @@ module door_handrail(subtract=false){
 		mid_handrail_height = door_handrail_height-handrail_thick*2;
 		mirror_y(){
 			translate([width/2,0,door_handrail_z+handrail_thick+radius])centred_cube(handrail_thick*2,handrail_thick,mid_handrail_height-radius*2);
-			translate([width/2-radius+handrail_thick,0,door_handrail_z+handrail_thick+radius])rotate([90,0,0])cylinder(r=radius,h=handrail_thick,center=true);
 			
-			translate([width/2-radius+handrail_thick,0,door_handrail_z+mid_handrail_height+handrail_thick-radius])rotate([90,0,0])cylinder(r=radius,h=handrail_thick,center=true);
+			difference(){
+				union(){
+					translate([width/2-radius+handrail_thick,0,door_handrail_z+handrail_thick+radius])rotate([90,0,0])cylinder(r=radius,h=handrail_thick,center=true);
+			
+			
+					translate([width/2-radius+handrail_thick,0,door_handrail_z+mid_handrail_height+handrail_thick-radius])rotate([90,0,0])cylinder(r=radius,h=handrail_thick,center=true);
+				}
+				//chop off bits taht would intrude inside
+				centred_cube(width-wall_thick*2,100,100);
+			}
 		}
 	}
 }
@@ -817,6 +827,31 @@ module fuel_end_grills(subtract=false){
 	}
 }
 
+module wall_and_roof_slice(long = girder_thick,wall_gap=side_base_ridge_height){
+	//walls
+	mirror_y()translate([width/2-wall_thick/2,0,wall_gap])centred_cube(wall_thick,long,wall_height-wall_gap);
+	//roof 
+	intersection(){
+		translate([0,0,wall_height])roof_shape(long,false,width,width,false);
+		centred_cube(100,long,100);
+	}
+}
+
+//where I think different modules might be attached? it's a ridge that travels up the walls and over the roof anyway
+module module_slice(){
+	scale_by_x = (width+wall_thick*2-girder_thick*2)/width;
+	scale_by_z = (wall_height+roof_top_from_walls+wall_thick-girder_thick)/(wall_height+roof_top_from_walls);
+	
+	scale([scale_by_x,1,scale_by_z])wall_and_roof_slice(girder_thick,side_base_ridge_height/scale_by_z);
+		
+}
+
+//the two module_slices in position
+module module_slices(){
+	translate([0,-60,0])module_slice();
+	translate([0,21,0])module_slice();
+}
+
 module shell(){
 	
 	front_window_width = 13.5;
@@ -922,6 +957,8 @@ module shell(){
 			//in_door_positions()door_handrail_pair(true);
 			translate([0,-length/2+door_centre_from_fuel_end+door_and_handrails_length/2+side_fuel_grill_length/2,0])fuel_end_grills(true);
 			in_door_positions()door(true);
+			
+			module_slices();
 		}
 	
 	}
