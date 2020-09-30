@@ -18,6 +18,7 @@ settings->Infil->fill angle to 51
 brim and no skirt for base and shell, need support for the socket and switch holes. need to investigate distance for brim - hard to remove cleanly on last print
 
 Shell didn't print roof without support. not tried with support yet - but possibly upside down will need less support?
+Even with 5mm brim the shell lifted at the ends. Not sure if to try more brim, custom brim on the inside of the model or a raft
 
 ## Intermodal Wagon
 

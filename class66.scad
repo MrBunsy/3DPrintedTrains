@@ -667,10 +667,38 @@ module door_handrail_pair(subtract=false){
 door_and_handrails_length = door_length+handrail_thick*3.5*2;
 
 //in final positions
-module door_handrails(subtract=false){
+/*module door_handrails(subtract=false){
 	translate([0,-length/2+door_centre_from_fuel_end,0])door_handrail_pair(subtract);
 	
 	translate([0,length/2-door_centre_from_box_end,0])door_handrail_pair(subtract);
+}*/
+
+module in_door_positions(){
+	translate([0,-length/2+door_centre_from_fuel_end,0])children();
+	
+	translate([0,length/2-door_centre_from_box_end,0])children();
+}
+
+//outline of door, rain guard on roof and doorhandle (but not the handrails)
+//note all doorhandles are on the +ve y side, and should not be mirrored along the x axis
+module door(subtract=false){
+	doorhandle_inset_length = 2.5;
+	doorhandle_inset_height = 2;
+	doorhandle_zs = [3.5,9.5];
+	doorhandle_height = girder_thick;
+	
+	mirror_y(){
+		if(subtract){
+			for(z = doorhandle_zs){
+				translate([width/2,door_length/2-doorhandle_inset_length/2,z])centred_cube(handrail_thick,doorhandle_inset_length,doorhandle_inset_height);
+			}
+		}else{
+			for(z = doorhandle_zs){
+				translate([width/2,door_length/2-doorhandle_inset_length/2+0.2,z+doorhandle_inset_height*0.6])centred_cube(handrail_thick/2,doorhandle_inset_length,doorhandle_height);
+			}
+		}
+		
+	}
 }
 
 //generic grill, (0,0) is centre of grill, which faces +ve x
@@ -684,10 +712,10 @@ module grill(subtract=false, length=side_fuel_grill_length/2, height=side_fuel_g
 		rim_size = thick;
 		slat_distance = (length-rim_size*2)/slats;
 		difference(){
-			centred_cube(thick*2,length,height);
+			centred_cube(thick*1,length,height);
 			union(){
 				for(i=[0:slats-1]){
-					translate([slat_cube_r,-length/2+rim_size+slat_distance/2 + slat_distance*i,rim_size])rotate([0,0,45])centred_cube(thick,thick,height-rim_size*2);
+					translate([slat_cube_r-thick*0.75,-length/2+rim_size+slat_distance/2 + slat_distance*i,rim_size])rotate([0,0,45])centred_cube(thick,thick,height-rim_size*2);
 				}
 			}
 		}
@@ -801,13 +829,15 @@ module shell(){
 				//bottom of front end
 				translate([0,side_window_y+length/2-end_width_start+side_window_length+side_window_bottom_corner_y,side_window_bottom_corner_z])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=width*2,center=true);
 			}
-			door_handrails(true);
+			in_door_positions()door_handrail_pair(true);
 			translate([0,-length/2+door_centre_from_fuel_end+door_and_handrails_length/2+side_fuel_grill_length/2])fuel_end_double_grill(true);
+			in_door_positions()door(true);
 		}
 	
 	}
 	//things to add after subtractions
-	door_handrails(false);
+	in_door_positions()door_handrail_pair(false);
+	in_door_positions()door(false);
 	translate([0,-length/2+door_centre_from_fuel_end+door_and_handrails_length/2+side_fuel_grill_length/2])fuel_end_double_grill();
 }
 
