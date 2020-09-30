@@ -529,7 +529,7 @@ function lesswide(total_width) = width!=total_width ? (width - total_width)/2 : 
 
 //function roof_corners(total_width) = for(i=[1,-1])[ for(j=[[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-12,0,7],[-2.5,0,11]]) [j*i] ];
 
-function roof_corners(total_width) = [[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-11,0,8-wall_thick/3],[-1.5,0,roof_top_from_walls],
+function roof_corners(total_width=width) = [[wall_thick/2-total_width/2,0,0],[lesswide(total_width)-15,0,4],[lesswide(total_width)-11,0,8-wall_thick/3],[-1.5,0,roof_top_from_walls],
 			[1.5,0,roof_top_from_walls],[11-lesswide(total_width),0,8-wall_thick/3],[15-lesswide(total_width),0,4],[total_width/2-wall_thick/2,0,0]];
 
 module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
@@ -693,6 +693,44 @@ module door(subtract=false){
 				translate([width/2,door_length/2-doorhandle_inset_length/2,z])centred_cube(handrail_thick,doorhandle_inset_length,doorhandle_inset_height);
 			}
 		}else{
+			//get shape of roof for the rain guard
+			roof = roof_corners();
+			dx = roof[0][0] - roof[1][0];
+			dz = roof[0][2] - roof[1][2];
+			dist = sqrt(dx*dx + dz*dz);
+			//angle = atan(dz/dx);
+			angle = 0;
+			//tried rotating inline with the roof, but decided it's better without
+			
+			x=dx/dist;
+			z=-dz/dist;
+			
+			rain_thick = 0.5;
+			//in plane of first roof angle
+			rain_corners = [[-door_and_handrails_length/2,rain_thick],[-door_length/2,rain_thick], [0,dist-rain_thick/2],[door_length/2,dist-rain_thick/2], [door_length/2,rain_thick], [door_and_handrails_length/2,rain_thick]];
+			
+			bottom_x = width/2;
+			bottom_z = wall_height;
+			
+			
+			
+			for(i=[0:len(rain_corners)-2]){
+				corner0 = rain_corners[i];
+				corner1 = rain_corners[i+1];
+				
+				hull(){
+					translate([bottom_x+corner0[1]*x,corner0[0],bottom_z+corner0[1]*z])rotate([0,angle,0])centred_cube(rain_thick,rain_thick,rain_thick);//cylinder(r=rain_thick/2,h=rain_thick);
+					translate([bottom_x+corner1[1]*x,corner1[0],bottom_z+corner1[1]*z])rotate([0,angle,0])centred_cube(rain_thick,rain_thick,rain_thick);//cylinder(r=rain_thick/2,h=rain_thick);
+				}
+			}
+			
+			/*hull(){
+				//bottom left
+				rotate([0,angle,0])translate([width/2-rain_thick/2,0,wall_height])cylinder(r=rain_thick/2,h=rain_thick);
+				//top left
+				rotate([0,angle,0])translate([width/2-rain_thick/2,0,wall_height])cylinder(r=rain_thick/2,h=rain_thick);
+				}*/
+			
 			for(z = doorhandle_zs){
 				translate([width/2,door_length/2-doorhandle_inset_length/2+0.2,z+doorhandle_inset_height*0.6])centred_cube(handrail_thick/2,doorhandle_inset_length,doorhandle_height);
 			}
