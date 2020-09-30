@@ -737,7 +737,7 @@ module door(subtract=false){
 			
 			
 			for(z = doorhandle_zs){
-				translate([width/2,door_length/2-doorhandle_inset_length/2+0.2,z+doorhandle_inset_height*0.6])centred_cube(handrail_thick/2,doorhandle_inset_length,doorhandle_height);
+				translate([width/2,door_length/2-doorhandle_inset_length/2+0.2,z+doorhandle_inset_height*0.6])centred_cube(handrail_thick,doorhandle_inset_length,doorhandle_height);
 			}
 			
 			//step at the bottom of the ladder. Not sure this will survive the brim being removed...
