@@ -686,8 +686,9 @@ module door(subtract=false){
 	doorhandle_inset_height = 2;
 	doorhandle_zs = [3.5,9.5];
 	doorhandle_height = girder_thick;
-	
+	door_handrail_pair(subtract);
 	mirror_y(){
+		
 		if(subtract){
 			for(z = doorhandle_zs){
 				translate([width/2,door_length/2-doorhandle_inset_length/2,z])centred_cube(handrail_thick,doorhandle_inset_length,doorhandle_inset_height);
@@ -699,7 +700,7 @@ module door(subtract=false){
 			dz = roof[0][2] - roof[1][2];
 			dist = sqrt(dx*dx + dz*dz);
 			//angle = atan(dz/dx);
-			angle = 0;
+			//angle = 0;
 			//tried rotating inline with the roof, but decided it's better without
 			
 			x=dx/dist;
@@ -719,21 +720,18 @@ module door(subtract=false){
 				corner1 = rain_corners[i+1];
 				
 				hull(){
-					translate([bottom_x+corner0[1]*x,corner0[0],bottom_z+corner0[1]*z])rotate([0,angle,0])centred_cube(rain_thick,rain_thick,rain_thick);//cylinder(r=rain_thick/2,h=rain_thick);
-					translate([bottom_x+corner1[1]*x,corner1[0],bottom_z+corner1[1]*z])rotate([0,angle,0])centred_cube(rain_thick,rain_thick,rain_thick);//cylinder(r=rain_thick/2,h=rain_thick);
+					translate([bottom_x+corner0[1]*x,corner0[0],bottom_z+corner0[1]*z])centred_cube(rain_thick,rain_thick,rain_thick);
+					translate([bottom_x+corner1[1]*x,corner1[0],bottom_z+corner1[1]*z])centred_cube(rain_thick,rain_thick,rain_thick);
 				}
 			}
 			
-			/*hull(){
-				//bottom left
-				rotate([0,angle,0])translate([width/2-rain_thick/2,0,wall_height])cylinder(r=rain_thick/2,h=rain_thick);
-				//top left
-				rotate([0,angle,0])translate([width/2-rain_thick/2,0,wall_height])cylinder(r=rain_thick/2,h=rain_thick);
-				}*/
 			
 			for(z = doorhandle_zs){
 				translate([width/2,door_length/2-doorhandle_inset_length/2+0.2,z+doorhandle_inset_height*0.6])centred_cube(handrail_thick/2,doorhandle_inset_length,doorhandle_height);
 			}
+			
+			//step at the bottom of the ladder. Not sure this will survive the brim being removed...
+			translate([width/2+girder_thick/2,0,0])centred_cube(girder_thick,ladder_length,ladder_rung_height);
 		}
 		
 	}
@@ -741,7 +739,7 @@ module door(subtract=false){
 
 //generic grill, (0,0) is centre of grill, which faces +ve x
 //defaults to fuel-end settings
-module grill(subtract=false, length=side_fuel_grill_length/2, height=side_fuel_grill_height, thick=girder_thick, slats=16){
+module grill(subtract=false, length=side_fuel_grill_length/2, height=side_fuel_grill_height, thick=girder_thick, slats=16,horizontal_slats = 0){
 	if(subtract){
 		centred_cube(thick*2,length,height);
 	}else{
@@ -749,11 +747,17 @@ module grill(subtract=false, length=side_fuel_grill_length/2, height=side_fuel_g
 		slat_cube_r = sqrt(thick*thick*2);
 		rim_size = thick;
 		slat_distance = (length-rim_size*2)/slats;
+		horizontal_slat_distance = (height-rim_size*2)/slats;
 		difference(){
 			centred_cube(thick*1,length,height);
 			union(){
 				for(i=[0:slats-1]){
 					translate([slat_cube_r-thick*0.75,-length/2+rim_size+slat_distance/2 + slat_distance*i,rim_size])rotate([0,0,45])centred_cube(thick,thick,height-rim_size*2);
+				}
+				if(horizontal_slats > 0){
+					for(i=[0:horizontal_slats-1]){
+					translate([slat_cube_r-thick*0.75,0,rim_size+horizontal_slat_distance/2 + horizontal_slat_distance*i])rotate([0,45,0])centred_cube(thick,length-rim_size*2,thick);
+				}
 				}
 			}
 		}
@@ -761,8 +765,21 @@ module grill(subtract=false, length=side_fuel_grill_length/2, height=side_fuel_g
 }
 
 //still centred around (0,0)
-module fuel_end_double_grill(subtract=false){
+module fuel_end_grills(subtract=false){
+	//grills on the side
 	mirror_xy()translate([width/2,side_fuel_grill_length/4,side_base_ridge_height])grill(subtract);
+	
+	mirror_y(){
+		//grills on the roof
+		roof = roof_corners();
+		dx = roof[3][0] - roof[2][0];
+		dz = roof[3][2] - roof[2][2];
+		dist = sqrt(dx*dx + dz*dz);
+		angle = atan(dz/dx);
+		echo("dx",dx,"dz",dz,"dist",dist,"angle",angle);
+		
+		translate([roof[2][0]+dx/2,0,roof[2][2]+dz/2+wall_height+girder_thick])rotate([0,-angle-90,0])translate([0,0,-dist/2])grill(subtract,side_fuel_grill_length,dist,girder_thick,19,18);
+	}
 }
 
 module shell(){
@@ -867,16 +884,16 @@ module shell(){
 				//bottom of front end
 				translate([0,side_window_y+length/2-end_width_start+side_window_length+side_window_bottom_corner_y,side_window_bottom_corner_z])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=width*2,center=true);
 			}
-			in_door_positions()door_handrail_pair(true);
-			translate([0,-length/2+door_centre_from_fuel_end+door_and_handrails_length/2+side_fuel_grill_length/2])fuel_end_double_grill(true);
+			//in_door_positions()door_handrail_pair(true);
+			translate([0,-length/2+door_centre_from_fuel_end+door_and_handrails_length/2+side_fuel_grill_length/2,0])fuel_end_grills(true);
 			in_door_positions()door(true);
 		}
 	
 	}
 	//things to add after subtractions
-	in_door_positions()door_handrail_pair(false);
+	//in_door_positions()door_handrail_pair(false);
 	in_door_positions()door(false);
-	translate([0,-length/2+door_centre_from_fuel_end+door_and_handrails_length/2+side_fuel_grill_length/2])fuel_end_double_grill();
+	translate([0,-length/2+door_centre_from_fuel_end+door_and_handrails_length/2+side_fuel_grill_length/2])fuel_end_grills();
 }
 
 if(GEN_BASE){
