@@ -770,15 +770,48 @@ module fuel_end_grills(subtract=false){
 	mirror_xy()translate([width/2,side_fuel_grill_length/4,side_base_ridge_height])grill(subtract);
 	
 	mirror_y(){
-		//grills on the roof
+		//grills on the roof. not quite accurte, as these grills go over the centre of the roof.
 		roof = roof_corners();
 		dx = roof[3][0] - roof[2][0];
 		dz = roof[3][2] - roof[2][2];
 		dist = sqrt(dx*dx + dz*dz);
-		angle = atan(dz/dx);
-		echo("dx",dx,"dz",dz,"dist",dist,"angle",angle);
 		
-		translate([roof[2][0]+dx/2,0,roof[2][2]+dz/2+wall_height+girder_thick])rotate([0,-angle-90,0])translate([0,0,-dist/2])grill(subtract,side_fuel_grill_length,dist,girder_thick,19,18);
+		topdist = abs(roof[3][0])*2;
+		//angle = atan(dz/dx);
+		//might be worth just doing the subtractions here?
+		//translate([roof[2][0]+dx/2,0,roof[2][2]+dz/2+wall_height+girder_thick])rotate([0,-angle-90,0])translate([0,0,-dist/2])grill(subtract,side_fuel_grill_length,dist,girder_thick,19,18);
+		if(subtract){
+			thick = girder_thick;
+			slat_cube_r = sqrt(thick*thick*2);
+			
+			vstlats = 19;
+			hslats=18;
+			
+			vslats_dist = side_fuel_grill_length/vstlats;
+			//just for the sloping sides of teh roof
+			hstlats_dist = dist/hslats;
+			//number of slats on the top
+			hstlats_top = topdist/hstlats_dist;
+			
+			for(i=[0,hslats-1]){
+				
+			}
+			
+			for(i=[0:vstlats-1]){
+				translate([0,-side_fuel_grill_length/2+i*vslats_dist + vslats_dist/2]){
+					hull(){
+						translate([roof[2][0],0,roof[2][2]+wall_height])centred_cube(thick,thick,thick*10);
+						translate([roof[2][0]+dx,0,roof[2][2]+dz+wall_height])centred_cube(thick,thick,thick*10);
+					}
+					hull(){
+						translate([roof[2][0]+dx,0,roof[2][2]+dz+wall_height])centred_cube(thick,thick,thick*10);
+						translate([0,0,roof[2][2]+dz+wall_height])centred_cube(thick,thick,thick*10);
+					}
+				}
+			}
+		}
+		
+		
 	}
 }
 
