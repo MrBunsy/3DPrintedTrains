@@ -664,12 +664,39 @@ module door_handrail(subtract=false){
 module door_handrail_pair(subtract=false){
 	mirror_x()translate([0,door_length/2+handrail_thick*2,0])door_handrail(subtract);
 }
+door_and_handrails_length = door_length+handrail_thick*3.5*2;
 
 //in final positions
 module door_handrails(subtract=false){
 	translate([0,-length/2+door_centre_from_fuel_end,0])door_handrail_pair(subtract);
 	
 	translate([0,length/2-door_centre_from_box_end,0])door_handrail_pair(subtract);
+}
+
+//generic grill, (0,0) is centre of grill, which faces +ve x
+//defaults to fuel-end settings
+module grill(subtract=false, length=side_fuel_grill_length/2, height=side_fuel_grill_height, thick=girder_thick, slats=16){
+	if(subtract){
+		centred_cube(thick*2,length,height);
+	}else{
+		
+		slat_cube_r = sqrt(thick*thick*2);
+		rim_size = thick;
+		slat_distance = (length-rim_size*2)/slats;
+		difference(){
+			centred_cube(thick*2,length,height);
+			union(){
+				for(i=[0:slats-1]){
+					translate([slat_cube_r,-length/2+rim_size+slat_distance/2 + slat_distance*i,rim_size])rotate([0,0,45])centred_cube(thick,thick,height-rim_size*2);
+				}
+			}
+		}
+	}
+}
+
+//still centred around (0,0)
+module fuel_end_double_grill(subtract=false){
+	mirror_xy()translate([width/2,side_fuel_grill_length/4,side_base_ridge_height])grill(subtract);
 }
 
 module shell(){
@@ -704,6 +731,11 @@ module shell(){
 
 		union(){
 			basic_shell_walls();
+			
+			ridgepos0=length/2-door_centre_from_box_end-door_length/2;
+			ridgepos1=-(length/2-door_centre_from_fuel_end-door_length/2);
+			//bottom side ridges door-to-door (minus a smidge)
+			mirror_y()translate([width/2,(ridgepos0+ridgepos1)/2,0])centred_cube(girder_thick*2,ridgepos0-ridgepos1-0.5,side_base_ridge_height);
 			
 			//angle of taper of walls
 			width_per_length = (width - end_width)/end_width_start;
@@ -770,12 +802,13 @@ module shell(){
 				translate([0,side_window_y+length/2-end_width_start+side_window_length+side_window_bottom_corner_y,side_window_bottom_corner_z])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=width*2,center=true);
 			}
 			door_handrails(true);
-			
+			translate([0,-length/2+door_centre_from_fuel_end+door_and_handrails_length/2+side_fuel_grill_length/2])fuel_end_double_grill(true);
 		}
 	
 	}
 	//things to add after subtractions
 	door_handrails(false);
+	translate([0,-length/2+door_centre_from_fuel_end+door_and_handrails_length/2+side_fuel_grill_length/2])fuel_end_double_grill();
 }
 
 if(GEN_BASE){
