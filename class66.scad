@@ -4,7 +4,7 @@ include <constants.scad>
 //IDEA - filling in the top bit of the roof might help print without scaffolding - since then the most shallow angle is printed on top of a bridged area.
 //downside is slightly less space inside
 //the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body
-
+//TODO fix/finish interactiosn between buffers and pipe space, then the base will be close to finished
 
 //non-dummy base needs scaffolding
 GEN_BASE = false;
@@ -561,7 +561,8 @@ module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 			
 		}
 	}else{
-		for(i=[0:len(corners0)-2]){
+		//as an experiment, I've made the top bit of the roof filled in. this should make it printable without support, because it's on top of a bridge.
+		for(i=[0,1,2,5,6]){
 			corners0 = [corners0[i],corners0[i+1]];
 			corners1 = [corners1[i],corners1[i+1]];
 			hull(){
@@ -573,6 +574,23 @@ module roof_shape(long=1,solid=false,total_width=width,total_width2=width){
 					translate([0,long/2])translate(corner)rotate([90,0,0])sphere(r=roof_corners_r, $fn=20);
 				}
 			}
+		}
+		
+		hull(){
+			for(i=[2,3,4]){
+			corners0 = [corners0[i],corners0[i+1]];
+			corners1 = [corners1[i],corners1[i+1]];
+			hull(){
+				for(corner=corners0){
+					translate([0,-long/2,0])translate(corner)rotate([90,0,0])sphere(r=roof_corners_r, $fn=20);
+				}
+				
+				for(corner = corners1){
+					translate([0,long/2,0])translate(corner)rotate([90,0,0])sphere(r=roof_corners_r, $fn=20);
+				}
+			}
+		}
+			
 		}
 	}
 }
