@@ -89,6 +89,7 @@ door_centre_from_box_end = 36;
 door_length = 7;
 door_handrail_height = 15.6;
 door_handrail_z = 3;
+door_and_handrails_length = door_length+handrail_thick*3.5*2;
 ladder_length = 6.5;
 ladder_rung_height = 0.2;
 //todo think if this is right
@@ -155,6 +156,11 @@ side_box_grill_height = 12.3;
 side_box_grill_length = 34;
 //when facing side with fuel tank on the left, one grill is next to the left door above the base ridge
 //when facing side with fuel tank on the right, one grill is next to the left grill, just below roof start, and another grill is to the right next to the door and just above the base ridge. This one is a mirror on the y axis with the other side
+//positions of the gaps in whta look like modular sections
+module_ys = [-60,21];
+
+fuel_side_hatch_length = 12;
+fuel_side_hatch_y = -60+9;
 
 module motor_space(){
 	intersection(){
@@ -674,7 +680,7 @@ module door_handrail(subtract=false){
 module door_handrail_pair(subtract=false){
 	mirror_x()translate([0,door_length/2+handrail_thick*2,0])door_handrail(subtract);
 }
-door_and_handrails_length = door_length+handrail_thick*3.5*2;
+
 
 //in final positions
 /*module door_handrails(subtract=false){
@@ -761,13 +767,15 @@ module grill(subtract=false, length=side_fuel_grill_length/2, height=side_fuel_g
 		difference(){
 			centred_cube(thick*1,length,height);
 			union(){
-				for(i=[0:slats-1]){
-					translate([slat_cube_r-thick*0.75,-length/2+rim_size+slat_distance/2 + slat_distance*i,rim_size])rotate([0,0,45])centred_cube(thick,thick,height-rim_size*2);
+				if(slats > 0){
+					for(i=[0:slats-1]){
+						translate([slat_cube_r-thick*0.75,-length/2+rim_size+slat_distance/2 + slat_distance*i,rim_size])rotate([0,0,45])centred_cube(thick,thick,height-rim_size*2);
+					}
 				}
 				if(horizontal_slats > 0){
 					for(i=[0:horizontal_slats-1]){
-					translate([slat_cube_r-thick*0.75,0,rim_size+horizontal_slat_distance/2 + horizontal_slat_distance*i])rotate([0,45,0])centred_cube(thick,length-rim_size*2,thick);
-				}
+						translate([slat_cube_r-thick*0.75,0,rim_size+horizontal_slat_distance/2 + horizontal_slat_distance*i])rotate([0,45,0])centred_cube(thick,length-rim_size*2,thick);
+					}
 				}
 			}
 		}
@@ -826,6 +834,23 @@ module fuel_end_grills(subtract=false){
 		
 	}
 }
+//only on +ve x side
+module big_side_ridges(length=10){
+	
+	height = wall_height-side_base_ridge_height*2;
+	ridges = 16;
+	ridge_height = height/ridges;
+	
+	r=ridge_height/4;
+	
+	
+	
+	//16 ridges
+	for(i=[0:ridges-1]){
+		translate([width/2,0,side_base_ridge_height*2 + i*ridge_height])rotate([90,0,0])cylinder(r=r,h=length,center=true,$fn=10);
+	}
+	
+}
 
 module wall_and_roof_slice(long = girder_thick,wall_gap=side_base_ridge_height){
 	//walls
@@ -848,8 +873,28 @@ module module_slice(){
 
 //the two module_slices in position
 module module_slices(){
-	translate([0,-60,0])module_slice();
-	translate([0,21,0])module_slice();
+	
+	for(y=module_ys){
+		translate([0,y,0])module_slice();
+	}
+}
+
+module door_indent(){
+//
+			
+			indent_y = 0;
+			
+			indent_r = 0.75;
+			indent_height = 4;
+			indent_mid_z = wall_height-3.5;
+			//some sort of intent between the door and window on the fuel tank end, only on the -ve x side (and box end on -ve side)
+
+			translate([-(width/2-girder_thick),indent_y,indent_mid_z+indent_height/2-indent_r])rotate([0,-90,0])cylinder(r=indent_r, h=wall_thick);
+				
+				translate([-(width/2-girder_thick),indent_y,indent_mid_z-indent_height/2+indent_r])rotate([0,-90,0])cylinder(r=indent_r, h=wall_thick);
+				
+				translate([-(width/2-girder_thick/2),indent_y,indent_mid_z-indent_height/2+indent_r])centred_cube(girder_thick,indent_r*2,indent_height-indent_r*2);
+			
 }
 
 module shell(){
@@ -936,6 +981,18 @@ module shell(){
 				horn_grill();
 
 			}
+			//fuel_side_hatch_length = 12;
+			//fuel_side_hatch_y = -60+9;
+			//long side ridges
+			door_railing_rear_edge_y = length/2-door_centre_from_box_end-door_and_handrails_length/2-girder_thick/2;
+			middle_ridge_y = module_ys[1]+girder_thick;
+			translate([0,(middle_ridge_y+door_railing_rear_edge_y)/2])big_side_ridges(door_railing_rear_edge_y-middle_ridge_y);
+			
+			
+			hatch_end_y = module_ys[0]+fuel_side_hatch_length;
+			module_y = module_ys[1]-girder_thick;
+			mirror_y()translate([0,(module_y+hatch_end_y)/2,0])big_side_ridges(module_y-hatch_end_y);
+			
 		}
 			
 		
@@ -958,11 +1015,27 @@ module shell(){
 			translate([0,-length/2+door_centre_from_fuel_end+door_and_handrails_length/2+side_fuel_grill_length/2,0])fuel_end_grills(true);
 			in_door_positions()door(true);
 			
+			//door_railing_front_edge_y = -length/2+door_centre_from_fuel_end-door_length/2-handrail_thick*2;
+			taper_start_y = -length/2+end_width_start;
+			window_back_edge_y = side_window_y-length/2+side_window_length;
+			indent_y = (taper_start_y+window_back_edge_y)/2;
+			
 			module_slices();
+			
+			translate([0,indent_y,0])door_indent();
+			
+			rotate([0,0,180])translate([0,indent_y,0])door_indent();
+			
+			
 		}
 	
 	}
 	//things to add after subtractions
+	
+	
+	
+	
+	
 	//in_door_positions()door_handrail_pair(false);
 	in_door_positions()door(false);
 	translate([0,-length/2+door_centre_from_fuel_end+door_and_handrails_length/2+side_fuel_grill_length/2])fuel_end_grills();
