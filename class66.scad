@@ -771,7 +771,8 @@ module grill(subtract=false, length=side_fuel_grill_length/2, height=side_fuel_g
 			union(){
 				if(slats > 0){
 					for(i=[0:slats-1]){
-						translate([slat_cube_r-thick*0.75,-length/2+rim_size+slat_distance/2 + slat_distance*i,rim_size])rotate([0,0,45])centred_cube(thick,thick,height-rim_size*2);
+						//translate([slat_cube_r-thick*0.75,-length/2+rim_size+slat_distance/2 + slat_distance*i,rim_size])rotate([0,0,45])centred_cube(thick,thick,height-rim_size*2);
+						translate([thick*0.5,-length/2+rim_size+slat_distance/2 + slat_distance*i,rim_size])centred_cube(thick,slat_distance/2,height-rim_size*2);
 					}
 				}
 				if(horizontal_slats > 0){
@@ -849,7 +850,8 @@ module big_side_ridges(length=10){
 	
 	//16 ridges
 	for(i=[0:ridges-1]){
-		translate([width/2,0,side_base_ridge_height*2 + i*ridge_height])rotate([90,0,0])cylinder(r=r,h=length,center=true,$fn=10);
+		//translate([width/2,0,side_base_ridge_height*2 + i*ridge_height])rotate([90,0,0])cylinder(r=r,h=length,center=true,$fn=10);
+		translate([width/2,0,side_base_ridge_height*2 + i*ridge_height])rotate([90,0,0])cube([r*2,r*2,length],center=true);
 	}
 	
 }
@@ -908,9 +910,9 @@ side_box_grill_inset_length = side_box_grill_length+girder_thick*2;*/
 	translate([0,length/2-door_centre_from_box_end-door_and_handrails_length/2-girder_thick-side_box_grill_inset_length/2,0]){
 	
 		if(subtract){
-			translate([-(width/2-girder_thick),0,side_base_ridge_height])centred_cube(wall_thick,side_box_grill_inset_length,wall_height-side_base_ridge_height);
+			translate([-(width/2-girder_thick/2+5),0,side_base_ridge_height])centred_cube(10,side_box_grill_inset_length,wall_height-side_base_ridge_height);
 		}else{
-			translate([-(width/2-girder_thick),0,side_box_grill_z])rotate([0,0,180])grill(false,side_box_grill_length,side_box_grill_height, girder_thick,30);
+			translate([-(width/2-girder_thick/2),0,side_box_grill_z])rotate([0,0,180])grill(false,side_box_grill_length,side_box_grill_height, girder_thick,30);
 		}
 		
 	}
