@@ -154,6 +154,8 @@ side_fuel_grill_length = 38;
 //box end grill is a single grill with wider ridges
 side_box_grill_height = 12.3;
 side_box_grill_length = 34;
+side_box_grill_z = wall_height - side_box_grill_height - girder_thick;
+side_box_grill_inset_length = side_box_grill_length+girder_thick*2;
 //when facing side with fuel tank on the left, one grill is next to the left door above the base ridge
 //when facing side with fuel tank on the right, one grill is next to the left grill, just below roof start, and another grill is to the right next to the door and just above the base ridge. This one is a mirror on the y axis with the other side
 //positions of the gaps in whta look like modular sections
@@ -897,6 +899,25 @@ module door_indent(){
 			
 }
 
+module box_side_grill(subtract=false){
+	/*side_box_grill_height = 12.3;
+side_box_grill_length = 34;
+side_box_grill_z = wall_height - side_box_grill_height - girder_thick;
+side_box_grill_inset_length = side_box_grill_length+girder_thick*2;*/
+	
+	translate([0,length/2-door_centre_from_box_end-door_and_handrails_length/2-girder_thick-side_box_grill_inset_length/2,0]){
+	
+		if(subtract){
+			translate([-(width/2-girder_thick),0,side_base_ridge_height])centred_cube(wall_thick,side_box_grill_inset_length,wall_height-side_base_ridge_height);
+		}else{
+			translate([-(width/2-girder_thick),0,side_box_grill_z])rotate([0,0,180])grill(false,side_box_grill_length,side_box_grill_height, girder_thick,30);
+		}
+		
+	}
+		
+		
+}
+
 module shell(){
 	
 	front_window_width = 13.5;
@@ -993,6 +1014,12 @@ module shell(){
 			module_y = module_ys[1]-girder_thick;
 			mirror_y()translate([0,(module_y+hatch_end_y)/2,0])big_side_ridges(module_y-hatch_end_y);
 			
+			grill_y = door_railing_rear_edge_y - side_box_grill_inset_length - girder_thick;
+			
+			mirror([1,0,0])translate([0,(middle_ridge_y+grill_y)/2,0])big_side_ridges(grill_y - middle_ridge_y);
+			
+			
+			
 		}
 			
 		
@@ -1025,7 +1052,7 @@ module shell(){
 			translate([0,indent_y,0])door_indent();
 			
 			rotate([0,0,180])translate([0,indent_y,0])door_indent();
-			
+			box_side_grill(true);
 			
 		}
 	
@@ -1034,7 +1061,7 @@ module shell(){
 	
 	
 	
-	
+	box_side_grill();
 	
 	//in_door_positions()door_handrail_pair(false);
 	in_door_positions()door(false);
