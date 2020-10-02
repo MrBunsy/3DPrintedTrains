@@ -1,10 +1,11 @@
 include <truck_bits.scad>
 include <constants.scad>
 
-//IDEA - filling in the top bit of the roof might help print without scaffolding - since then the most shallow angle is printed on top of a bridged area.
-//downside is slightly less space inside
+
 //the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body
+
 //TODO fix/finish interactiosn between buffers and pipe space, then the base will be close to finished
+//TODO finish ridge around the base of the whole shell
 
 //non-dummy base needs scaffolding
 GEN_BASE = false;
@@ -26,6 +27,7 @@ height = m2mm(3.9);
 
 wall_height = 18.6;
 wall_thick = 1.2;
+
 
 //the height of the flat bit in the middle of the front
 wall_front_midsection_height = 2.6;
@@ -126,13 +128,21 @@ base_height_above_track = top_of_buffer_from_top_of_rail ;//20;
 
 echo("length, width,height", length, width,height);
 
-
+//how far beyond base_thick the mount should be
 bogie_mount_height = base_height_above_track - bogie_wheel_d/2 - (axle_to_top_of_bogie+m3_washer_thick);
 //distance between the two end axles
 bogie_end_axles_distance = 55;
 //distance between the two bits which hold the pointy bits of the axles
 //called axle_space in some places
 bogie_axle_mount_width = 23;
+
+
+
+motor_clip_above_rails = 30;
+motor_clip_hole_d = 6;
+motor_clip_thick = 6;
+motor_clip_shell_z = motor_clip_above_rails-(bogie_wheel_d/2+axle_to_top_of_bogie+m3_washer_thick+bogie_mount_height + base_thick);
+
 
 screwhole_from_edge = 5;
 //to be mirrored in x and y
@@ -187,11 +197,17 @@ module buffers(){
 			hull(){
 				//top half of buffer box
 				translate([0,-buffer_box_length_top/2,base_thick-girder_thick])centred_cube(buffer_width,buffer_box_length_top,buffer_box_bottom_height+girder_thick );
-				//sloping bit at top of box
-				translate([0,-buffer_box_length_top/2-girder_thick/2,base_thick/2])centred_cube(base_bottom_width-base_pipe_space,buffer_box_length_top-girder_thick,buffer_box_height);
+				
 				//bottom half of box
 				translate([0,-buffer_box_length_bottom/2,base_thick+buffer_box_bottom_height])centred_cube(buffer_width,buffer_box_length_bottom,buffer_box_bottom_height );
 				
+			}
+			
+			hull(){
+				//bottom of base
+				translate([0,-buffer_box_length_top/2,base_thick-girder_thick*2])centred_cube(base_bottom_width,buffer_box_length_top,girder_thick );
+				//sloping bit at top of box
+				translate([0,-buffer_box_length_top/2-girder_thick/2,0])centred_cube(end_width,buffer_box_length_top-girder_thick,girder_thick);
 			}
 		}
 		
@@ -749,7 +765,7 @@ module door(subtract=false){
 			}
 			
 			//step at the bottom of the ladder. Not sure this will survive the brim being removed...
-			translate([width/2+girder_thick/2,0,0])centred_cube(girder_thick,ladder_length,ladder_rung_height);
+			translate([width/2+girder_thick/2,0,0])centred_cube(girder_thick,ladder_length,girder_thick);//ladder_rung_height
 		}
 		
 	}
@@ -920,6 +936,18 @@ side_box_grill_inset_length = side_box_grill_length+girder_thick*2;*/
 		
 }
 
+module side_cabinet(){
+	
+}
+
+module motor_holder(){
+	translate([0,-(length/2 - motor_centre_from_end),motor_clip_shell_z])
+	difference(){
+		centred_cube(width-wall_thick,motor_clip_hole_d*2,motor_clip_thick);
+		cylinder(r=motor_clip_hole_d/2,h=100,center=true);
+	}
+}
+
 module shell(){
 	
 	front_window_width = 13.5;
@@ -1061,7 +1089,7 @@ module shell(){
 	}
 	//things to add after subtractions
 	
-	
+	motor_holder();
 	
 	box_side_grill();
 	
