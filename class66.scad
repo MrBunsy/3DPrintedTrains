@@ -104,7 +104,7 @@ bogie_chain_mount_height = base_thick/2;
 //statement of intent
 top_of_bogie_from_rails = 15;
 //measurement of wheels
-bogie_wheel_d = 14.0;
+bogie_wheel_d = 14.3;
 
 bogie_axle_d = 2;
 wheel_holder_width = 13.8;
@@ -138,9 +138,9 @@ bogie_axle_mount_width = 23;
 
 
 
-motor_clip_above_rails = 30;
-motor_clip_hole_d = 6;
-motor_clip_thick = 6;
+motor_clip_above_rails = 37;
+motor_clip_hole_d = 4;
+motor_clip_thick = 4;//or 4.1?
 motor_clip_shell_z = motor_clip_above_rails-(bogie_wheel_d/2+axle_to_top_of_bogie+m3_washer_thick+bogie_mount_height + base_thick);
 
 

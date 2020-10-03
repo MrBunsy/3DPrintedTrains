@@ -1,5 +1,5 @@
 //diameters = [15,15, 12.7, 12.6];//not much gradient on the wheel part with this
-diameters = [16.5,16.5, 14.4, 13.9];
+diameters = [16.5,16.5, 14.45, 14.0];
 depths = [0.4, 0.3, 2.7];//total 3.4
 //might need to make first dpeth longer to reduce wobble?
 $fn=1000;
@@ -31,8 +31,8 @@ difference(){
 		cylinder(h=10, r=axle_r, center=true);
 		
 		difference(){
-			translate([0,0,2.9])cylinder(h=10, r=diameters[len(diameters)-1]/2-0.75);
-			cylinder(h=10, r=axle_r*2, center=true);
+			translate([0,0,2.9])cylinder(h=10, r=diameters[len(diameters)-1]/2-1.5);
+			cylinder(h=10, r=5.8/2, center=true);
 		}
 	}
 }
