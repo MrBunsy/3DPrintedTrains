@@ -896,8 +896,8 @@ module wall_and_roof_slice(long = girder_thick,wall_gap=side_base_ridge_height,s
 
 //where I think different modules might be attached? it's a ridge that travels up the walls and over the roof anyway
 module module_slice(){
-	scale_by_x = (width+wall_thick*2-girder_thick*2)/width;
-	scale_by_z = (wall_height+roof_top_from_walls+wall_thick-girder_thick)/(wall_height+roof_top_from_walls);
+	scale_by_x = (width+wall_thick*2-girder_thick)/width;
+	scale_by_z = (wall_height+roof_top_from_walls+wall_thick-girder_thick/2)/(wall_height+roof_top_from_walls);
 	
 	scale([scale_by_x,1,scale_by_z])wall_and_roof_slice(girder_thick,side_base_ridge_height/scale_by_z);
 		
@@ -1101,7 +1101,7 @@ module shell(){
 			
 			rotate([0,0,180])translate([0,indent_y,0])door_indent();
 			box_side_grill(true);
-			
+			//notch in roof
 		}
 	
 	}
