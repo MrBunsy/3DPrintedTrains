@@ -128,7 +128,7 @@ base_height_above_track = top_of_buffer_from_top_of_rail ;//20;
 
 echo("length, width,height", length, width,height);
 
-//how far beyond base_thick the mount should be
+//how far beyond base_thick the mount should be (this works out to be independent of wheel size, due to setting top of bogie as a constant)
 bogie_mount_height = base_height_above_track - bogie_wheel_d/2 - (axle_to_top_of_bogie+m3_washer_thick);
 //distance between the two end axles
 bogie_end_axles_distance = 55;
@@ -486,7 +486,7 @@ module bogie_axle_holder(axle_height){
 module bogies(){
 	bogie_arm_length = bogie_wheel_d*0.75;
 	bogie_cosmetic_arm_length = bogie_wheel_d*0.5;
-	
+	axle_height = axle_to_top_of_bogie-centre_bogie_wheel_offset/2;
 	
 	
 	difference(){
@@ -495,9 +495,9 @@ module bogies(){
 		cylinder(r=m3_thread_loose_size/2,h=100,center=true);
 	}
 	//center axle slightly lower (or higher from the final position), so as the bogie flexes it doesn't put all the weight on the centre wheels
-	bogie_axle_holder(axle_to_top_of_bogie-centre_bogie_wheel_offset/2);
+	bogie_axle_holder(axle_height);
 	
-	mirror_x()translate([0,bogie_end_axles_distance/2,0])bogie_axle_holder(axle_to_top_of_bogie+centre_bogie_wheel_offset/2);
+	mirror_x()translate([0,bogie_end_axles_distance/2,0])bogie_axle_holder(axle_height);
 	//centred_cube(wheel_holder_arm_width+10,bogie_arm_length,bogie_thick);
 	
 	//arms to hold cosmetics
@@ -510,7 +510,14 @@ module bogies(){
 	coupling_arm_z = axle_to_top_of_bogie+bogie_wheel_d/2 -coupling_arm_thick-top_of_coupling_from_top_of_rail +centre_bogie_wheel_offset/2;
 	
 	//arm to hold coupling
-	translate([0,-(coupling_arm_from_mount-coupling_arm_length/2-coupling_mount_length/2),coupling_arm_z])centred_cube(coupling_arm_width,coupling_arm_length-coupling_mount_length,coupling_arm_thick);
+	difference(){
+		translate([0,-(coupling_arm_from_mount-coupling_arm_length/2-coupling_mount_length/2),coupling_arm_z])centred_cube(coupling_arm_width,coupling_arm_length-coupling_mount_length,coupling_arm_thick);
+		union(){
+		//enough space near the axle
+			translate([0,-bogie_end_axles_distance/2,axle_height])rotate([0,90,0])cylinder(h=wheel_holder_width,r=bogie_axle_d*0.8, center=true );
+			translate([0,-bogie_end_axles_distance/2+50,axle_height-bogie_axle_d*0.8])centred_cube(100,100,100);
+		}
+	}
 	//fill in gap under coupling arm
 	translate([0,-bogie_end_axles_distance/2,0])centred_cube(coupling_arm_width,wheel_mount_length,coupling_arm_z);
 	
@@ -775,7 +782,7 @@ module door(subtract=false){
 //defaults to fuel-end settings
 module grill(subtract=false, length=side_fuel_grill_length/2, height=side_fuel_grill_height, thick=girder_thick, slats=16,horizontal_slats = 0){
 	if(subtract){
-		centred_cube(thick*2,length,height);
+		centred_cube(thick*0.9,length,height);
 	}else{
 		
 		slat_cube_r = sqrt(thick*thick*2);
@@ -872,12 +879,17 @@ module big_side_ridges(length=10){
 	
 }
 
-module wall_and_roof_slice(long = girder_thick,wall_gap=side_base_ridge_height){
+module wall_and_roof_slice(long = girder_thick,wall_gap=side_base_ridge_height,solid=false){
 	//walls
-	mirror_y()translate([width/2-wall_thick/2,0,wall_gap])centred_cube(wall_thick,long,wall_height-wall_gap);
+	if(solid){
+		translate([0,0,wall_gap])centred_cube(width,long,wall_height-wall_gap);
+	}else{
+		mirror_y()translate([width/2-wall_thick/2,0,wall_gap])centred_cube(wall_thick,long,wall_height-wall_gap);
+	}
 	//roof 
 	intersection(){
-		translate([0,0,wall_height])roof_shape(long,false,width,width,false);
+		//roof slice uses spheres, so it extends slightly beyond length. intersection to prevent that
+		translate([0,0,wall_height])roof_shape(long,solid,width,width,false);
 		centred_cube(100,long,100);
 	}
 }
@@ -941,10 +953,16 @@ module side_cabinet(){
 }
 
 module motor_holder(){
-	translate([0,-(length/2 - motor_centre_from_end),motor_clip_shell_z])
-	difference(){
-		centred_cube(width-wall_thick,motor_clip_hole_d*2,motor_clip_thick);
-		cylinder(r=motor_clip_hole_d/2,h=100,center=true);
+	
+	translate([0,-(length/2 - motor_centre_from_end),0])
+	intersection(){
+		translate([0,0,motor_clip_shell_z])
+		difference(){
+			centred_cube(width-wall_thick,motor_clip_hole_d*2,motor_clip_thick);
+			cylinder(r=motor_clip_hole_d/2,h=100,center=true);
+		}
+		//intersect with solid roof and walls to prevent poking out the sides of the roof
+		wall_and_roof_slice(motor_clip_hole_d*2,0,true);
 	}
 }
 
@@ -1096,6 +1114,8 @@ module shell(){
 	//in_door_positions()door_handrail_pair(false);
 	in_door_positions()door(false);
 	translate([0,-length/2+door_centre_from_fuel_end+door_and_handrails_length/2+side_fuel_grill_length/2])fuel_end_grills();
+	
+	
 }
 
 if(GEN_BASE){
@@ -1104,7 +1124,7 @@ if(GEN_BASE){
 }
 
 if(GEN_BOGIES){
-	mirror_x(GEN_IN_PLACE && DUMMY)optional_translate([0,-(length/2 - motor_centre_from_end),base_height_above_track-bogie_mount_height-m3_washer_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)bogies();
+	mirror_x(GEN_IN_PLACE && DUMMY)mirror([0,1,0])optional_translate([0,-(length/2 - motor_centre_from_end),base_height_above_track-bogie_mount_height-m3_washer_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)bogies();
 	
 }
 
