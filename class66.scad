@@ -1,17 +1,23 @@
 include <truck_bits.scad>
 include <constants.scad>
 
+//$fn=50;
 
-//the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body
+//the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body, likewise with the roof of the shell
+//the DC socket and switch holders still need scaffolding, as does the motor holder screwholes in the shell
 
 //TODO fix/finish interactiosn between buffers and pipe space, then the base will be close to finished
+//TODO wonky battery holders to hold 8 AAAs in the fuel container of the base
 //TODO finish ridge around the base of the whole shell
+//TODO final detail on the roof
+//TODO improve shape of rainguards
 
 //non-dummy base needs scaffolding
 GEN_BASE = false;
-GEN_SHELL = true;
+GEN_SHELL = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
+GEN_MOTOR_CLIP = true;
 GEN_IN_PLACE = false;
 
 //dummy model has no motor
@@ -88,7 +94,7 @@ motor_centre_from_end = 45;
 //doors are different at each end
 door_centre_from_fuel_end = 28;
 door_centre_from_box_end = 36;
-door_length = 7;
+door_length = 6.5;//7;
 door_handrail_height = 15.6;
 door_handrail_z = 3;
 door_and_handrails_length = door_length+handrail_thick*3.5*2;
@@ -137,12 +143,21 @@ bogie_end_axles_distance = 55;
 bogie_axle_mount_width = 23;
 
 
+/*there are now two parts to the motor holder:
+ - a separate peice which clips to the top of the motor
+ - two screwholes in the roof of the shell
+ 
+ This is because it's hard to unclip the motor. If the roof was separate, it might not be needed?
 
+*/
 motor_clip_above_rails = 37;
-motor_clip_hole_d = 4;
+motor_clip_hole_d = 4.4;//4 was too tight
 motor_clip_thick = 4;//or 4.1?
 motor_clip_shell_z = motor_clip_above_rails-(bogie_wheel_d/2+axle_to_top_of_bogie+m3_washer_thick+bogie_mount_height + base_thick);
-
+motor_width=17.3;
+motor_clip_fudge_height = 0.5;
+motor_holder_width = 26;
+motor_holder_screws_x = 17.3/2 + m2_thread_size;
 
 screwhole_from_edge = 5;
 //to be mirrored in x and y
@@ -725,7 +740,7 @@ module in_door_positions(){
 module door(subtract=false){
 	doorhandle_inset_length = 2.5;
 	doorhandle_inset_height = 2;
-	doorhandle_zs = [3.5,9.5];
+	doorhandle_zs = [3.5,10];
 	doorhandle_height = girder_thick;
 	door_handrail_pair(subtract);
 	mirror_y(){
@@ -879,12 +894,14 @@ module big_side_ridges(length=10){
 	
 }
 
-module wall_and_roof_slice(long = girder_thick,wall_gap=side_base_ridge_height,solid=false){
+module wall_and_roof_slice(long = girder_thick,wall_gap=side_base_ridge_height,solid=false,roof_only=false){
 	//walls
-	if(solid){
-		translate([0,0,wall_gap])centred_cube(width,long,wall_height-wall_gap);
-	}else{
-		mirror_y()translate([width/2-wall_thick/2,0,wall_gap])centred_cube(wall_thick,long,wall_height-wall_gap);
+	if(!roof_only){
+		if(solid){
+			translate([0,0,wall_gap])centred_cube(width,long,wall_height-wall_gap);
+		}else{
+			mirror_y()translate([width/2-wall_thick/2,0,wall_gap])centred_cube(wall_thick,long,wall_height-wall_gap);
+		}
 	}
 	//roof 
 	intersection(){
@@ -895,11 +912,11 @@ module wall_and_roof_slice(long = girder_thick,wall_gap=side_base_ridge_height,s
 }
 
 //where I think different modules might be attached? it's a ridge that travels up the walls and over the roof anyway
-module module_slice(){
+module module_slice(roof_only=false){
 	scale_by_x = (width+wall_thick*2-girder_thick)/width;
 	scale_by_z = (wall_height+roof_top_from_walls+wall_thick-girder_thick/2)/(wall_height+roof_top_from_walls);
 	
-	scale([scale_by_x,1,scale_by_z])wall_and_roof_slice(girder_thick,side_base_ridge_height/scale_by_z);
+	scale([scale_by_x,1,scale_by_z])wall_and_roof_slice(girder_thick,side_base_ridge_height/scale_by_z,false,roof_only);
 		
 }
 
@@ -909,6 +926,7 @@ module module_slices(){
 	for(y=module_ys){
 		translate([0,y,0])module_slice();
 	}
+	translate([0,length/2-door_centre_from_box_end-door_and_handrails_length/2-girder_thick,0])module_slice(true);
 }
 
 module door_indent(){
@@ -952,17 +970,78 @@ module side_cabinet(){
 	
 }
 
+//separate peice that clips onto motor and screws into shell
 module motor_holder(){
 	
-	translate([0,-(length/2 - motor_centre_from_end),0])
-	intersection(){
-		translate([0,0,motor_clip_shell_z])
-		difference(){
-			centred_cube(width-wall_thick,motor_clip_hole_d*2,motor_clip_thick);
-			cylinder(r=motor_clip_hole_d/2,h=100,center=true);
+	//translate([0,-(length/2 - motor_centre_from_end),0])
+	/*difference(){
+		intersection(){
+			translate([0,0,motor_clip_shell_z])
+			difference(){
+				centred_cube(width-wall_thick,motor_clip_hole_d*2,motor_clip_thick);
+				cylinder(r=motor_clip_hole_d/2,h=100,center=true);
+			}
+			//intersect with solid roof and walls to prevent poking out the sides of the roof
+			wall_and_roof_slice(motor_clip_hole_d*2,0,true);
 		}
+		wall_and_roof_slice(motor_clip_hole_d*3,0,false);
+	}*/
+	
+	thick = motor_clip_thick;//-motor_clip_fudge_height;
+	difference(){
+		centred_cube(motor_holder_width,motor_clip_hole_d*2,thick);
+		union(){
+			cylinder(r=motor_clip_hole_d/2,h=100,center=true);
+			mirror_y(){
+				translate([motor_holder_screws_x,0,0])cylinder(r=m2_thread_size/2,h=100,center=true);
+				translate([motor_holder_screws_x,0,thick-m2_head_length])cylinder(r=m2_head_size/2,h=100);
+				centred_cube(motor_clip_hole_d*2,50,motor_clip_fudge_height);
+			}
+			
+		}
+	}
+	
+}
+//part of the shell with the screwholes for the motor_holder
+module motor_holder_holder(){
+	translate([0,-(length/2 - motor_centre_from_end),-girder_thick*1.5])
+	intersection(){
+		translate([0,0,motor_clip_shell_z+motor_clip_thick+girder_thick]){
+			difference(){
+				mirror_y()translate([motor_holder_screws_x,0,0])cylinder(r=m2_thread_size,h=10);
+				mirror_y()translate([motor_holder_screws_x,0,0])cylinder(r=m2_thread_size/2,h=100,center=true);
+			}
+		}
+	
 		//intersect with solid roof and walls to prevent poking out the sides of the roof
-		wall_and_roof_slice(motor_clip_hole_d*2,0,true);
+		wall_and_roof_slice(motor_clip_hole_d*4,0,true);
+	}
+}
+
+roof_notches_positions=[[module_ys[0]+18,17.5] , [length/2-door_centre_from_box_end+2.5,12]];
+roof_notches_z = 29;
+
+module roof_notches(){
+	//[y pos, length]
+
+	for(notch = roof_notches_positions){
+		translate([0,notch[0],roof_notches_z])centred_cube(width,notch[1],10);
+	}
+	
+	
+}
+
+module roof_hatches(){
+	
+	hatch_length = 17.5;
+	hatch_distance=18.8;
+	roof_shape = roof_corners(width);
+	hatch_width = abs(roof_shape[2][0] - roof_shape[3][0]);
+	hatch_centre_x = abs(roof_shape[2][0] + roof_shape[3][0])/2;
+	hatch_centre_z = (roof_shape[2][2] + roof_shape[3][2])/2;
+	
+	mirror_xy(){
+		//translate([0,hatch_distance/2,])
 	}
 }
 
@@ -1102,14 +1181,17 @@ module shell(){
 			rotate([0,0,180])translate([0,indent_y,0])door_indent();
 			box_side_grill(true);
 			//notch in roof
+			roof_notches();
 		}
 	
 	}
 	//things to add after subtractions
 	
-	motor_holder();
+	motor_holder_holder();
 	
 	box_side_grill();
+	
+	roof_hatches();
 	
 	//in_door_positions()door_handrail_pair(false);
 	in_door_positions()door(false);
@@ -1130,6 +1212,9 @@ if(GEN_BOGIES){
 
 if(GEN_SHELL){
 	optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)shell();
+}
+if(GEN_MOTOR_CLIP){
+	optional_translate([0,-(length/2 - motor_centre_from_end),motor_clip_shell_z+base_thick+base_height_above_track],GEN_IN_PLACE)optional_rotate([90,0,0],!GEN_IN_PLACE)motor_holder();	
 }
 
 
