@@ -87,9 +87,12 @@ buffer_box_length_top = 5;
 buffer_box_length_bottom = 3;
 buffer_box_bottom_height = 1.5;
 buffer_box_height = 3;
+//under the buffers, there's a front panel of the loco
+buffer_front_height = 5;
+buffer_front_length = 1;
 
 //wall_thick = 2;
-motor_length = 70;
+motor_length = 60;
 motor_centre_from_end = 45;
 //doors are different at each end
 door_centre_from_fuel_end = 28;
@@ -152,12 +155,23 @@ bogie_axle_mount_width = 23;
 */
 motor_clip_above_rails = 37;
 motor_clip_hole_d = 4.4;//4 was too tight
-motor_clip_thick = 4;//or 4.1?
-motor_clip_shell_z = motor_clip_above_rails-(bogie_wheel_d/2+axle_to_top_of_bogie+m3_washer_thick+bogie_mount_height + base_thick);
-motor_width=17.3;
 motor_clip_fudge_height = 0.5;
-motor_holder_width = 26;
-motor_holder_screws_x = 17.3/2 + m2_thread_size;
+//making it the perfect size doesn't result in enough side to side wobble to deal with the join in the motor, so make the clip smaller by the fudge
+motor_clip_thick = 4 - motor_clip_fudge_height;//or 4.1?
+//for old mechanism of screwing motor into the shell
+motor_clip_shell_z = motor_clip_above_rails-(bogie_wheel_d/2+axle_to_top_of_bogie+m3_washer_thick+bogie_mount_height + base_thick);
+//for new mechanism of motor clip screwing into the base
+motor_clip_base_z = motor_clip_above_rails - base_height_above_track - base_thick;
+motor_width=17.3;
+
+//old roof
+//motor_holder_width = 26;
+motor_holder_width = motor_clip_hole_d*3;
+motor_holder_length = motor_length + motor_clip_hole_d*3;
+//old roof clip
+//motor_holder_screws_x = 17.3/2 + m2_thread_size;
+//new base clip, relative to motor centre, mirrored xy
+motor_hold_screws = [motor_clip_hole_d,motor_length/2 + motor_clip_hole_d*0.75, 0];
 
 screwhole_from_edge = 5;
 //to be mirrored in x and y
@@ -210,11 +224,12 @@ module buffers(){
 			
 			//buffer holders
 			hull(){
+				//variable names use bottom to mean as printed, by mistake
 				//top half of buffer box
 				translate([0,-buffer_box_length_top/2,base_thick-girder_thick])centred_cube(buffer_width,buffer_box_length_top,buffer_box_bottom_height+girder_thick );
 				
 				//bottom half of box
-				translate([0,-buffer_box_length_bottom/2,base_thick+buffer_box_bottom_height])centred_cube(buffer_width,buffer_box_length_bottom,buffer_box_bottom_height );
+				translate([0,-buffer_box_length_bottom/2,base_thick])centred_cube(buffer_width,buffer_box_length_bottom,buffer_box_height );
 				
 			}
 			
@@ -224,6 +239,9 @@ module buffers(){
 				//sloping bit at top of box
 				translate([0,-buffer_box_length_top/2-girder_thick/2,0])centred_cube(end_width,buffer_box_length_top-girder_thick,girder_thick);
 			}
+			
+			//front face
+			translate([0,-buffer_front_length/2,base_thick])centred_cube(buffer_width,buffer_front_length,buffer_front_height);
 		}
 		
 		mirror_y()translate([buffer_distance/2,0,base_thick+buffer_box_height/2])rotate([90,0,0])cylinder(r=buffer_holder_d/2,h=buffer_holder_length*2,center=true);
@@ -468,10 +486,18 @@ module base(){
 			translate([0,0,-1])mirror_xy()for(pos = base_wall_screwholes){
 				translate(pos)cylinder(r=m2_thread_size_loose/2,h=100,$fn=50);
 			}
-			
 			translate([0,0,base_thick-m2_head_length])mirror_xy()for(pos = base_wall_screwholes){
 				translate(pos)cylinder(r=m2_head_size/2,h=100,$fn=50);
 			}
+			
+			if(!DUMMY){
+				//screwholes for motor clip
+				translate([0,-length/2+motor_centre_from_end,-1])mirror_xy()translate(motor_hold_screws)cylinder(r=m2_thread_size_loose/2,h=100,$fn=50);
+				translate([0,-length/2+motor_centre_from_end,base_thick-m2_head_length])mirror_xy()translate(motor_hold_screws)cylinder(r=m2_head_size/2,h=100,$fn=50);
+			}
+			
+			
+			
 			
 		}//end subtractive union
 	}
@@ -970,9 +996,10 @@ module side_cabinet(){
 	
 }
 
-//separate peice that clips onto motor and screws into shell
+//separate peice that clips onto motor and screws into the base
 module motor_holder(){
-	
+	//first attempt, built into roof of shell
+	//would be impossible to ever remove the motor again
 	//translate([0,-(length/2 - motor_centre_from_end),0])
 	/*difference(){
 		intersection(){
@@ -986,7 +1013,8 @@ module motor_holder(){
 		}
 		wall_and_roof_slice(motor_clip_hole_d*3,0,false);
 	}*/
-	
+	//second attempt, screws into roof of shell, works but super fiddly to assemble loco
+	/*
 	thick = motor_clip_thick;//-motor_clip_fudge_height;
 	difference(){
 		centred_cube(motor_holder_width,motor_clip_hole_d*2,thick);
@@ -999,8 +1027,26 @@ module motor_holder(){
 			}
 			
 		}
+	}*/
+	//third attempt, this shape screws into the base and the motor clips into this
+	lip_height = 1.5;
+	difference(){
+		union(){
+			centred_cube(motor_holder_width,motor_holder_length,motor_clip_thick-lip_height);
+			cylinder(r=motor_clip_hole_d,h=motor_clip_thick);
+		}
+		cylinder(r=motor_clip_hole_d/2,h=100,center=true);
 	}
-	
+	screw_depth = 10;
+	difference(){
+		translate([0,0,motor_clip_thick-lip_height])mirror_x()centred_cube(motor_holder_width,motor_holder_length,motor_clip_base_z-motor_clip_thick+lip_height);
+		union(){	
+			//don't overlap with space for motor
+			cylinder(r=motor_length/2,h=100);
+			//screwholes
+			translate([0,0,motor_clip_base_z-screw_depth])mirror_xy()translate(motor_hold_screws)cylinder(r=m2_thread_size/2,h=100);
+		}
+	}
 }
 //part of the shell with the screwholes for the motor_holder
 module motor_holder_holder(){
@@ -1186,8 +1232,8 @@ module shell(){
 	
 	}
 	//things to add after subtractions
-	
-	motor_holder_holder();
+	//now doing this as part of the base
+	//motor_holder_holder();
 	
 	box_side_grill();
 	
@@ -1214,7 +1260,7 @@ if(GEN_SHELL){
 	optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)shell();
 }
 if(GEN_MOTOR_CLIP){
-	optional_translate([0,-(length/2 - motor_centre_from_end),motor_clip_shell_z+base_thick+base_height_above_track],GEN_IN_PLACE)optional_rotate([90,0,0],!GEN_IN_PLACE)motor_holder();	
+	optional_translate([0,-(length/2 - motor_centre_from_end),motor_clip_base_z+base_thick+base_height_above_track],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	
 }
 
 
