@@ -12,13 +12,15 @@ include <constants.scad>
 //TODO final detail on the roof
 //TODO improve shape of rainguards
 
+//TODO motor hinge point isn't in the centre of its length, so need to re-arrange hole in the base an the motor holder arm to give it the best space
+
 //non-dummy base needs scaffolding
-GEN_BASE = false;
+GEN_BASE = true;
 GEN_SHELL = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
 GEN_MOTOR_CLIP = true;
-GEN_IN_PLACE = false;
+GEN_IN_PLACE = true;
 
 //dummy model has no motor
 DUMMY = false;
@@ -92,7 +94,10 @@ buffer_front_height = 5;
 buffer_front_length = 1;
 
 //wall_thick = 2;
-motor_length = 60;
+motor_length = 60+5;
+//the bulk of the motor is not central to the wheels or rotation clip
+//however this makes the screwholes and whatnot more complicated, and I'm lazy. so I've just made the length longer
+//motor_length_offset_y = 2.5;
 motor_centre_from_end = 45;
 //doors are different at each end
 door_centre_from_fuel_end = 28;
@@ -1029,7 +1034,8 @@ module motor_holder(){
 		}
 	}*/
 	//third attempt, this shape screws into the base and the motor clips into this
-	lip_height = 1.5;
+	//this can be much smaller than 1.5 and still give plenty of play for gradient changes
+	lip_height = 1;//1.5;
 	difference(){
 		union(){
 			centred_cube(motor_holder_width,motor_holder_length,motor_clip_thick-lip_height);
@@ -1039,12 +1045,12 @@ module motor_holder(){
 	}
 	screw_depth = 10;
 	difference(){
-		translate([0,0,motor_clip_thick-lip_height])mirror_x()centred_cube(motor_holder_width,motor_holder_length,motor_clip_base_z-motor_clip_thick+lip_height);
+		translate([0,0,motor_clip_thick-lip_height])mirror_x()centred_cube(motor_holder_width,motor_holder_length,motor_clip_base_z+lip_height);
 		union(){	
 			//don't overlap with space for motor
 			cylinder(r=motor_length/2,h=100);
 			//screwholes
-			translate([0,0,motor_clip_base_z-screw_depth])mirror_xy()translate(motor_hold_screws)cylinder(r=m2_thread_size/2,h=100);
+			translate([0,0,motor_clip_base_z+motor_clip_thick-screw_depth])mirror_xy()translate(motor_hold_screws)cylinder(r=m2_thread_size/2,h=100);
 		}
 	}
 }
@@ -1260,7 +1266,7 @@ if(GEN_SHELL){
 	optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)shell();
 }
 if(GEN_MOTOR_CLIP){
-	optional_translate([0,-(length/2 - motor_centre_from_end),motor_clip_base_z+base_thick+base_height_above_track],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	
+	optional_translate([0,-(length/2 - motor_centre_from_end),motor_clip_base_z+base_thick+base_height_above_track+motor_clip_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	
 }
 
 
