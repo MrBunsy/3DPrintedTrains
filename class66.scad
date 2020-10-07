@@ -19,8 +19,8 @@ GEN_BASE = true;
 GEN_SHELL = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
-GEN_MOTOR_CLIP = true;
-GEN_IN_PLACE = true;
+GEN_MOTOR_CLIP = false;
+GEN_IN_PLACE = false;
 
 //dummy model has no motor
 DUMMY = false;
@@ -363,6 +363,30 @@ module fuel_pump(){
 	}
 }
 
+module battery_holder(subtract=true){
+	//big rectangle
+	translate([0,(fuel_tank_length-base_arch_bottom_length)/2,-0.01])centred_cube(battery_space_width*0.5,fuel_tank_length-wall_thick*2,base_arch_height+fuel_tank_height-wall_thick+0.01);
+	
+	battery_angle = -25;
+	start_offset = 8;
+	
+	//battery_angle = -27.5;
+	//start_offset = 7;
+	battery_spacing = 2;
+	
+	difference(){
+		mirror_y()union(){
+			for(i=[0:3]){
+				translate([battery_space_width/4,start_offset-(i*(aaa_battery_d/cos(battery_angle)+battery_spacing)),0])rotate([battery_angle,0,0])cylinder(r=aaa_battery_d/2,h=aaa_battery_length*2,center=true);
+			}
+		}
+		
+		translate([0,0,base_arch_height+fuel_tank_height-wall_thick])centred_cube(100,100,100);
+		
+	}
+}
+//battery_holder();
+
 module base(){
 	underside_box_y = base_arch_bottom_length/2-(base_arch_bottom_length-fuel_tank_length)/2;
 	difference(){
@@ -458,7 +482,7 @@ module base(){
 			
 			if(!DUMMY){
 				//hollow out fuel tank for batteries
-				translate([0,(fuel_tank_length-base_arch_bottom_length)/2,-0.01])centred_cube(battery_space_width,fuel_tank_length-wall_thick*2,base_arch_height+fuel_tank_height-wall_thick);
+				battery_holder(true);
 
 				//TODO custom battery holder, I think we can hold eight batteries in here if they're at the right angle or position.
 				//for now, I'll leave it as it is to get the whole loco working then come back and improve this
