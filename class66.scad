@@ -1,7 +1,6 @@
 include <truck_bits.scad>
 include <constants.scad>
 
-//$fn=50;
 
 //the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body, likewise with the roof of the shell
 //the DC socket and switch holders still need scaffolding, as does the motor holder screwholes in the shell
@@ -16,11 +15,11 @@ include <constants.scad>
 
 //non-dummy base needs scaffolding
 GEN_BASE = true;
-GEN_SHELL = false;
+GEN_SHELL = true;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
-GEN_IN_PLACE = false;
+GEN_IN_PLACE = true;
 
 //dummy model has no motor
 DUMMY = false;
@@ -55,7 +54,7 @@ front_end_thick = 0.6;
 base_pipe_space = 2;
 crane_mount_box_length = 2;
 
-battery_space_width = 27;
+battery_space_width = width-base_pipe_space*2-girder_thick*2;//28;//27;
 dc_socket_d = 8.1;
 dc_socket_thread_height = 5.6;
 dc_socket_space_d = 11.2;
@@ -66,6 +65,8 @@ base_bottom_width = width-3;
 base_top_width = width;
 //needs to be smaller than top width but larger than bottom width
 buffer_width = width-3;
+
+headlight_x = 11.5;
 
 //the girder bits extend further downwards in the middle
 base_arch_top_length = 90;
@@ -365,7 +366,7 @@ module fuel_pump(){
 
 module battery_holder(subtract=true){
 	//big rectangle
-	translate([0,(fuel_tank_length-base_arch_bottom_length)/2,-0.01])centred_cube(battery_space_width*0.5,fuel_tank_length-wall_thick*2,base_arch_height+fuel_tank_height-wall_thick+0.01);
+	translate([0,(fuel_tank_length-base_arch_bottom_length)/2,-0.01])centred_cube(battery_space_width*0.45,fuel_tank_length-wall_thick*2,base_arch_height+fuel_tank_height-wall_thick+0.01);
 	
 	battery_angle = -25;
 	start_offset = 8;
@@ -377,7 +378,7 @@ module battery_holder(subtract=true){
 	difference(){
 		mirror_y()union(){
 			for(i=[0:3]){
-				translate([battery_space_width/4,start_offset-(i*(aaa_battery_d/cos(battery_angle)+battery_spacing)),0])rotate([battery_angle,0,0])cylinder(r=aaa_battery_d/2,h=aaa_battery_length*2,center=true);
+				translate([(battery_space_width/2-aaa_battery_d/2),start_offset-(i*(aaa_battery_d/cos(battery_angle)+battery_spacing)),0])rotate([battery_angle,0,0])cylinder(r=aaa_battery_d/2,h=aaa_battery_length*2,center=true);
 			}
 		}
 		
@@ -385,7 +386,33 @@ module battery_holder(subtract=true){
 		
 	}
 }
-//battery_holder();
+
+//headlight box is split between base and shell. both will use this module, but slice it so they only get the half that fits on each - so it will be designed to slot together and hollow out space for LEDs
+//this is for the headlight in +ve x and y quad, with 0,0 of this module lining up with centre (in x) of lights box and y lining up with the front of the loco (lenght/2), z lining up with the top of the base/bottom of the shell
+//this is with +ve in the final upright position (so will be upside down for the default position of the base)
+module headlight_box(subtract = false){
+	//large lights style, since I think that's easiest with LEDs
+	lights_box_width = 7;
+	lights_box_height = 4.5;
+	//how far out the front this should extend
+	lights_box_length = 2;//1.75;
+	z = -2;
+	//note - subtraction is done after the main shape (unlike most of teh shell)
+	if(subtract){
+		//want it against the edge same distance it is from top and bottom
+		led_edge_space = (lights_box_height - led_3mm_d)/2;
+		white_led_x = lights_box_width/2 - led_edge_space - led_3mm_d/2;
+		
+		//space for LEDs and wires
+		//white LED
+		translate([white_led_x,lights_box_length - led_3mm_total_length*0.9,z+lights_box_height/2])led_3mm();
+		//red LED
+		translate([-(lights_box_width/2-led_1_8mm_d/2-led_edge_space),lights_box_length - led_1_8mm_total_length*0.9,z+lights_box_height-led_1_8mm_d/2-led_edge_space])led_1_8mm(3);
+	}else{
+			translate([-lights_box_width/2,0,z])cube([lights_box_width,lights_box_length,lights_box_height]);
+		translate([-lights_box_width/2,0,z+lights_box_height])cube([lights_box_width,lights_box_length*0.75,lights_box_height]);
+	}
+}
 
 module base(){
 	underside_box_y = base_arch_bottom_length/2-(base_arch_bottom_length-fuel_tank_length)/2;
@@ -463,10 +490,33 @@ module base(){
 				translate([0,-(length/2-door_centre_from_fuel_end),0])ladder_base();
 				translate([0,(length/2-door_centre_from_box_end),0])ladder_base();
 				
+				mirror_xy()translate([headlight_x, length/2,0])
+				{
+					difference(){
+						//only the bits that are part of teh base
+						
+						mirror([1,0,0])rotate([0,180,0])headlight_box(false);
+						translate([0,0,-10])centred_cube(10,10,10);
+					}
+					
+				};
+				
 			}//end additive union
 		
 		
 		union(){
+			
+			mirror_xy()translate([headlight_x, length/2,0])
+				{
+					difference(){
+						//only the bits that are part of teh base
+						mirror([1,0,0])rotate([0,180,0])headlight_box(true);
+						translate([0,0,-10-0.0001])centred_cube(10,10,10);
+					}
+					
+				};
+			
+			
 			if(!DUMMY){
 				//space for motor
 				translate([0,-(length/2 - motor_centre_from_end),0])motor_space();
@@ -1221,7 +1271,16 @@ module shell(){
 			
 			mirror([1,0,0])translate([0,(middle_ridge_y+grill_y)/2,0])big_side_ridges(grill_y - middle_ridge_y);
 			
-			
+			mirror_xy()translate([headlight_x, length/2,0])
+				{
+					difference(){
+						//only the bits that are part of teh base
+						
+						headlight_box(false);
+						translate([0,0,-10])centred_cube(10,10,10);
+					}
+					
+				};
 			
 		}
 			
@@ -1258,6 +1317,18 @@ module shell(){
 			box_side_grill(true);
 			//notch in roof
 			roof_notches();
+			
+			mirror_xy()translate([headlight_x, length/2,0])
+			{
+				difference(){
+					//only the bits that are part of teh base
+					
+					headlight_box(true);
+					translate([0,0,-10-0.0001])centred_cube(10,10,10);
+				}
+				
+			};
+			
 		}
 	
 	}
