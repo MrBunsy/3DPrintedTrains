@@ -148,8 +148,8 @@ led_1_8mm_tip_length = 1.55;
 led_1_8mm_base_length = led_1_8mm_total_length - led_1_8mm_tip_length;
 led_1_8mm_d = 1.8+0.2;
 led_1_8_base_width=3.3+0.2;
-module led_1_8mm(extra_base_length = led_base_extra){
-	rotate([-90,0,0])cylinder(r=led_1_8mm_d/2, h=led_1_8mm_total_length);
+module led_1_8mm(extra_base_length = led_base_extra, extra_front_length = 0){
+	rotate([-90,0,0])cylinder(r=led_1_8mm_d/2, h=led_1_8mm_total_length+extra_front_length);
 	
 	translate([0,(led_1_8mm_base_length+extra_base_length)/2-extra_base_length,-led_1_8_base_width/2])centred_cube(2.4+0.2,led_1_8mm_base_length+extra_base_length,led_1_8_base_width);
 }

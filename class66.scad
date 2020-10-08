@@ -14,12 +14,12 @@ include <constants.scad>
 //TODO motor hinge point isn't in the centre of its length, so need to re-arrange hole in the base an the motor holder arm to give it the best space
 
 //non-dummy base needs scaffolding
-GEN_BASE = true;
+GEN_BASE = false;
 GEN_SHELL = true;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
-GEN_IN_PLACE = true;
+GEN_IN_PLACE = false;
 
 //dummy model has no motor
 DUMMY = false;
@@ -407,7 +407,9 @@ module headlight_box(subtract = false){
 		//white LED
 		translate([white_led_x,lights_box_length - led_3mm_total_length*0.9,z+lights_box_height/2])led_3mm();
 		//red LED
-		translate([-(lights_box_width/2-led_1_8mm_d/2-led_edge_space),lights_box_length - led_1_8mm_total_length*0.9,z+lights_box_height-led_1_8mm_d/2-led_edge_space])led_1_8mm(3);
+		//this is fairly far back, mainly so the box can be printable (walls were too thin otherwise
+		//but has the advantage I can put a diffuser on the front to hide the fact I bought red-casing red LED, when really I want a clear casing red/white LED - turns out on the large-style lights the smaller light is both a daytime white and a rear red
+		translate([-(lights_box_width/2-led_1_8mm_d/2-led_edge_space), - led_1_8mm_base_length-wall_thick/2,z+lights_box_height-led_1_8mm_d/2-led_edge_space])led_1_8mm(3,6);
 	}else{
 			translate([-lights_box_width/2,0,z])cube([lights_box_width,lights_box_length,lights_box_height]);
 		translate([-lights_box_width/2,0,z+lights_box_height])cube([lights_box_width,lights_box_length*0.75,lights_box_height]);
