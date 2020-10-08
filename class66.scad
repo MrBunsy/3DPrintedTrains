@@ -14,12 +14,12 @@ include <constants.scad>
 //TODO motor hinge point isn't in the centre of its length, so need to re-arrange hole in the base an the motor holder arm to give it the best space
 
 //non-dummy base needs scaffolding
-GEN_BASE = false;
+GEN_BASE = true;
 GEN_SHELL = true;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = false;
-GEN_MOTOR_CLIP = false;
-GEN_IN_PLACE = false;
+GEN_BOGIES = true;
+GEN_MOTOR_CLIP = true;
+GEN_IN_PLACE = true;
 
 //dummy model has no motor
 DUMMY = false;
@@ -46,12 +46,12 @@ wall_front_midsection_y = 1.8;
 end_width_start = 22;
 
 coupling_arm_thick = 1.5;
-base_thick = 3;
+base_thick = 5.5;
 girder_thick = 0.5;
 handrail_thick = girder_thick;
 front_end_thick = 0.6;
 //how deep the pipe space in the side of the base is, from base_top_width
-base_pipe_space = 2;
+base_pipe_space = 3;
 crane_mount_box_length = 2;
 
 battery_space_width = width-base_pipe_space*2-girder_thick*2;//28;//27;
@@ -61,10 +61,10 @@ dc_socket_space_d = 11.2;
 dc_socket_nut_space_d = 12.5;
 dc_socket_switch_nut_height = 1.6;
 
-base_bottom_width = width-3;
+base_bottom_width = width-4;
 base_top_width = width;
 //needs to be smaller than top width but larger than bottom width
-buffer_width = width-3;
+buffer_width = width-3.5;
 
 headlight_x = 11.5;
 
@@ -179,9 +179,9 @@ motor_holder_length = motor_length + motor_clip_hole_d*3;
 //new base clip, relative to motor centre, mirrored xy
 motor_hold_screws = [motor_clip_hole_d,motor_length/2 + motor_clip_hole_d*0.75, 0];
 
-screwhole_from_edge = 5;
+screwhole_from_edge = 5.5;
 //to be mirrored in x and y
-base_wall_screwholes = [[width/2-screwhole_from_edge,base_arch_top_length/2+screwhole_from_edge/2,0],[width/2-5,length/2-screwhole_from_edge*1.5,0]];
+base_wall_screwholes = [[width/2-screwhole_from_edge,base_arch_top_length/2+screwhole_from_edge/2,0],[width/2-screwhole_from_edge,length/2-screwhole_from_edge*1.5,0]];
 shell_screwhole_thick = 2;
 
 //for calculating roof shape at the front
@@ -307,7 +307,7 @@ module springs(){
 
 //the bit of the ladder in the base
 module ladder_base(){
-	rung_z = base_thick*0.7;
+	rung_z = base_thick*0.6;
 	mirror_y(){
 		mirror_x()translate([width/2-base_pipe_space/2,door_length/2+girder_thick])centred_cube(base_pipe_space,girder_thick,base_thick);
 		
@@ -323,7 +323,7 @@ module crane_mount_box(){
 		
 		centred_cube(base_pipe_space,crane_mount_box_length,base_thick);
 		
-		translate([girder_thick+0.01,0,base_thick/2])centred_cube(base_pipe_space-girder_thick*2,crane_mount_box_length-girder_thick*2,base_thick/2-girder_thick);
+		translate([girder_thick+0.01,0,base_thick/3])centred_cube(base_pipe_space-girder_thick*2,crane_mount_box_length-girder_thick*2,2*base_thick/3-girder_thick);
 		
 	}
 }
