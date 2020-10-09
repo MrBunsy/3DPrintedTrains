@@ -230,7 +230,7 @@ module buffers(){
 		union(){
 			//front face
 			hull(){
-				translate([0,-front_end_thick/2,0])centred_cube(end_width,front_end_thick,girder_thick);
+				translate([0,-front_end_thick/2,0])centred_cube(end_width+front_outer_ridge_width*2,front_end_thick,girder_thick);
 				translate([0,-front_end_thick/2,base_thick-girder_thick])centred_cube(buffer_width,front_end_thick,girder_thick);
 				
 			}
@@ -1231,18 +1231,18 @@ module shell(){
 				translate([width/2,(ridgepos_boxtaper+ridgepos_boxdoor)/2,0])centred_cube(front_ridge_width*2,ridgepos_boxtaper-ridgepos_boxdoor,front_ridge_height);
 				hull(){
 					//bodge to add extra length. it shouldn't be needed?
-					translate([end_width/2,length/2+girder_thick,0])centred_cube(front_ridge_width*2,front_ridge_width*2,front_ridge_height);
+					translate([end_width/2,length/2,0])centred_cube(front_ridge_width*2,front_ridge_width*2,front_ridge_height);
 					translate([width/2,ridgepos_boxtaper-front_ridge_width,0])centred_cube(front_ridge_width*2,front_ridge_width*2,front_ridge_height);
 				}
 				hull(){
-					translate([end_width/2,length/2+girder_thick,0])centred_cube(front_outer_ridge_width*2,front_outer_ridge_width*2,front_outer_ridge_height);
+					translate([end_width/2,length/2,0])centred_cube(front_outer_ridge_width*2,front_outer_ridge_width*2,front_outer_ridge_height);
 					translate([width/2,ridgepos_boxtaper-front_outer_ridge_width,0])centred_cube(front_outer_ridge_width*2,front_outer_ridge_width*2,front_outer_ridge_height);
 				}
 			}
 			//very front
 			mirror_x(){
-				translate([0,length/2+girder_thick,0])centred_cube(end_width,front_ridge_width*2,front_ridge_height);
-				translate([0,length/2+girder_thick,0])centred_cube(end_width,front_outer_ridge_width*2,front_outer_ridge_height);
+				translate([0,length/2,0])centred_cube(end_width,front_ridge_width*2,front_ridge_height);
+				translate([0,length/2,0])centred_cube(end_width,front_outer_ridge_width*2,front_outer_ridge_height);
 			}
 
 			
@@ -1257,11 +1257,11 @@ module shell(){
 				
 				hull(){
 					//bodge to add extra length. it shouldn't be needed?
-					translate([end_width/2,-(length/2+girder_thick),0])centred_cube(front_ridge_width*2,front_ridge_width*2,front_ridge_height);
+					translate([end_width/2,-(length/2),0])centred_cube(front_ridge_width*2,front_ridge_width*2,front_ridge_height);
 					translate([width/2,ridgepos_fueltaper+front_ridge_width,0])centred_cube(front_ridge_width*2,front_ridge_width*2,front_ridge_height);
 					}
 				hull(){
-					translate([end_width/2,-(length/2+girder_thick),0])centred_cube(front_outer_ridge_width*2,front_outer_ridge_width*2,front_outer_ridge_height);
+					translate([end_width/2,-(length/2),0])centred_cube(front_outer_ridge_width*2,front_outer_ridge_width*2,front_outer_ridge_height);
 					translate([width/2,ridgepos_fueltaper+front_ridge_width,0])centred_cube(front_outer_ridge_width*2,front_outer_ridge_width*2,front_outer_ridge_height);
 				}
 				
@@ -1281,15 +1281,18 @@ module shell(){
 			
 				intersection(){
 				hull(){
-					//wall inside the cab
-						mirror_y()translate([end_width/2-wall_thick/2,length/2-wall_thick/2,0])centred_cube(wall_thick,wall_thick,front_height);
+					//wall inside the cab (raising up by ridge height)
+						mirror_y()translate([end_width/2-wall_thick/2,length/2-wall_thick/2,front_ridge_height])centred_cube(wall_thick,wall_thick,front_height - front_ridge_height);
 					//flat bit in the middle
 						translate([0,length/2+wall_front_midsection_y-wall_thick/2,wall_front_midsection_bottom_z])centred_cube(wall_front_midsection_width,wall_thick,wall_front_midsection_height);
 					}
+					
 				
 				//intersection with cylinder
 				translate([0,0,front_top_r_z])rotate([90,0,0])cylinder(r=front_top_r,h=length*2,center=true);
 					}
+					//wall at the bottom
+					mirror_y()translate([0,length/2-wall_thick/2,0])centred_cube(end_width,wall_thick,front_ridge_height);
 			}
 			//main section of roof
 			translate([0,0,wall_height])roof_shape(length-end_width_start*2);
