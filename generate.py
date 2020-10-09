@@ -36,12 +36,16 @@ def executeJob(job):
 jobs = []
 
 class66Variables = ["base", "shell", "bogies","motor_clip"]
+at_angle = ["base","shell"]
 full66Job = JobDescription("class66.scad", "class66_model")
 full66Job.addVariable("GEN_IN_PLACE", "true")
+
 for v in class66Variables:
     full66Job.addVariable("GEN_"+v.upper(), "true")
     job = JobDescription("class66.scad", "class66_{}".format(v))
     job.addVariable("GEN_IN_PLACE", "false")
+    #so it fits on the print bed without me having to fiddle it every tiem in the slicer
+    job.addVariable("ANGLE", "51" if v in at_angle else "0")
     for v2 in class66Variables:
         job.addVariable("GEN_"+v2.upper(), "true" if v==v2 else "false")
     jobs.append(job)

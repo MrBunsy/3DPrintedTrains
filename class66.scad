@@ -15,11 +15,13 @@ include <constants.scad>
 
 //non-dummy base needs scaffolding
 GEN_BASE = true;
-GEN_SHELL = false;
+GEN_SHELL = true;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
-GEN_IN_PLACE = false;
+GEN_IN_PLACE = true;
+
+ANGLE = 0;
 
 //dummy model has no motor
 DUMMY = false;
@@ -445,6 +447,30 @@ module front_mountpoints(){
 	}
 }
 
+//module of the "real" coupling, that will be entirely cosmetic
+module cosmetic_coupling(presubtract = false, subtract = true, postsubtract = false){
+	
+	cosmetic_coupling_width = 3.5;
+	cosmetic_coupling_length = 3;
+	cosmetic_coupling_height = 6;
+	cosmetic_coupling_z = 5;
+	
+	mirror_x(){
+		translate([0,length/2,0]){
+			if(presubtract){
+				//extra space behind the front face
+				translate([0,-cosmetic_coupling_length/4-girder_thick/2])centred_cube(cosmetic_coupling_width+girder_thick*2 ,cosmetic_coupling_length/2+girder_thick,buffer_front_height+base_thick);
+			}
+			if(subtract){
+				//space in teh front face
+				translate([0,0,cosmetic_coupling_z])centred_cube(cosmetic_coupling_width ,cosmetic_coupling_length,cosmetic_coupling_height);
+			}else{
+				
+			}
+		}
+	}
+}
+
 module base(){
 	underside_box_y = base_arch_bottom_length/2-(base_arch_bottom_length-fuel_tank_length)/2;
 	difference(){
@@ -533,11 +559,13 @@ module base(){
 				};
 				
 				front_mountpoints();
-				
+				cosmetic_coupling(true, false, false);
 			}//end additive union
 		
 		
-		union(){
+		union(){//subtractive union
+			
+			cosmetic_coupling(false, true, false);
 			
 			mirror_xy()translate([headlight_x, length/2,0])
 				{
@@ -612,7 +640,12 @@ module base(){
 			
 			
 		}//end subtractive union
+		
+		
 	}
+	//things to add in after the subtract
+	
+	cosmetic_coupling(false, false, true);
 }
 
 module bogie_axle_holder(axle_height){
@@ -1445,26 +1478,26 @@ module shell(){
 	
 	
 }
+optional_rotate([0,0,ANGLE],ANGLE != 0){
+	if(GEN_BASE){
+		echo("gen base");
+		optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)base();
+		
+	}
 
-if(GEN_BASE){
-	echo("gen base");
-	optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)base();
-	
+	if(GEN_BOGIES){
+		echo("gen bogies");
+		mirror_x(GEN_IN_PLACE && DUMMY)mirror([0,1,0])optional_translate([0,-(length/2 - motor_centre_from_end),base_height_above_track-bogie_mount_height-m3_washer_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)bogies();
+		
+	}
+
+	if(GEN_SHELL){
+		echo("gen shell");
+		optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)shell();
+	}
+	if(GEN_MOTOR_CLIP){
+		echo("gen motor clip");
+		optional_translate([0,-(length/2 - motor_centre_from_end),motor_clip_base_z+base_thick+base_height_above_track+motor_clip_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	
+	}
+
 }
-
-if(GEN_BOGIES){
-	echo("gen bogies");
-	mirror_x(GEN_IN_PLACE && DUMMY)mirror([0,1,0])optional_translate([0,-(length/2 - motor_centre_from_end),base_height_above_track-bogie_mount_height-m3_washer_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)bogies();
-	
-}
-
-if(GEN_SHELL){
-	echo("gen shell");
-	optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)shell();
-}
-if(GEN_MOTOR_CLIP){
-	echo("gen motor clip");
-	optional_translate([0,-(length/2 - motor_centre_from_end),motor_clip_base_z+base_thick+base_height_above_track+motor_clip_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	
-}
-
-
