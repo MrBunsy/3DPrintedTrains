@@ -423,6 +423,28 @@ module headlight_box(subtract = false){
 	}
 }
 
+//looks like these are used to secure the loco when shipping
+//this is a single, vertical, mounting point facing +ve y
+module front_mountpoint(){
+	mountpoint_size = 2.5;
+	mountpoint_r = mountpoint_size*0.75/2;
+	
+	difference(){
+		hull(){
+			translate([0,girder_thick/2,0])centred_cube(girder_thick,girder_thick,mountpoint_size);
+			translate([0,mountpoint_size-mountpoint_r,mountpoint_size/2])rotate([0,90,0])cylinder(r=mountpoint_r,h=girder_thick,center=true);
+		}
+		translate([0,mountpoint_size-mountpoint_r,mountpoint_size/2])rotate([0,90,0])cylinder(r=mountpoint_r/2,h=10,center=true);
+	}
+}
+
+module front_mountpoints(){
+	mirror_xy(){
+		translate([3.75,length/2,0.75])rotate([0,-45,0])front_mountpoint();
+		translate([6.75,length/2,2])rotate([0,-60,0])front_mountpoint();
+	}
+}
+
 module base(){
 	underside_box_y = base_arch_bottom_length/2-(base_arch_bottom_length-fuel_tank_length)/2;
 	difference(){
@@ -509,6 +531,8 @@ module base(){
 					}
 					
 				};
+				
+				front_mountpoints();
 				
 			}//end additive union
 		
@@ -1190,20 +1214,7 @@ module front_socket(){
 	translate([0,0,box_size/2])rotate([-90,0,0])cylinder(r=lid_r,h=wall_front_midsection_y);
 }
 
-//looks like these are used to secure the loco when shipping
-//this is a single, vertical, mounting point facing +ve y
-module front_mountpoint(){
-	mountpoint_size = 2.5;
-	mountpoint_r = mountpoint_size*0.75/2;
-	
-	difference(){
-		hull(){
-			centred_cube(girder_thick,girder_thick,mountpoint_size);
-			
-		}
-		rotate([0,90,0])cylinder(r=mountpoint_r/2,h=10,center=true);
-	}
-}
+
 
 module shell(){
 	
