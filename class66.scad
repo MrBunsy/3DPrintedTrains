@@ -17,7 +17,7 @@ include <constants.scad>
 GEN_BASE = true;
 GEN_SHELL = true;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = true;
+GEN_BOGIES = false;
 GEN_MOTOR_CLIP = true;
 GEN_IN_PLACE = true;
 
@@ -193,6 +193,13 @@ roof_front_overhang = 2.5;
 
 //there's a small ridge along teh sides from door to door
 side_base_ridge_height = 1.5;
+side_base_ridge_width = girder_thick;
+//the door-front-door section has a double ridge
+front_outer_ridge_height = girder_thick;
+front_outer_ridge_width = girder_thick;
+front_ridge_height = girder_thick*2;
+front_ridge_width = girder_thick/2;
+
 //fuel end grill is a double grill with relatively thin ridges
 side_fuel_grill_height = 12.5;
 side_fuel_grill_length = 38;
@@ -396,7 +403,7 @@ module headlight_box(subtract = false){
 	lights_box_height = 4.5;
 	//how far out the front this should extend
 	lights_box_length = 2;//1.75;
-	z = -2;
+	z = -3;
 	//note - subtraction is done after the main shape (unlike most of teh shell)
 	if(subtract){
 		//want it against the edge same distance it is from top and bottom
@@ -405,7 +412,7 @@ module headlight_box(subtract = false){
 		
 		//space for LEDs and wires
 		//white LED
-		translate([white_led_x,lights_box_length - led_3mm_total_length*0.9,z+lights_box_height/2])led_3mm();
+		translate([white_led_x,lights_box_length - led_3mm_total_length*0.9,z+lights_box_height/2])led_3mm(2);
 		//red LED
 		//this is fairly far back, mainly so the box can be printable (walls were too thin otherwise
 		//but has the advantage I can put a diffuser on the front to hide the fact I bought red-casing red LED, when really I want a clear casing red/white LED - turns out on the large-style lights the smaller light is both a daytime white and a rear red
@@ -894,7 +901,7 @@ module door(subtract=false){
 			}
 			
 			//step at the bottom of the ladder. Not sure this will survive the brim being removed...
-			translate([width/2+girder_thick/2,0,0])centred_cube(girder_thick,ladder_length,girder_thick);//ladder_rung_height
+		//note - now doing this as part of teh front ridge	//translate([width/2+girder_thick/2,0,0])centred_cube(girder_thick,ladder_length,girder_thick);//ladder_rung_height
 		}
 		
 	}
@@ -1205,11 +1212,62 @@ module shell(){
 
 		union(){
 			basic_shell_walls();
-			
-			ridgepos0=length/2-door_centre_from_box_end-door_length/2;
-			ridgepos1=-(length/2-door_centre_from_fuel_end-door_length/2);
+			ridge_door_dist = 0.25;
+			ridgepos0=length/2-door_centre_from_box_end-door_length/2 - ridge_door_dist;
+			ridgepos1=-(length/2-door_centre_from_fuel_end-door_length/2) + ridge_door_dist;
 			//bottom side ridges door-to-door (minus a smidge)
-			mirror_y()translate([width/2,(ridgepos0+ridgepos1)/2,0])centred_cube(girder_thick*2,ridgepos0-ridgepos1-0.5,side_base_ridge_height);
+			mirror_y()translate([width/2,(ridgepos0+ridgepos1)/2,0])centred_cube(side_base_ridge_width*2,ridgepos0-ridgepos1,side_base_ridge_height);
+			//^twice as thick just so I can lazily centre of width/2
+			
+			//front side ridges
+			//under the doors
+			//box end
+			ridgepos_boxdoor=length/2-door_centre_from_box_end+door_length/2+ridge_door_dist;
+			ridgepos_boxtaper = length/2-end_width_start;
+			//under door and until the beginning of the taper
+			mirror_y(){
+				translate([width/2,(ridgepos_boxtaper+ridgepos0)/2,0])centred_cube(front_outer_ridge_width*2,ridgepos_boxtaper-ridgepos0,front_outer_ridge_height);
+				//just front edge of door to taper start
+				translate([width/2,(ridgepos_boxtaper+ridgepos_boxdoor)/2,0])centred_cube(front_ridge_width*2,ridgepos_boxtaper-ridgepos_boxdoor,front_ridge_height);
+				hull(){
+					//bodge to add extra length. it shouldn't be needed?
+					translate([end_width/2,length/2+girder_thick,0])centred_cube(front_ridge_width*2,front_ridge_width*2,front_ridge_height);
+					translate([width/2,ridgepos_boxtaper-front_ridge_width,0])centred_cube(front_ridge_width*2,front_ridge_width*2,front_ridge_height);
+				}
+				hull(){
+					translate([end_width/2,length/2+girder_thick,0])centred_cube(front_outer_ridge_width*2,front_outer_ridge_width*2,front_outer_ridge_height);
+					translate([width/2,ridgepos_boxtaper-front_outer_ridge_width,0])centred_cube(front_outer_ridge_width*2,front_outer_ridge_width*2,front_outer_ridge_height);
+				}
+			}
+			//very front
+			mirror_x(){
+				translate([0,length/2+girder_thick,0])centred_cube(end_width,front_ridge_width*2,front_ridge_height);
+				translate([0,length/2+girder_thick,0])centred_cube(end_width,front_outer_ridge_width*2,front_outer_ridge_height);
+			}
+
+			
+			//fuel end
+			ridgepos_fueldoor=-(length/2-door_centre_from_fuel_end+door_length/2+ridge_door_dist);
+			ridgepos_fueltaper = -(length/2-end_width_start);
+			//under door and until the beginning of the taper
+			mirror_y(){
+				translate([width/2,(ridgepos_fueltaper+ridgepos1)/2,0])centred_cube(front_outer_ridge_width*2,abs(ridgepos_fueltaper-ridgepos1),front_outer_ridge_height);
+			//just front edge of door to taper start
+				translate([width/2,(ridgepos_fueltaper+ridgepos_fueldoor)/2,0])centred_cube(front_ridge_width*2,abs(ridgepos_fueltaper-ridgepos_fueldoor),front_ridge_height);
+				
+				hull(){
+					//bodge to add extra length. it shouldn't be needed?
+					translate([end_width/2,-(length/2+girder_thick),0])centred_cube(front_ridge_width*2,front_ridge_width*2,front_ridge_height);
+					translate([width/2,ridgepos_fueltaper+front_ridge_width,0])centred_cube(front_ridge_width*2,front_ridge_width*2,front_ridge_height);
+					}
+				hull(){
+					translate([end_width/2,-(length/2+girder_thick),0])centred_cube(front_outer_ridge_width*2,front_outer_ridge_width*2,front_outer_ridge_height);
+					translate([width/2,ridgepos_fueltaper+front_ridge_width,0])centred_cube(front_outer_ridge_width*2,front_outer_ridge_width*2,front_outer_ridge_height);
+				}
+				
+			}
+			
+			
 			
 			//angle of taper of walls
 			width_per_length = (width - end_width)/end_width_start;

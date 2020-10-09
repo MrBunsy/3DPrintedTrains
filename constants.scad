@@ -136,11 +136,11 @@ led_3mm_base_length = 1;
 led_3mm_tip_length = 5.08 - led_3mm_base_length;
 led_3mm_d = 3+0.2;
 //on its side, facing +ve y, 0,0 being base of LED 'head' and a box for wires
-module led_3mm(){
+module led_3mm(extra_base_length = led_base_extra){
 	
 	base_d = 4.05+0.1;
 	rotate([-90,0,0])cylinder(r=led_3mm_d/2, h=led_3mm_total_length);
-	rotate([-90,0,0])translate([0,0,-led_base_extra])cylinder(r=base_d/2, h=led_3mm_base_length+led_base_extra);
+	rotate([-90,0,0])translate([0,0,-extra_base_length ])cylinder(r=base_d/2, h=led_3mm_base_length+extra_base_length );
 }
 
 led_1_8mm_total_length = 3.1;
