@@ -15,11 +15,11 @@ include <constants.scad>
 
 //non-dummy base needs scaffolding
 GEN_BASE = true;
-GEN_SHELL = true;
+GEN_SHELL = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
-GEN_MOTOR_CLIP = true;
-GEN_IN_PLACE = true;
+GEN_MOTOR_CLIP = false;
+GEN_IN_PLACE = false;
 
 //dummy model has no motor
 DUMMY = false;
@@ -1447,19 +1447,23 @@ module shell(){
 }
 
 if(GEN_BASE){
+	echo("gen base");
 	optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)base();
-
+	
 }
 
 if(GEN_BOGIES){
+	echo("gen bogies");
 	mirror_x(GEN_IN_PLACE && DUMMY)mirror([0,1,0])optional_translate([0,-(length/2 - motor_centre_from_end),base_height_above_track-bogie_mount_height-m3_washer_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)bogies();
 	
 }
 
 if(GEN_SHELL){
+	echo("gen shell");
 	optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)shell();
 }
 if(GEN_MOTOR_CLIP){
+	echo("gen motor clip");
 	optional_translate([0,-(length/2 - motor_centre_from_end),motor_clip_base_z+base_thick+base_height_above_track+motor_clip_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	
 }
 
