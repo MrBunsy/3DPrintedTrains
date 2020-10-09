@@ -1180,6 +1180,16 @@ module roof_hatches(){
 	}
 }
 
+//what looks like a power socket on the front
+//facing +ve y, 0,0 at back centre
+module front_socket(){
+	box_size = 2.5;
+	lid_r = box_size*0.8/2;
+	lid_length = girder_thick;
+	translate([-box_size/2,0,0])cube([box_size,wall_front_midsection_y-lid_length,box_size]);
+	translate([0,0,box_size/2])rotate([-90,0,0])cylinder(r=lid_r,h=wall_front_midsection_y);
+}
+
 module shell(){
 	
 	front_window_width = 13.5;
@@ -1344,7 +1354,7 @@ module shell(){
 					}
 					
 				};
-			
+			mirror_x()translate([0,length/2,front_ridge_height])front_socket();
 		}
 			
 		
