@@ -39,7 +39,7 @@ wall_thick = 1.2;
 //the height of the flat bit in the middle of the front
 wall_front_midsection_height = 2.6;
 //z height of the bottom of this section
-wall_front_midsection_bottom_z = 5.5;
+wall_front_midsection_bottom_z = 5.5+1;
 //how far out from the main body the front nose sticks
 wall_front_midsection_y = 1.8;
 //distance from end that the taper starts twoards the narrorer end width
@@ -1190,16 +1190,31 @@ module front_socket(){
 	translate([0,0,box_size/2])rotate([-90,0,0])cylinder(r=lid_r,h=wall_front_midsection_y);
 }
 
+//looks like these are used to secure the loco when shipping
+//this is a single, vertical, mounting point facing +ve y
+module front_mountpoint(){
+	mountpoint_size = 2.5;
+	mountpoint_r = mountpoint_size*0.75/2;
+	
+	difference(){
+		hull(){
+			centred_cube(girder_thick,girder_thick,mountpoint_size);
+			
+		}
+		rotate([0,90,0])cylinder(r=mountpoint_r/2,h=10,center=true);
+	}
+}
+
 module shell(){
 	
 	front_window_width = 13.5;
-	front_window_height = 10.5;
+	front_window_height = 10.5-1;
 	front_window_r = 2;
-	front_window_z = 14;
-	front_window_x = 8;
+	front_window_z = 14+0.5;
+	front_window_x = 8-0.25;
 	side_window_length = 12;
-	side_window_height = 9.5;
-	side_window_z = 8.3;
+	side_window_height = 9.5-0.5;
+	side_window_z = 8.3+1;
 	side_window_y = 4.9;
 	side_window_bottom_corner_r=1.2;
 	side_window_bottom_corner_z=side_window_z+1.9;
