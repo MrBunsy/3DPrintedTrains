@@ -14,8 +14,8 @@ include <constants.scad>
 //TODO motor hinge point isn't in the centre of its length, so need to re-arrange hole in the base an the motor holder arm to give it the best space
 
 //non-dummy base needs scaffolding
-GEN_BASE = true;
-GEN_SHELL = false;
+GEN_BASE = false;
+GEN_SHELL = true;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
@@ -429,6 +429,32 @@ module headlight_box(subtract = false){
 	}
 }
 
+module top_headlights(subtract = true){
+	top_headlight_width = 4.5;
+	top_headlight_total_height = 3.3;
+	top_headlight_mid_height = 2.5;
+	top_headlight_top_width = 2;
+	top_headlight_length = wall_front_midsection_y;
+	top_headlight_z = 20;
+	
+	mirror_x()translate([0,length/2+top_headlight_length/2,top_headlight_z]){
+		
+		if(subtract){
+			translate([0,-2.5,top_headlight_total_height/2])rotate([0,90,0])led_1_8mm(3,6);
+		}else{
+			echo("headlight");
+		
+			hull(){
+				//bottom half
+				centred_cube(top_headlight_width,top_headlight_length,top_headlight_mid_height);
+				//top bit
+				centred_cube(top_headlight_top_width,top_headlight_length,top_headlight_total_height);
+			}
+		}
+	
+	}
+}
+
 //looks like these are used to secure the loco when shipping
 //this is a single, vertical, mounting point facing +ve y
 module front_mountpoint(){
@@ -565,6 +591,7 @@ module base(){
 					
 				};
 				
+				
 				front_mountpoints();
 				cosmetic_coupling(true, false, false);
 			}//end additive union
@@ -583,6 +610,7 @@ module base(){
 					}
 					
 				};
+				
 			
 			
 			if(!DUMMY){
@@ -1420,6 +1448,7 @@ module shell(){
 					}
 					
 				};
+				top_headlights(false);
 			mirror_x()translate([0,length/2,front_ridge_height])front_socket();
 		}
 			
@@ -1467,6 +1496,7 @@ module shell(){
 				}
 				
 			};
+			top_headlights(true);
 			
 		}
 	
