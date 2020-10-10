@@ -15,11 +15,14 @@ include <constants.scad>
 
 //non-dummy base needs scaffolding
 GEN_BASE = true;
-GEN_SHELL = true;
+GEN_SHELL = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
-GEN_IN_PLACE = true;
+GEN_IN_PLACE = false;
+
+//generate tiny things that won't print well
+GEN_TINY_BITS = false;
 
 ANGLE = 0;
 
@@ -181,7 +184,8 @@ motor_holder_length = motor_length + motor_clip_hole_d*3;
 //new base clip, relative to motor centre, mirrored xy
 motor_hold_screws = [motor_clip_hole_d,motor_length/2 + motor_clip_hole_d*0.75, 0];
 
-screwhole_from_edge = 5.5;
+//5.5 isn't far enough away from the enlarged pipespace, althouhg 5.75 is plenty.
+screwhole_from_edge = 5.75;
 //to be mirrored in x and y
 base_wall_screwholes = [[width/2-screwhole_from_edge,base_arch_top_length/2+screwhole_from_edge/2,0],[width/2-screwhole_from_edge,length/2-screwhole_from_edge*1.5,0]];
 shell_screwhole_thick = 2;
@@ -436,7 +440,10 @@ module front_mountpoint(){
 			translate([0,girder_thick/2,0])centred_cube(girder_thick,girder_thick,mountpoint_size);
 			translate([0,mountpoint_size-mountpoint_r,mountpoint_size/2])rotate([0,90,0])cylinder(r=mountpoint_r,h=girder_thick,center=true);
 		}
-		translate([0,mountpoint_size-mountpoint_r,mountpoint_size/2])rotate([0,90,0])cylinder(r=mountpoint_r/2,h=10,center=true);
+		if(GEN_TINY_BITS){
+			//these barely slice and definitely don't print
+			translate([0,mountpoint_size-mountpoint_r,mountpoint_size/2])rotate([0,90,0])cylinder(r=mountpoint_r/2,h=10,center=true);
+		}
 	}
 }
 
