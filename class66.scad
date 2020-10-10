@@ -5,11 +5,10 @@ include <constants.scad>
 //the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body, likewise with the roof of the shell
 //the DC socket and switch holders still need scaffolding, as does the motor holder screwholes in the shell
 
-//TODO fix/finish interactiosn between buffers and pipe space, then the base will be close to finished
-//TODO wonky battery holders to hold 8 AAAs in the fuel container of the base
-//TODO finish ridge around the base of the whole shell
 //TODO final detail on the roof
 //TODO improve shape of rainguards
+
+//TODO mountings for pi and camera - screholes in base and a new peice?
 
 //TODO motor hinge point isn't in the centre of its length, so need to re-arrange hole in the base an the motor holder arm to give it the best space
 
@@ -19,6 +18,8 @@ GEN_SHELL = true;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
+//can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
+//GEN_LIGHTS_FACEPLATE = true;
 GEN_IN_PLACE = false;
 
 //generate tiny things that won't print well
@@ -39,6 +40,10 @@ height = m2mm(3.9);
 
 wall_height = 18.6;
 wall_thick = 1.2;
+
+//how far out the front the headlight box should extend
+lights_box_length = 2;//1.75;
+lights_box_faceplate_thick = 0;//lights_box_length*0.25;
 
 
 //the height of the flat bit in the middle of the front
@@ -403,12 +408,12 @@ module battery_holder(subtract=true){
 //headlight box is split between base and shell. both will use this module, but slice it so they only get the half that fits on each - so it will be designed to slot together and hollow out space for LEDs
 //this is for the headlight in +ve x and y quad, with 0,0 of this module lining up with centre (in x) of lights box and y lining up with the front of the loco (lenght/2), z lining up with the top of the base/bottom of the shell
 //this is with +ve in the final upright position (so will be upside down for the default position of the base)
+//latest plan: since the plastic between the red and white LEDs snaps offeasily, the box connected to the base and shell will be less long, and a separate plate can be glued over the top afterwards
 module headlight_box(subtract = false){
 	//large lights style, since I think that's easiest with LEDs
 	lights_box_width = 7;
 	lights_box_height = 4.5;
-	//how far out the front this should extend
-	lights_box_length = 2;//1.75;
+	
 	z = -3;
 	//note - subtraction is done after the main shape (unlike most of teh shell)
 	if(subtract){
@@ -418,13 +423,17 @@ module headlight_box(subtract = false){
 		
 		//space for LEDs and wires
 		//white LED
-		translate([white_led_x,lights_box_length - led_3mm_total_length*0.9,z+lights_box_height/2])led_3mm(2);
+		translate([white_led_x,-wall_thick,z+lights_box_height/2])led_3mm(2);
 		//red LED
 		//this is fairly far back, mainly so the box can be printable (walls were too thin otherwise
 		//but has the advantage I can put a diffuser on the front to hide the fact I bought red-casing red LED, when really I want a clear casing red/white LED - turns out on the large-style lights the smaller light is both a daytime white and a rear red
-		translate([-(lights_box_width/2-led_1_8mm_d/2-led_edge_space), - led_1_8mm_base_length-wall_thick/2,z+lights_box_height-led_1_8mm_d/2-led_edge_space])led_1_8mm(3,6);
-	}else{
-			translate([-lights_box_width/2,0,z])cube([lights_box_width,lights_box_length,lights_box_height]);
+		translate([-(lights_box_width/2-led_1_8mm_d/2-led_edge_space), -wall_thick,z+lights_box_height-led_1_8mm_d/2-led_edge_space])led_1_8mm(3,6);
+		
+		
+		
+	}else{//shorter by lights_box_faceplate_thick
+			translate([-lights_box_width/2,0,z])cube([lights_box_width,lights_box_length-lights_box_faceplate_thick,lights_box_height]);
+		//the blank plate above the box
 		translate([-lights_box_width/2,0,z+lights_box_height])cube([lights_box_width,lights_box_length*0.75,lights_box_height]);
 	}
 }
@@ -440,7 +449,7 @@ module top_headlights(subtract = true){
 	mirror_x()translate([0,length/2+top_headlight_length/2,top_headlight_z]){
 		
 		if(subtract){
-			translate([0,-2.5,top_headlight_total_height/2])rotate([0,90,0])led_1_8mm(3,6);
+			translate([0,-top_headlight_length/2-wall_thick,top_headlight_total_height/2])rotate([0,90,0])led_1_8mm(3,6);
 		}else{
 			echo("headlight");
 		
@@ -610,7 +619,13 @@ module base(){
 					}
 					
 				};
+				//bigger space for wires for LEDs behind the headlightboxes
+				wire_space_length1=buffer_box_length_top-wall_thick-0.2;
+				wire_space_depth = base_thick-1.75;
 				
+				mirror_x()translate([0,length/2-wire_space_length1/2-wall_thick,-0.001])centred_cube(end_width-wall_thick*2,wire_space_length1,wire_space_depth);
+				wire_space_length2=2;
+				mirror_x()translate([0,length/2-wire_space_length1-wire_space_length2/2-wall_thick,-0.001])centred_cube(width-base_pipe_space*2-girder_thick,wire_space_length2+0.01,wire_space_depth);
 			
 			
 			if(!DUMMY){
@@ -1263,12 +1278,19 @@ module roof_hatches(){
 	hatch_length = 17.5;
 	hatch_distance=18.8;
 	roof_shape = roof_corners(width);
-	hatch_width = abs(roof_shape[2][0] - roof_shape[3][0]);
+	dx = roof_shape[2][0] - roof_shape[3][0];
+	dz = roof_shape[2][2] - roof_shape[3][2];
+	hatch_width = sqrt(dx*dx+dz*dz)*0.9;
 	hatch_centre_x = abs(roof_shape[2][0] + roof_shape[3][0])/2;
-	hatch_centre_z = (roof_shape[2][2] + roof_shape[3][2])/2;
+	hatch_centre_z = wall_height+(roof_shape[2][2] + roof_shape[3][2])/2;
+	hatch_thick = girder_thick*0.6;
+	angle = atan(dz/dx);
 	
-	mirror_xy(){
-		//translate([0,hatch_distance/2,])
+	translate([0,roof_notches_positions[0][0]+roof_notches_positions[0][1]/2+hatch_length/2+hatch_distance/2 + 1,0])mirror_xy(){
+		translate([hatch_centre_x,hatch_distance/2,hatch_centre_z])hull(){
+			rotate([0,angle,0])centred_cube(hatch_width, hatch_length,wall_thick+hatch_thick);
+			rotate([0,angle,0])centred_cube(0.01,0.01,wall_thick+hatch_thick*2);
+		}
 	}
 }
 

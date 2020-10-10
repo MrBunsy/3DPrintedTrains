@@ -135,12 +135,13 @@ led_3mm_total_length = 5.08;
 led_3mm_base_length = 1;
 led_3mm_tip_length = 5.08 - led_3mm_base_length;
 led_3mm_d = 3+0.2;
-//on its side, facing +ve y, 0,0 being base of LED 'head' and a box for wires
+//on its side, facing +ve y, 0,0 being base of LED tip (flange is in -ve y direction) and a box for wires
 module led_3mm(extra_base_length = led_base_extra){
-	
-	base_d = 4.05+0.1;
-	rotate([-90,0,0])cylinder(r=led_3mm_d/2, h=led_3mm_total_length);
-	rotate([-90,0,0])translate([0,0,-extra_base_length ])cylinder(r=base_d/2, h=led_3mm_base_length+extra_base_length );
+	translate([0,-led_3mm_base_length,0]){
+		base_d = 4.05+0.1;
+		rotate([-90,0,0])cylinder(r=led_3mm_d/2, h=led_3mm_total_length);
+		rotate([-90,0,0])translate([0,0,-extra_base_length ])cylinder(r=base_d/2, h=led_3mm_base_length+extra_base_length );
+	}
 }
 
 led_1_8mm_total_length = 3.1;
@@ -148,8 +149,12 @@ led_1_8mm_tip_length = 1.55;
 led_1_8mm_base_length = led_1_8mm_total_length - led_1_8mm_tip_length;
 led_1_8mm_d = 1.8+0.2;
 led_1_8_base_width=3.3+0.2;
+//on its side, facing +ve y, 0,0 being base of LED tip (flange is in -ve y direction) and a box for wires
 module led_1_8mm(extra_base_length = led_base_extra, extra_front_length = 0){
-	rotate([-90,0,0])cylinder(r=led_1_8mm_d/2, h=led_1_8mm_total_length+extra_front_length);
 	
-	translate([0,(led_1_8mm_base_length+extra_base_length)/2-extra_base_length,-led_1_8_base_width/2])centred_cube(2.4+0.2,led_1_8mm_base_length+extra_base_length,led_1_8_base_width);
+	translate([0,-led_1_8mm_base_length,0]){
+		rotate([-90,0,0])cylinder(r=led_1_8mm_d/2, h=led_1_8mm_total_length+extra_front_length);
+		
+		translate([0,(led_1_8mm_base_length+extra_base_length)/2-extra_base_length,-led_1_8_base_width/2])centred_cube(2.4+0.2,led_1_8mm_base_length+extra_base_length,led_1_8_base_width);
+	}
 }
