@@ -1283,13 +1283,13 @@ module roof_hatches(){
 	hatch_width = sqrt(dx*dx+dz*dz)*0.9;
 	hatch_centre_x = abs(roof_shape[2][0] + roof_shape[3][0])/2;
 	hatch_centre_z = wall_height+(roof_shape[2][2] + roof_shape[3][2])/2;
-	hatch_thick = girder_thick*0.6;
+	hatch_thick =girder_thick*0.75;// 0.2;//girder_thick*0.2;
 	angle = atan(dz/dx);
 	
 	translate([0,roof_notches_positions[0][0]+roof_notches_positions[0][1]/2+hatch_length/2+hatch_distance/2 + 1,0])mirror_xy(){
 		translate([hatch_centre_x,hatch_distance/2,hatch_centre_z])hull(){
-			rotate([0,angle,0])centred_cube(hatch_width, hatch_length,wall_thick+hatch_thick);
-			rotate([0,angle,0])centred_cube(0.01,0.01,wall_thick+hatch_thick*2);
+			rotate([0,angle,0])centred_cube(hatch_width, hatch_length,wall_thick/2+hatch_thick);
+			rotate([0,angle,0])centred_cube(0.01,0.01,wall_thick/2+hatch_thick*2.5);
 		}
 	}
 }
