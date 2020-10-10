@@ -312,10 +312,10 @@ module springs(){
 		
 		
 		translate([base_top_width/2-base_pipe_space/2,0,0])centred_cube(base_pipe_space,girder_thick,girder_thick);
-		translate([spring_width/2-bottom_width/2,0,base_thick-girder_thick*2])centred_cube(bottom_width,girder_thick,girder_thick);
+		translate([spring_width/2-bottom_width/2,0,base_thick-girder_thick*1.5])centred_cube(bottom_width,girder_thick,girder_thick);
 	}
-	
-	mirror_y()translate([spring_width/2-bottom_width,0,base_thick-girder_thick])cylinder(h=girder_thick,r=bottom_width);
+	//making the semicircle half as thick as the ledge, so it should slice better (not trying to print semi-circles on thin air)
+	mirror_y()translate([spring_width/2-bottom_width,0,base_thick-girder_thick/2])cylinder(h=girder_thick/2,r=bottom_width);
 }
 
 //the bit of the ladder in the base
