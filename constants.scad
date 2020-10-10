@@ -14,6 +14,7 @@ top_of_buffer_from_top_of_rail = 17;//16.0;
 axle_width = 25.65;
 
 m2_thread_size = 2;
+m2_thread_size_vertical = 1.95;
 m2_thread_size_loose = 2.3;
 //actually 3.9, but this allows space
 m2_head_size=4.5;

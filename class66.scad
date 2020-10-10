@@ -889,7 +889,7 @@ module shell_screwhole(from_edge=screwhole_from_edge){
 			cylinder(r=m2_thread_size*1.5,h=shell_screwhole_thick);
 			translate([from_edge/2,0,0])centred_cube(from_edge,m2_thread_size*3,shell_screwhole_thick);
 		}
-		cylinder(r=m2_thread_size/2,h=shell_screwhole_thick*3,center=true);
+		cylinder(r=m2_thread_size_vertical/2,h=shell_screwhole_thick*3,center=true);
 		
 	}
 }
@@ -1240,7 +1240,7 @@ module motor_holder(){
 			//don't overlap with space for motor
 			cylinder(r=motor_length/2,h=100);
 			//screwholes
-			translate([0,0,motor_clip_base_z+motor_clip_thick-screw_depth])mirror_xy()translate(motor_hold_screws)cylinder(r=m2_thread_size/2,h=100);
+			translate([0,0,motor_clip_base_z+motor_clip_thick-screw_depth])mirror_xy()translate(motor_hold_screws)cylinder(r=m2_thread_size_vertical/2,h=100);
 		}
 	}
 }
@@ -1250,8 +1250,8 @@ module motor_holder_holder(){
 	intersection(){
 		translate([0,0,motor_clip_shell_z+motor_clip_thick+girder_thick]){
 			difference(){
-				mirror_y()translate([motor_holder_screws_x,0,0])cylinder(r=m2_thread_size,h=10);
-				mirror_y()translate([motor_holder_screws_x,0,0])cylinder(r=m2_thread_size/2,h=100,center=true);
+				mirror_y()translate([motor_holder_screws_x,0,0])cylinder(r=m2_thread_size_vertical,h=10);
+				mirror_y()translate([motor_holder_screws_x,0,0])cylinder(r=m2_thread_size_vertical/2,h=100,center=true);
 			}
 		}
 	
