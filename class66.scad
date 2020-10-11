@@ -1386,7 +1386,7 @@ module middle_hoover_head(){
 
 //for keeping the overhead lines free of leaves.
 module roof_hoover(subtract=false){
-	
+	union(){
 	if(subtract){
 		//main body
 		translate([0,hoover_end_y-hoover_body_length/2,hoover_z])centred_cube(width,hoover_body_length+0.001,20);
@@ -1456,12 +1456,13 @@ module roof_hoover(subtract=false){
 			}
 			union(){
 				//chop off anything below the roof
-				translate([0,0,hoover_z-20])centred_cube(width,length,20);
+				translate([0,0,hoover_z-20])centred_cube(width,length,19.5);
 				//hole in the body
 				translate([hoover_body_width/2-4,hoover_end_y-3.75,0])cylinder(r=3,h=height*1.5);
 			}
 		}
 	}
+}
 }
 
 module shell(){
