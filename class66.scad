@@ -1371,12 +1371,17 @@ module middle_hoover_head(){
 	
 	
 	
-	translate([0,hoover_end_y-hoover_body_length-hoover_arm_to_body_length-hoover_arm_mid_length-hoover_arm_to_head_length-hoover_head_length*0.25,hoover_z+hoover_to_end_z])hull(){
+	translate([0,hoover_end_y-hoover_body_length-hoover_arm_to_body_length-hoover_arm_mid_length-hoover_arm_to_head_length-hoover_head_length*0.25,hoover_z+hoover_to_end_z])
+	{
+		hull(){
 		
-		mirror_y()translate([hoover_head_width/2-hoover_head_height/2,0,0])rotate([90,0,0])cylinder(r=hoover_head_height/2,h=hoover_head_length/2,center=true,$fn=50);
-		//middle of head
-		centred_cube(hoover_head_width/3,hoover_head_length/2,hoover_head_height);
-	}	
+			mirror_y()translate([hoover_head_width/2-hoover_head_height/2,0,0])rotate([90,0,0])cylinder(r=hoover_head_height/2,h=hoover_head_length/2,center=true,$fn=50);
+			//middle of head
+			centred_cube(hoover_head_width/3,hoover_head_length/2,hoover_head_height);
+		}	
+		//extra bit underneath to help hull to main arm
+		translate([0,0,-hoover_to_end_z])centred_cube(hoover_head_width,hoover_head_length/2,hoover_to_end_z);
+	}
 }
 
 //for keeping the overhead lines free of leaves.
@@ -1427,7 +1432,8 @@ module roof_hoover(subtract=false){
 				
 				//arm to head
 				hull(){
-					middle_hoover_head();	
+					middle_hoover_head();
+					
 					//arm end
 					translate([0,hoover_end_y-hoover_body_length-hoover_arm_to_body_length-hoover_arm_mid_length+0.5, hoover_arm_z]){
 						scale([1,1,0.75])rotate([90,0,0])cylinder(r=hoover_arm_width/2,h=1,center=true,$fn=50);
