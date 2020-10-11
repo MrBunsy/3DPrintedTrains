@@ -1114,7 +1114,7 @@ module big_side_ridges(length=10){
 	}
 	
 }
-
+//very slow, use sparingly. think it shouldn't be needed anymore
 module wall_and_roof_slice(long = girder_thick,wall_gap=side_base_ridge_height,solid=false,roof_only=false){
 	//walls
 	if(!roof_only){
@@ -1132,23 +1132,39 @@ module wall_and_roof_slice(long = girder_thick,wall_gap=side_base_ridge_height,s
 	}
 }
 
+module wall_and_roof_slice_simple(roof_only=false,ridge_height=1){
+	corners = roof_corners(width);
+		//square_size = module_slice_thick;
+		translate([0,0,wall_height]){
+			for(i=[0:len(corners)-2]){
+				hull(){
+					for(corner=[corners[i],corners[i+1]]){
+						//translate(corner)centred_cube(girder_thick,girder_thick,girder_thick);
+						translate(corner)rotate([90,0,0])cylinder(r=wall_thick/2,h=girder_thick,$fn=6,center=true);
+					}
+				}
+			}
+		}
+		if(!roof_only){
+			//down to ridges
+			mirror_y()translate([width/2-wall_thick/2,0,ridge_height])centred_cube(wall_thick,girder_thick,wall_height-ridge_height);
+		}
+}
+
+module_slice_thick = girder_thick;
 //where I think different modules might be attached? it's a ridge that travels up the walls and over the roof anyway
 module module_slice(roof_only=false){
-	scale_by_x = (width+wall_thick*2-girder_thick)/width;
-	scale_by_z = (wall_height+roof_top_from_walls+wall_thick-girder_thick/2)/(wall_height+roof_top_from_walls);
-	
-	scale([scale_by_x,1,scale_by_z])wall_and_roof_slice(girder_thick,side_base_ridge_height/scale_by_z,false,roof_only);
+
+		//old, computationally slow way
+		scale_by_x = (width+wall_thick*2-module_slice_thick)/width;
+		scale_by_z = (wall_height+roof_top_from_walls+wall_thick-module_slice_thick/2)/(wall_height+roof_top_from_walls);
+		
+		scale([scale_by_x,1,scale_by_z])wall_and_roof_slice_simple(roof_only,side_base_ridge_height/scale_by_z);
+	//wall_and_roof_slice(module_slice_thick,side_base_ridge_height/scale_by_z,false,roof_only);
+
 		
 }
 
-//the two module_slices in position
-module module_slices(){
-	
-	for(y=module_ys){
-		translate([0,y,0])module_slice();
-	}
-	translate([0,length/2-door_centre_from_box_end-door_and_handrails_length/2-girder_thick,0])module_slice(true);
-}
 
 module door_indent(){
 //
@@ -1260,14 +1276,26 @@ module motor_holder_holder(){
 	}
 }
 
-roof_notches_positions=[[module_ys[0]+18,17.5] , [length/2-door_centre_from_box_end+2.5,12]];
+//the two module_slices in position
+module module_slices(){
+	//whole body slices
+	for(y=module_ys){
+		translate([0,y,0])module_slice();
+	}
+	//roof only slices
+	translate([0,length/2-door_centre_from_box_end-door_and_handrails_length/2-girder_thick,0])module_slice(true);
+	translate([0,length/2-door_centre_from_box_end-door_and_handrails_length/2+girder_thick*2,0])module_slice(true);
+}
+
 roof_notches_z = 29;
+roof_notches_positions=[[module_ys[0]+18,17.5,roof_notches_z] , [length/2-door_centre_from_box_end+2.5,12,roof_notches_z]];
+
 
 module roof_notches(){
-	//[y pos, length]
+	//[y pos, length, zpos]
 
 	for(notch = roof_notches_positions){
-		translate([0,notch[0],roof_notches_z])centred_cube(width,notch[1],10);
+		translate([0,notch[0],notch[2]])centred_cube(width,notch[1],notch[2]);
 	}
 	
 	
@@ -1304,7 +1332,10 @@ module front_socket(){
 	translate([0,0,box_size/2])rotate([-90,0,0])cylinder(r=lid_r,h=wall_front_midsection_y);
 }
 
-
+//for keeping the overhead lines free of leaves.
+module roof_hoover(subtract=false){
+	
+}
 
 module shell(){
 	
