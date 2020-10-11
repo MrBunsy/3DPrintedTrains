@@ -5,12 +5,12 @@ include <constants.scad>
 //the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body, likewise with the roof of the shell
 //the DC socket and switch holders still need scaffolding, as does the motor holder screwholes in the shell
 
-//TODO final detail on the roof
-//TODO improve shape of rainguards
+//TODO final detail on the roof (should just be some grills on top now)
+//TODO improve shape of rainguards?
 
 //TODO mountings for pi and camera - screholes in base and a new peice?
 
-//TODO motor hinge point isn't in the centre of its length, so need to re-arrange hole in the base an the motor holder arm to give it the best space
+//TODO motor hinge point isn't in the centre of its length, so need to re-arrange hole in the base an the motor holder arm to give it the best space - not sure worth the effort
 
 //non-dummy base needs scaffolding
 GEN_BASE = false;
@@ -233,8 +233,27 @@ hoover_end_y = length/2-door_centre_from_box_end-door_and_handrails_length*1.5-h
 hoover_body_length = 28.5;
 //should be high enough that we can still have a bridged section of the underside of the roof
 hoover_z = 27;
-hoover_arm_width = 10;
+hoover_arm_space_width = 10;
+//length of the bit of the arm over the module with the hoover body
+hoover_arm_module_length = (hoover_end_y-hoover_body_length) - (module_ys[1]-girder_thick/2);
+hoover_arm_length = hoover_arm_module_length * 1.5;
 
+hoover_to_arm_z=2;
+hoover_arm_z = hoover_z + hoover_to_arm_z;
+hoover_to_end_z=1.75;
+hoover_head_y = module_ys[1]-girder_thick/2 - (hoover_arm_length-hoover_arm_module_length)/2;
+hoover_head_extra_cutout = 0.5;
+
+hoover_body_width = 16.5;
+//arm of the hoover
+hoover_arm_width = 6;
+
+hoover_arm_mid_length = hoover_arm_length*0.4;
+hoover_arm_to_body_length = hoover_arm_length*0.1;
+hoover_arm_to_head_length = hoover_arm_length*0.3;
+hoover_head_length = hoover_arm_length*0.2;
+hoover_head_width = hoover_arm_space_width;
+hoover_head_height = 2;
 
 module motor_space(){
 	intersection(){
@@ -1348,29 +1367,86 @@ module front_socket(){
 	translate([0,0,box_size/2])rotate([-90,0,0])cylinder(r=lid_r,h=wall_front_midsection_y);
 }
 
+module middle_hoover_head(){
+	
+	
+	
+	translate([0,hoover_end_y-hoover_body_length-hoover_arm_to_body_length-hoover_arm_mid_length-hoover_arm_to_head_length-hoover_head_length*0.25,hoover_z+hoover_to_end_z])hull(){
+		
+		mirror_y()translate([hoover_head_width/2-hoover_head_height/2,0,0])rotate([90,0,0])cylinder(r=hoover_head_height/2,h=hoover_head_length/2,center=true,$fn=50);
+		//middle of head
+		centred_cube(hoover_head_width/3,hoover_head_length/2,hoover_head_height);
+	}	
+}
+
 //for keeping the overhead lines free of leaves.
 module roof_hoover(subtract=false){
 	
-	hoover_body_width = 16.5;
 	if(subtract){
 		//main body
 		translate([0,hoover_end_y-hoover_body_length/2,hoover_z])centred_cube(width,hoover_body_length+0.001,20);
 		//"arm"
-		arm_length = (hoover_end_y-hoover_body_length) - (module_ys[1]-girder_thick/2);
+		
 		arm_y = ((hoover_end_y-hoover_body_length) + module_ys[1]-girder_thick/2)/2;
-		translate([0,arm_y,hoover_z])centred_cube(hoover_arm_width,arm_length,10);
+		translate([0,arm_y,hoover_z])centred_cube(hoover_arm_space_width,hoover_arm_module_length,10);
+		
+		
+		//end of arm
+		translate([0,hoover_head_y-hoover_head_extra_cutout/2,hoover_z+hoover_to_end_z])centred_cube(hoover_arm_space_width*1.2,hoover_arm_length-hoover_arm_module_length + hoover_head_extra_cutout,10);
 	}else{
 		difference(){
 			union(){
-				//hull(){
-					/*mirror_y()translate([5,hoover_end_y-hoover_body_length/2, hoover_z])rotate([90,0,0])cylinder(r=3,h=hoover_body_length,center=true);
-					
-					translate([0,hoover_end_y-hoover_body_length/2, hoover_z])rotate([90,0,0])cylinder(r=4,h=hoover_body_length,center=true);
-					*/
 				
+					//main body of the hoover
 					translate([0,hoover_end_y-hoover_body_length/2, hoover_z])scale([1,1,0.5])rotate([90,0,0])cylinder(r=hoover_body_width/2,h=hoover_body_length,center=true);
 				translate([0,hoover_end_y-hoover_body_length/2, hoover_z])mirror_xy()translate([hoover_body_width/2,hoover_body_length/2-4,0])centred_cube(2,2,1);
-				//}
+				
+				
+				
+				
+				//body to arm
+				hull(){
+					//body end
+					translate([0,hoover_end_y-hoover_body_length, hoover_z])scale([1,1,0.75])rotate([90,0,0])cylinder(r=hoover_arm_width/2,h=hoover_arm_mid_length,center=true,$fn=50);
+					//arm end
+					translate([0,hoover_end_y-hoover_body_length-hoover_arm_to_body_length-0.5, hoover_arm_z]){
+						scale([1,1,0.75])rotate([90,0,0])cylinder(r=hoover_arm_width/2,h=1,center=true,$fn=50);
+						translate([0,0,-hoover_to_arm_z])centred_cube(hoover_arm_width,1,hoover_to_arm_z);
+					}
+				}
+				
+				//mid arm
+				translate([0,hoover_end_y-hoover_body_length-hoover_arm_to_body_length-hoover_arm_mid_length/2, hoover_arm_z]){
+					
+					scale([1,1,0.75])rotate([90,0,0])cylinder(r=hoover_arm_width/2,h=hoover_arm_mid_length,center=true,$fn=50);
+					translate([0,0,-hoover_to_arm_z])centred_cube(hoover_arm_width,hoover_arm_mid_length,hoover_to_arm_z);
+				}
+				
+				
+				//head of the hoover
+				
+				//arm to head
+				hull(){
+					middle_hoover_head();	
+					//arm end
+					translate([0,hoover_end_y-hoover_body_length-hoover_arm_to_body_length-hoover_arm_mid_length+0.5, hoover_arm_z]){
+						scale([1,1,0.75])rotate([90,0,0])cylinder(r=hoover_arm_width/2,h=1,center=true,$fn=50);
+						translate([0,0,-hoover_to_arm_z])centred_cube(hoover_arm_width,1,hoover_to_arm_z);
+					}
+				}
+				
+				middle_hoover_head();
+				
+				//end of hoover head
+				
+				hull(){
+					middle_hoover_head();
+					mirror_y()translate([hoover_head_width/2-hoover_head_height/2,hoover_end_y-hoover_body_length-hoover_arm_to_body_length-hoover_arm_mid_length-hoover_arm_to_head_length-hoover_head_length+hoover_head_height/2,hoover_z+hoover_to_end_z])sphere(r=hoover_head_height/2,$fn=50);
+				}
+				
+				
+				//base of head bit
+				translate([0,hoover_head_y-hoover_head_extra_cutout/2,hoover_z])centred_cube(hoover_arm_space_width*1.2,hoover_arm_length-hoover_arm_module_length+hoover_head_extra_cutout,hoover_to_end_z);
 			}
 			union(){
 				//chop off anything below the roof
