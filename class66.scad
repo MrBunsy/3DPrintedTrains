@@ -227,6 +227,15 @@ module_ys = [-60,21];
 fuel_side_hatch_length = 12;
 fuel_side_hatch_y = -60+9;
 
+
+hoover_notch_length = 14;
+hoover_end_y = length/2-door_centre_from_box_end-door_and_handrails_length*1.5-hoover_notch_length;
+hoover_body_length = 28.5;
+//should be high enough that we can still have a bridged section of the underside of the roof
+hoover_z = 27;
+hoover_arm_width = 10;
+
+
 module motor_space(){
 	intersection(){
 		cylinder(r=motor_length/2,h=100,center=true);
@@ -1276,6 +1285,8 @@ module motor_holder_holder(){
 	}
 }
 
+
+
 //the two module_slices in position
 module module_slices(){
 	//whole body slices
@@ -1284,11 +1295,16 @@ module module_slices(){
 	}
 	//roof only slices
 	translate([0,length/2-door_centre_from_box_end-door_and_handrails_length/2-girder_thick,0])module_slice(true);
+	//judging from photos there are different variations - some have two slices above the door handrail with the notch butted up to them, others have only one slice and a space before the notch. but it's hard to tell on some photos.
 	translate([0,length/2-door_centre_from_box_end-door_and_handrails_length/2+girder_thick*2,0])module_slice(true);
+	
+	translate([0,hoover_end_y+hoover_notch_length-girder_thick/2,0])module_slice(true);
 }
 
+
+
 roof_notches_z = 29;
-roof_notches_positions=[[module_ys[0]+18,17.5,roof_notches_z] , [length/2-door_centre_from_box_end+2.5,12,roof_notches_z]];
+roof_notches_positions=[[module_ys[0]+18,17.5,roof_notches_z] , [length/2-door_centre_from_box_end+1.75,12,roof_notches_z], [hoover_end_y+hoover_notch_length/2,hoover_notch_length,roof_notches_z]];
 
 
 module roof_notches(){
@@ -1335,6 +1351,35 @@ module front_socket(){
 //for keeping the overhead lines free of leaves.
 module roof_hoover(subtract=false){
 	
+	hoover_body_width = 16.5;
+	if(subtract){
+		//main body
+		translate([0,hoover_end_y-hoover_body_length/2,hoover_z])centred_cube(width,hoover_body_length+0.001,20);
+		//"arm"
+		arm_length = (hoover_end_y-hoover_body_length) - (module_ys[1]-girder_thick/2);
+		arm_y = ((hoover_end_y-hoover_body_length) + module_ys[1]-girder_thick/2)/2;
+		translate([0,arm_y,hoover_z])centred_cube(hoover_arm_width,arm_length,10);
+	}else{
+		difference(){
+			union(){
+				//hull(){
+					/*mirror_y()translate([5,hoover_end_y-hoover_body_length/2, hoover_z])rotate([90,0,0])cylinder(r=3,h=hoover_body_length,center=true);
+					
+					translate([0,hoover_end_y-hoover_body_length/2, hoover_z])rotate([90,0,0])cylinder(r=4,h=hoover_body_length,center=true);
+					*/
+				
+					translate([0,hoover_end_y-hoover_body_length/2, hoover_z])scale([1,1,0.5])rotate([90,0,0])cylinder(r=hoover_body_width/2,h=hoover_body_length,center=true);
+				translate([0,hoover_end_y-hoover_body_length/2, hoover_z])mirror_xy()translate([hoover_body_width/2,hoover_body_length/2-4,0])centred_cube(2,2,1);
+				//}
+			}
+			union(){
+				//chop off anything below the roof
+				translate([0,0,hoover_z-20])centred_cube(width,length,20);
+				//hole in the body
+				translate([hoover_body_width/2-4,hoover_end_y-3.75,0])cylinder(r=3,h=height*1.5);
+			}
+		}
+	}
 }
 
 module shell(){
@@ -1550,14 +1595,14 @@ module shell(){
 				
 			};
 			top_headlights(true);
-			
+			roof_hoover(true);
 		}
 	
 	}
 	//things to add after subtractions
 	//now doing this as part of the base
 	//motor_holder_holder();
-	
+	roof_hoover(false);
 	box_side_grill();
 	
 	roof_hatches();
