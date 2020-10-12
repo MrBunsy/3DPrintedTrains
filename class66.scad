@@ -1044,14 +1044,14 @@ module door(subtract=false){
 
 //generic grill, (0,0) is centre of grill, which faces +ve x
 //defaults to fuel-end settings
-module grill(subtract=false, length=side_fuel_grill_length/2, height=side_fuel_grill_height, thick=girder_thick, slats=16,horizontal_slats = 0){
+module grill(subtract=false, length=side_fuel_grill_length/2, height=side_fuel_grill_height, thick=girder_thick, slats=16,horizontal_slats = 0,rim_size = girder_thick){
 	if(subtract){
 		centred_cube(thick*0.9,length,height);
 	}else{
 		
 		slat_cube_r = sqrt(thick*thick*2);
-		rim_size = thick;
-		slat_distance = (length-rim_size*2)/slats;
+		;
+		slat_distance = (length-rim_size*2)/(rim_size == 0 ? slats-0.5 : slats);
 		horizontal_slat_distance = (height-rim_size*2)/slats;
 		difference(){
 			centred_cube(thick*1,length,height);
@@ -1059,7 +1059,7 @@ module grill(subtract=false, length=side_fuel_grill_length/2, height=side_fuel_g
 				if(slats > 0){
 					for(i=[0:slats-1]){
 						//translate([slat_cube_r-thick*0.75,-length/2+rim_size+slat_distance/2 + slat_distance*i,rim_size])rotate([0,0,45])centred_cube(thick,thick,height-rim_size*2);
-						translate([thick*0.5,-length/2+rim_size+slat_distance/2 + slat_distance*i,rim_size])centred_cube(thick,slat_distance/2,height-rim_size*2);
+						translate([thick*0.5,-length/2+rim_size+(rim_size == 0 ? slat_distance/4 : slat_distance/2) + slat_distance*i,rim_size])centred_cube(thick,slat_distance/2,height-rim_size*2);
 					}
 				}
 				if(horizontal_slats > 0){
@@ -1334,6 +1334,17 @@ module roof_notches(){
 	}
 	
 	
+}
+
+module roof_grills(){
+	roof_grill_size = 5;
+	//above the door. on some pictures this is clearly a grill, and on other it's just a square.
+
+	//just a square:	//translate([0,roof_notches_positions[1][0],roof_notches_positions[1][2]])centred_cube(roof_grill_size,roof_grill_size,girder_thick);
+	
+	translate([0,roof_notches_positions[1][0]+roof_grill_size/2,roof_notches_positions[1][2]+girder_thick/2])rotate([0,-90,90])grill(false, roof_grill_size, roof_grill_size, girder_thick, slats=4);
+	
+	translate([roof_grill_size/2,roof_notches_positions[2][0]-3,roof_notches_positions[2][2]+girder_thick/2])rotate([0,-90,0])grill(false, roof_grill_size, roof_grill_size, girder_thick, 5,0,0);//7slats just doesn't slice
 }
 
 module roof_hatches(){
@@ -1683,9 +1694,11 @@ module shell(){
 	
 	}
 	//things to add after subtractions
-	//now doing this as part of the base
-	//motor_holder_holder();
+	
 	roof_hoover(false);
+	
+	roof_grills();
+	
 	box_side_grill();
 	
 	roof_hatches();
