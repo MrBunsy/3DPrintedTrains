@@ -16,8 +16,8 @@ include <constants.scad>
 //not sure how to fix this. A few internal walls? actually make the roof a separate peice? buttresses?
 
 //non-dummy base needs scaffolding
-GEN_BASE = false;
-GEN_SHELL = true;
+GEN_BASE = true;
+GEN_SHELL = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
@@ -322,6 +322,21 @@ module fuel_tank(){
 	translate([0,0,little_r])centred_cube(width,fuel_tank_length,little_r);
 	hull()mirror_y()translate([width/2-little_r,0,little_r])rotate([90,0,0])cylinder(r=little_r,h=fuel_tank_length,center=true);
 }
+
+module fuel_caps(subtract = false){
+	fuel_cap_z = 2.5;
+	fuel_cap_size = 2.5;
+	translate([0,(fuel_tank_length-base_arch_bottom_length)/2,base_arch_height]){
+		//now centred on fuel tank
+		if(subtract){
+			mirror_y()translate([width/2,12-fuel_tank_length/2,fuel_cap_z])centred_cube(fuel_cap_size,fuel_cap_size,fuel_cap_size);
+			
+			mirror_y()translate([width/2,21-fuel_tank_length/2,fuel_cap_z+fuel_cap_size/2])rotate([0,90,0])cylinder(r=fuel_cap_size/2,h=fuel_cap_size,center=true);
+		}
+	}
+}
+
+
 //some sort of electical workings box, next to the fuel tank
 //making it larger than it would be so it can house the switch and DC socket
 module underside_box(){
@@ -546,6 +561,7 @@ module cosmetic_coupling(presubtract = false, subtract = true, postsubtract = fa
 	}
 }
 
+
 module base(){
 	underside_box_y = base_arch_bottom_length/2-(base_arch_bottom_length-fuel_tank_length)/2;
 	difference(){
@@ -640,7 +656,7 @@ module base(){
 		
 		
 		union(){//subtractive union
-			
+			fuel_caps(true);
 			cosmetic_coupling(false, true, false);
 			
 			mirror_xy()translate([headlight_x, length/2,0])
@@ -729,6 +745,7 @@ module base(){
 	//things to add in after the subtract
 	
 	cosmetic_coupling(false, false, true);
+	fuel_caps(false);
 }
 
 module bogie_axle_holder(axle_height){
