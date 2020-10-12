@@ -1419,7 +1419,7 @@ module roof_hoover(subtract=false){
 			union(){
 				
 					//main body of the hoover
-					translate([0,hoover_end_y-hoover_body_length/2, hoover_z])scale([1,1,0.5])rotate([90,0,0])cylinder(r=hoover_body_width/2,h=hoover_body_length,center=true);
+					translate([0,hoover_end_y-hoover_body_length/2, hoover_z])scale([1,1,0.45])rotate([90,0,0])cylinder(r=hoover_body_width/2,h=hoover_body_length,center=true);
 				translate([0,hoover_end_y-hoover_body_length/2, hoover_z])mirror_xy()translate([hoover_body_width/2,hoover_body_length/2-4,0])centred_cube(2,2,1);
 				
 				
@@ -1428,7 +1428,7 @@ module roof_hoover(subtract=false){
 				//body to arm
 				hull(){
 					//body end
-					translate([0,hoover_end_y-hoover_body_length, hoover_z])scale([1,1,0.75])rotate([90,0,0])cylinder(r=hoover_arm_width/2,h=hoover_arm_mid_length,center=true,$fn=50);
+					translate([0,hoover_end_y-hoover_body_length, hoover_z-1])scale([1,1,0.75])rotate([90,0,0])cylinder(r=hoover_arm_width/2,h=hoover_arm_mid_length,center=true,$fn=50);
 					//arm end
 					translate([0,hoover_end_y-hoover_body_length-hoover_arm_to_body_length-0.5, hoover_arm_z]){
 						scale([1,1,0.75])rotate([90,0,0])cylinder(r=hoover_arm_width/2,h=1,center=true,$fn=50);
