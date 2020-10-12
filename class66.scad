@@ -12,6 +12,9 @@ include <constants.scad>
 
 //TODO motor hinge point isn't in the centre of its length, so need to re-arrange hole in the base an the motor holder arm to give it the best space - not sure worth the effort
 
+//TODO - when printing the shell, after the bridge layer the walls are pulled inwards slightly (presumably by the contracting bridge plastic) and so the roof shape on the final printed version isn't quite right.
+//not sure how to fix this. A few internal walls? actually make the roof a separate peice? buttresses?
+
 //non-dummy base needs scaffolding
 GEN_BASE = false;
 GEN_SHELL = true;
@@ -194,6 +197,8 @@ screwhole_from_edge = 5.75;
 //to be mirrored in x and y
 base_wall_screwholes = [[width/2-screwhole_from_edge,base_arch_top_length/2+screwhole_from_edge/2,0],[width/2-screwhole_from_edge,length/2-screwhole_from_edge*1.5,0]];
 shell_screwhole_thick = 2;
+
+base_pi_screwholes = [];
 
 //for calculating roof shape at the front
 //seems like a reasonable aproximation
@@ -1478,7 +1483,7 @@ module roof_hoover(subtract=false){
 
 module shell(){
 	
-	front_window_width = 13.5;
+	front_window_width = 13.5-0.5;
 	front_window_height = 10.5-1;
 	front_window_r = 2;
 	front_window_z = 14+0.5;
