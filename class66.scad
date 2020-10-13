@@ -16,17 +16,23 @@ include <constants.scad>
 //not sure how to fix this. A few internal walls? actually make the roof a separate peice? buttresses?
 
 //non-dummy base needs scaffolding
-GEN_BASE = true;
+GEN_BASE = false;
+//walls and roof together
 GEN_SHELL = false;
+GEN_WALLS = false;
+GEN_ROOF = true;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
-GEN_IN_PLACE = false;
+GEN_IN_PLACE = true;
 
 //generate tiny things that won't print well
 GEN_TINY_BITS = false;
+
+//generate things not for the model, but to help it print (like walls in teh shell)
+//GEN_PRINT_HELPERS = true;
 
 ANGLE = 0;
 
@@ -1731,6 +1737,46 @@ module shell(){
 	
 	
 }
+roof = roof_corners(width);
+roof_start_z = wall_height + roof[2][2]-wall_thick/2;
+//this is most definitely a bodge. but it might work
+roof_walls_overlap_width = abs(roof[2][0])*2+wall_thick*2+0.675;
+roof_walls_overlap = 0;//0.4;
+
+module wall_roof_diff(shrinkby=0){
+	union(){
+		translate([0,0,-1])centred_cube(width*1.5,length*1.5,roof_start_z+1);
+		mirror_x()translate([0,length/2-end_width_start-shrinkby + 50])centred_cube(100,100,100);
+	}
+}
+module wall_roof_slot(shrinkby=0){
+	translate([0,0,roof_start_z-roof_walls_overlap])centred_cube(roof_walls_overlap_width-shrinkby,length-end_width_start*2-shrinkby*2,roof_walls_overlap);
+}
+
+//just bottom half of shell
+module walls(){
+	
+	difference(){
+		intersection(){
+			shell();
+			wall_roof_diff();
+		}
+		wall_roof_slot();
+	}
+}
+
+//just top half of shell
+module roof(){
+	translate([0,0,-roof_start_z+roof_walls_overlap])
+	{
+		difference(){
+			shell();
+			wall_roof_diff(0.1);
+		}
+		wall_roof_slot(0.1);
+	}
+}
+
 optional_rotate([0,0,ANGLE],ANGLE != 0){
 	if(GEN_BASE){
 		echo("gen base");
@@ -1748,6 +1794,17 @@ optional_rotate([0,0,ANGLE],ANGLE != 0){
 		echo("gen shell");
 		optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)shell();
 	}
+	
+	if(GEN_WALLS){
+		echo("gen walls");
+		optional_translate([0,0,base_thick+base_height_above_track],GEN_IN_PLACE)walls();
+	}
+	
+	if(GEN_ROOF){
+		echo("gen roof");
+		optional_translate([0,0,base_thick+base_height_above_track+roof_start_z+1],GEN_IN_PLACE)roof();
+	}
+	
 	if(GEN_MOTOR_CLIP){
 		echo("gen motor clip");
 		optional_translate([0,-(length/2 - motor_centre_from_end),motor_clip_base_z+base_thick+base_height_above_track+motor_clip_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	

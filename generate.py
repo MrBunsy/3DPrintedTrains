@@ -35,8 +35,8 @@ def executeJob(job):
 
 jobs = []
 
-class66Variables = ["base", "shell", "bogies","motor_clip"]
-at_angle = ["base","shell"]
+class66Variables = ["base", "walls", "roof", "bogies","motor_clip"]
+at_angle = ["base","shell", "walls", "roof"]
 full66Job = JobDescription("class66.scad", "class66_model")
 full66Job.addVariable("GEN_IN_PLACE", "true")
 
@@ -49,7 +49,7 @@ for v in class66Variables:
     for v2 in class66Variables:
         job.addVariable("GEN_"+v2.upper(), "true" if v==v2 else "false")
     jobs.append(job)
-jobs.append((full66Job))
+#jobs.append((full66Job))
 
 if __name__ == '__main__':
     p = Pool(multiprocessing.cpu_count()-1)
