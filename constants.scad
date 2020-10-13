@@ -116,6 +116,13 @@ module optional_rotate(rotation, doRotate = true){
 		children();
 	}
 }
+
+//take one object, clone it and translate it, then mirror and combine with the original - so if you had one thing you end up with three
+module triplicate_x(trans_position){
+	children();
+	mirror_x()translate(trans_position)children();
+}
+
 rs_switch_body_height = 8.89;
 rs_switch_thread_height = 8.89;
 rs_switch_height = rs_switch_body_height + rs_switch_thread_height;

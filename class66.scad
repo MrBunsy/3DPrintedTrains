@@ -16,13 +16,13 @@ include <constants.scad>
 //not sure how to fix this. A few internal walls? actually make the roof a separate peice? buttresses?
 
 //non-dummy base needs scaffolding
-GEN_BASE = false;
+GEN_BASE = true;
 //walls and roof together
 GEN_SHELL = false;
 GEN_WALLS = false;
-GEN_ROOF = true;
+GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = false;
+GEN_BOGIES = true;
 GEN_MOTOR_CLIP = false;
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
@@ -173,9 +173,9 @@ bogie_axle_mount_width = 23;
 
 /*there are now two parts to the motor holder:
  - a separate peice which clips to the top of the motor
- - two screwholes in the roof of the shell
+ - screwholes in base
  
- This is because it's hard to unclip the motor. If the roof was separate, it might not be needed?
+ This is because it's hard to unclip the motor.
 
 */
 motor_clip_above_rails = 37;
@@ -204,7 +204,7 @@ screwhole_from_edge = 5.75;
 base_wall_screwholes = [[width/2-screwhole_from_edge,base_arch_top_length/2+screwhole_from_edge/2,0],[width/2-screwhole_from_edge,length/2-screwhole_from_edge*1.5,0]];
 shell_screwhole_thick = 2;
 
-base_pi_screwholes = [];
+pi_screwholes_from_centre = 5;
 
 //for calculating roof shape at the front
 //seems like a reasonable aproximation
@@ -316,12 +316,16 @@ module buffers(){
 //(upside down) 'top' of fuel tank is flat on the xy plane
 module fuel_tank(){
 	
-	big_r = width/2;
+	//width/5;
 	little_r = width/2 - base_bottom_width/2;
 	straight_section = little_r;
 	
+	big_r = fuel_tank_height-little_r-straight_section;
+	
 	intersection(){
-		translate([0,0,little_r]*2)rotate([90,0,0])cylinder(r=big_r,h=fuel_tank_length,center=true);
+		//translate([0,0,little_r]*2)rotate([90,0,0])cylinder(r=big_r,h=fuel_tank_length,center=true);
+		hull()mirror_y()translate([width/2-big_r,0,little_r+straight_section])rotate([90,0,0])cylinder(r=big_r,h=fuel_tank_length,center=true);
+		
 		translate([0,0,little_r+straight_section])centred_cube(100,100,fuel_tank_height - (little_r+straight_section));
 	}
 	
@@ -332,12 +336,17 @@ module fuel_tank(){
 module fuel_caps(subtract = false){
 	fuel_cap_z = 2.5;
 	fuel_cap_size = 2.5;
+	fuel_cap_size_inner = girder_thick*2;
 	translate([0,(fuel_tank_length-base_arch_bottom_length)/2,base_arch_height]){
 		//now centred on fuel tank
 		if(subtract){
 			mirror_y()translate([width/2,12-fuel_tank_length/2,fuel_cap_z])centred_cube(fuel_cap_size,fuel_cap_size,fuel_cap_size);
 			
 			mirror_y()translate([width/2,21-fuel_tank_length/2,fuel_cap_z+fuel_cap_size/2])rotate([0,90,0])cylinder(r=fuel_cap_size/2,h=fuel_cap_size,center=true);
+		}else{
+			mirror_y()translate([width/2-fuel_cap_size/2+girder_thick-fuel_cap_size/2,12-fuel_tank_length/2,fuel_cap_z+(fuel_cap_size-fuel_cap_size_inner)/2])centred_cube(fuel_cap_size,fuel_cap_size_inner,fuel_cap_size_inner);
+			
+			mirror_y()translate([width/2-fuel_cap_size/2+girder_thick,21-fuel_tank_length/2,fuel_cap_z+(fuel_cap_size-fuel_cap_size_inner)/2+fuel_cap_size_inner/2])rotate([0,-90,0])cylinder(r=fuel_cap_size_inner/2,h=fuel_cap_size);
 		}
 	}
 }
@@ -543,6 +552,14 @@ module front_mountpoints(){
 	}
 }
 
+module pi_screwholes(){
+	cabin_wall_y = length/2-end_width_start;
+	mirror_y()translate([pi_screwholes_from_centre,cabin_wall_y,0])cylinder(r=m2_thread_size_vertical/2,h=20,center=true);
+	
+	//extra holes so I can invent some sort of pi mount later
+	mirror_y()translate([pi_screwholes_from_centre,length/2-motor_centre_from_end - (cabin_wall_y - (length/2 - motor_centre_from_end)),0])cylinder(r=m2_thread_size_vertical/2,h=20,center=true);
+}
+
 //module of the "real" coupling, that will be entirely cosmetic
 module cosmetic_coupling(presubtract = false, subtract = true, postsubtract = false){
 	
@@ -682,7 +699,7 @@ module base(){
 				wire_space_length2=2;
 				mirror_x()translate([0,length/2-wire_space_length1-wire_space_length2/2-wall_thick,-0.001])centred_cube(width-base_pipe_space*2-girder_thick,wire_space_length2+0.01,wire_space_depth);
 			
-			
+			pi_screwholes();
 			if(!DUMMY){
 				//space for motor
 				translate([0,-(length/2 - motor_centre_from_end),0])motor_space();
@@ -775,10 +792,69 @@ module bogie_axle_holder(axle_height){
 	
 }
 
-module bogies(){
+
+//"front" is -ve y
+module bogie_cosmetics(box_end=true){
+	bogie_top_gap = 1.5;
+	bogie_top_thick = 4.5;
+	bogie_chunks_length = 9.5;
+	//how much further inside the thinner bits are
+	bogie_inner_width = bogie_width-2;
+	
+	bogie_cosmetic_arm_length = 3;
+	bogie_cosmetics_width = 1;
+	bogie_thick_width = (bogie_width - bogie_inner_width)/2 + bogie_cosmetics_width;
+	
+	
+	//arms to hold cosmetics
+	mirror_x()translate([0,bogie_end_axles_distance/4,bogie_top_gap])centred_cube(bogie_inner_width,bogie_cosmetic_arm_length,bogie_thick );
+	
+	//inner chunks between the wheels
+	mirror_xy()translate([bogie_inner_width/2-bogie_cosmetics_width/2,bogie_end_axles_distance/4,bogie_top_gap])centred_cube(bogie_cosmetics_width, bogie_chunks_length,bogie_top_thick);
+	//chunks above the wheels
+	
+	triplicate_x([0,bogie_end_axles_distance/2,0])mirror_y()translate([bogie_inner_width/2-bogie_cosmetics_width/2,0,0])centred_cube(bogie_cosmetics_width, bogie_chunks_length,bogie_top_thick);
+	
+	//wibbly bits
+	mirror_xy(){
+		//middle top to front lower
+		hull(){
+			//edge of middle top
+			translate([bogie_inner_width/2-bogie_cosmetics_width/2,bogie_chunks_length/2])centred_cube(bogie_cosmetics_width, 0.1,bogie_top_thick);
+			//edge of next lower
+			translate([bogie_inner_width/2-bogie_cosmetics_width/2,bogie_end_axles_distance/4-bogie_chunks_length/2+0.1/2,bogie_top_gap])centred_cube(bogie_cosmetics_width, 0.1,bogie_top_thick);
+		}
+		
+		//front lower to end top
+		hull(){
+			//edge of next lower
+			translate([bogie_inner_width/2-bogie_cosmetics_width/2,bogie_end_axles_distance/4+bogie_chunks_length/2-0.1/2,bogie_top_gap])centred_cube(bogie_cosmetics_width, 0.1,bogie_top_thick);
+			//edge of front top
+			translate([bogie_inner_width/2-bogie_cosmetics_width/2,bogie_end_axles_distance/2-bogie_chunks_length/2+0.1/2])centred_cube(bogie_cosmetics_width, 0.1,bogie_top_thick);
+		}
+	}
+	
+	
+	front_y = bogie_end_axles_distance/2 + 1.2*bogie_wheel_d/2;
+	//front_chunk_y2 = bogie_end_axles_distance/2 - bogie_wheel_d*0.3;
+	front_chunk_y2 = bogie_end_axles_distance/2 - bogie_chunks_length/2;
+	//extra bits at front
+	
+	mirror_y()translate([bogie_width/2-bogie_thick_width/2,-(front_chunk_y2 + front_y)/2,0])
+	difference(){
+		centred_cube(bogie_thick_width,front_y-front_chunk_y2,bogie_top_thick);
+		translate([0,-((front_y-front_chunk_y2)/2-girder_thick)])centred_cube(bogie_thick_width+0.1,girder_thick*2,girder_thick);
+	}
+	
+}
+
+//fuel end or box end? only need box for motorised 66, but will need both for dummy
+//main difference is position of the ladder. I'm not sure I'm going to add enoguh detail for anything else
+module bogies(box_end=true){
 	bogie_arm_length = bogie_wheel_d*0.75;
-	bogie_cosmetic_arm_length = bogie_wheel_d*0.5;
+	
 	axle_height = axle_to_top_of_bogie-centre_bogie_wheel_offset/2;
+	
 	
 	
 	difference(){
@@ -792,8 +868,7 @@ module bogies(){
 	mirror_x()translate([0,bogie_end_axles_distance/2,0])bogie_axle_holder(axle_height);
 	//centred_cube(wheel_holder_arm_width+10,bogie_arm_length,bogie_thick);
 	
-	//arms to hold cosmetics
-	mirror_x()translate([0,bogie_end_axles_distance/4,0])centred_cube(bogie_width,bogie_cosmetic_arm_length,bogie_thick );
+	bogie_cosmetics(box_end);
 	
 	coupling_arm_length = coupling_arm_from_mount - bogie_end_axles_distance/2 + wheel_mount_length/2;
 	
