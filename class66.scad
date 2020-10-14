@@ -16,24 +16,25 @@ include <constants.scad>
 //not sure how to fix this. A few internal walls? actually make the roof a separate peice? buttresses?
 
 //non-dummy base needs scaffolding
-GEN_BASE = true;
-//walls and roof together
-GEN_SHELL = true;
+GEN_BASE = false;
+//walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
+GEN_SHELL = false;
+//note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = false;
+GEN_BOGIES = true;
 GEN_MOTOR_CLIP = false;
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
-GEN_IN_PLACE = true;
+GEN_IN_PLACE = false;
 
 //generate tiny things that won't print well
 GEN_TINY_BITS = false;
 
 //generate things not for the model, but to help it print (like walls in teh shell)
 //GEN_PRINT_HELPERS = true;
-
+LAYER_THICK = 0.2;
 ANGLE = 0;
 
 //dummy model has no motor
@@ -826,31 +827,43 @@ module bogie_axle_holder(axle_height){
 //"front" is -ve y
 module bogie_cosmetics(box_end=true){
 	bogie_top_gap = 1.5;
+	bogie_top_gap_rear = 3.5;
 	bogie_top_thick = 4.5;
 	bogie_chunks_length = 9.5;
 	//how much further inside the thinner bits are
 	bogie_inner_width = bogie_width-2;
 	
 	bogie_cosmetic_arm_length = 3;
-	bogie_cosmetics_width = 1;
+	bogie_cosmetics_width = 1.5;
 	bogie_thick_width = (bogie_width - bogie_inner_width)/2 + bogie_cosmetics_width;
+	
+	end_y = bogie_end_axles_distance/2 + 1.6*bogie_wheel_d/2;
+	end_y2 = end_y - 7;
+	
+	front_y = bogie_end_axles_distance/2 + 1.2*bogie_wheel_d/2;
+	//front_chunk_y2 = bogie_end_axles_distance/2 - bogie_wheel_d*0.3;
+	front_chunk_y2 = bogie_end_axles_distance/2 - bogie_chunks_length/2;
+	//extra bits at front
 	
 	
 	//arms to hold cosmetics
-	mirror_x()translate([0,bogie_end_axles_distance/4,bogie_top_gap])centred_cube(bogie_inner_width,bogie_cosmetic_arm_length,bogie_thick );
+	mirror_x()translate([0,bogie_end_axles_distance/4,bogie_top_gap+LAYER_THICK])centred_cube(bogie_inner_width,bogie_cosmetic_arm_length,bogie_thick);
+	
+	translate([0,(bogie_end_axles_distance/2 + end_y)/2 , 0])centred_cube(bogie_cosmetic_arm_length,end_y-bogie_end_axles_distance/2,bogie_top_gap_rear);
 	
 	//inner chunks between the wheels
 	mirror_xy()translate([bogie_inner_width/2-bogie_cosmetics_width/2,bogie_end_axles_distance/4,bogie_top_gap])centred_cube(bogie_cosmetics_width, bogie_chunks_length,bogie_top_thick);
 	//chunks above the wheels
 	
-	triplicate_x([0,bogie_end_axles_distance/2,0])mirror_y()translate([bogie_inner_width/2-bogie_cosmetics_width/2,0,0])centred_cube(bogie_cosmetics_width, bogie_chunks_length,bogie_top_thick);
+	//triplicate_x([0,bogie_end_axles_distance/2,0])
+	mirror_y()translate([bogie_width/2-bogie_thick_width/2,0,0])centred_cube(bogie_thick_width, bogie_chunks_length,bogie_top_thick);
 	
 	//wibbly bits
 	mirror_xy(){
 		//middle top to front lower
 		hull(){
 			//edge of middle top
-			translate([bogie_inner_width/2-bogie_cosmetics_width/2,bogie_chunks_length/2])centred_cube(bogie_cosmetics_width, 0.1,bogie_top_thick);
+			translate([bogie_width/2-bogie_thick_width/2,bogie_chunks_length/2])centred_cube(bogie_thick_width, 0.1,bogie_top_thick);
 			//edge of next lower
 			translate([bogie_inner_width/2-bogie_cosmetics_width/2,bogie_end_axles_distance/4-bogie_chunks_length/2+0.1/2,bogie_top_gap])centred_cube(bogie_cosmetics_width, 0.1,bogie_top_thick);
 		}
@@ -860,22 +873,34 @@ module bogie_cosmetics(box_end=true){
 			//edge of next lower
 			translate([bogie_inner_width/2-bogie_cosmetics_width/2,bogie_end_axles_distance/4+bogie_chunks_length/2-0.1/2,bogie_top_gap])centred_cube(bogie_cosmetics_width, 0.1,bogie_top_thick);
 			//edge of front top
-			translate([bogie_inner_width/2-bogie_cosmetics_width/2,bogie_end_axles_distance/2-bogie_chunks_length/2+0.1/2])centred_cube(bogie_cosmetics_width, 0.1,bogie_top_thick);
+			translate([bogie_width/2-bogie_thick_width/2,bogie_end_axles_distance/2-bogie_chunks_length/2+0.1/2])centred_cube(bogie_thick_width, 0.1,bogie_top_thick);
 		}
 	}
 	
 	
-	front_y = bogie_end_axles_distance/2 + 1.2*bogie_wheel_d/2;
-	//front_chunk_y2 = bogie_end_axles_distance/2 - bogie_wheel_d*0.3;
-	front_chunk_y2 = bogie_end_axles_distance/2 - bogie_chunks_length/2;
-	//extra bits at front
+	
 	
 	mirror_y()translate([bogie_width/2-bogie_thick_width/2,-(front_chunk_y2 + front_y)/2,0])
 	difference(){
 		centred_cube(bogie_thick_width,front_y-front_chunk_y2,bogie_top_thick);
-		translate([0,-((front_y-front_chunk_y2)/2-girder_thick)])centred_cube(bogie_thick_width+0.1,girder_thick*2,girder_thick);
+		translate([0,-((front_y-front_chunk_y2)/2-girder_thick),-0.1])centred_cube(bogie_thick_width+0.1,girder_thick*2+0.1,girder_thick+0.1);
 	}
 	
+	//extra bits at back
+	mirror_y()translate([bogie_width/2-bogie_thick_width/2,(front_chunk_y2 + end_y2)/2,0])centred_cube(bogie_thick_width,end_y2-front_chunk_y2,bogie_top_thick);
+	
+	rear_width = bogie_inner_width-5;
+	
+	translate([0,end_y-bogie_cosmetics_width/2,bogie_top_gap_rear])centred_cube(rear_width,bogie_cosmetics_width,bogie_top_thick);
+	
+	mirror_y(){
+		hull(){
+			//end of back bit
+			translate([rear_width/2-bogie_cosmetics_width/2,end_y-bogie_cosmetics_width/2,bogie_top_gap_rear])centred_cube(bogie_cosmetics_width,bogie_cosmetics_width,bogie_top_thick);
+			//end of rear side bit
+			translate([bogie_width/2-bogie_thick_width/2,end_y2-0.1/2,0])centred_cube(bogie_thick_width,0.1,bogie_top_thick);
+		}
+	}
 }
 
 //fuel end or box end? only need box for motorised 66, but will need both for dummy
