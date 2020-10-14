@@ -18,11 +18,11 @@ include <constants.scad>
 //non-dummy base needs scaffolding
 GEN_BASE = true;
 //walls and roof together
-GEN_SHELL = false;
+GEN_SHELL = true;
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = true;
+GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
@@ -336,17 +336,20 @@ module fuel_tank(){
 module fuel_caps(subtract = false){
 	fuel_cap_z = 2.5;
 	fuel_cap_size = 2.5;
-	fuel_cap_size_inner = girder_thick*2;
+	fuel_cap_size_inner = fuel_cap_size- girder_thick*2;
 	translate([0,(fuel_tank_length-base_arch_bottom_length)/2,base_arch_height]){
 		//now centred on fuel tank
 		if(subtract){
-			mirror_y()translate([width/2,12-fuel_tank_length/2,fuel_cap_z])centred_cube(fuel_cap_size,fuel_cap_size,fuel_cap_size);
+			mirror_y()translate([width/2,12-fuel_tank_length/2,fuel_cap_z])centred_cube(girder_thick*2,fuel_cap_size,fuel_cap_size);
 			
-			mirror_y()translate([width/2,21-fuel_tank_length/2,fuel_cap_z+fuel_cap_size/2])rotate([0,90,0])cylinder(r=fuel_cap_size/2,h=fuel_cap_size,center=true);
+			mirror_y()translate([width/2,21-fuel_tank_length/2,fuel_cap_z+fuel_cap_size/2])rotate([0,90,0])cylinder(r=fuel_cap_size/2,h=girder_thick*2,center=true);
 		}else{
-			mirror_y()translate([width/2-fuel_cap_size/2+girder_thick-fuel_cap_size/2,12-fuel_tank_length/2,fuel_cap_z+(fuel_cap_size-fuel_cap_size_inner)/2])centred_cube(fuel_cap_size,fuel_cap_size_inner,fuel_cap_size_inner);
+		//I can't decide if it looks better or worse with these bits
 			
-			mirror_y()translate([width/2-fuel_cap_size/2+girder_thick,21-fuel_tank_length/2,fuel_cap_z+(fuel_cap_size-fuel_cap_size_inner)/2+fuel_cap_size_inner/2])rotate([0,-90,0])cylinder(r=fuel_cap_size_inner/2,h=fuel_cap_size);
+	 mirror_y()translate([width/2-girder_thick/2,12-fuel_tank_length/2,fuel_cap_z+(fuel_cap_size-fuel_cap_size_inner)/2+fuel_cap_size_inner/2])rotate([0,-90,0])cylinder(r=fuel_cap_size_inner/2,h=girder_thick);
+			
+			mirror_y()translate([width/2-girder_thick/2,21-fuel_tank_length/2,fuel_cap_z+(fuel_cap_size-fuel_cap_size_inner)/2+fuel_cap_size_inner/2])rotate([0,-90,0])cylinder(r=fuel_cap_size_inner/2,h=girder_thick);
+			
 		}
 	}
 }
@@ -432,17 +435,43 @@ module bogie_chain_mount(){
 module fuel_pump(){
 	centre_height = 0.5;
 	centre_z = base_arch_height*0.5;
-	mirror_y()hull(){
+	mirror_y(){
+		hull(){
 		
-		//top of triangle
-		translate([base_top_width/2-base_pipe_space*1.5,0,girder_thick*2])centred_cube(base_pipe_space,fuel_pump_length,girder_thick);
+			//top of triangle
+			translate([base_top_width/2-base_pipe_space*1.5,0,girder_thick*2])centred_cube(base_pipe_space,fuel_pump_length,girder_thick);
+			
+			//most outward bit of triangle
+			translate([width/2-base_pipe_space/2,0,centre_z-centre_height/2])centred_cube(base_pipe_space,fuel_pump_length,centre_height);
+			
+			pipe_space_x=base_top_width/2-base_pipe_space;
+			bottom_pipe_space_width = base_bottom_width/2-pipe_space_x;
+			//bottom bit
+			translate([pipe_space_x,0,base_arch_height-girder_thick*2])centred_cube(bottom_pipe_space_width*2,girder_thick,girder_thick);
+		}
 		
-		//most outward bit of triangle
-		translate([width/2-base_pipe_space/2,0,centre_z-centre_height/2])centred_cube(base_pipe_space,fuel_pump_length,centre_height);
+		//bits on "top" of the triangle
+		bottomxz = [width/2, centre_z-centre_height/2];
+		topxz = [base_top_width/2-base_pipe_space,girder_thick*2];
+		dx = topxz[0] - bottomxz[0];
+		dz = topxz[1] - bottomxz[1];
+		angle = atan(dz/dx);
+		squarebit_width = sqrt(dx*dx + dz*dz)*0.9;
+		squarebit_length = fuel_pump_length*0.4;
+		farAlong = 0.75;
 		
-		//bottom bit
-		translate([base_bottom_width/2-girder_thick/2,0,base_arch_height-girder_thick*2])centred_cube(girder_thick,girder_thick,girder_thick);
+		mirror_x()translate([bottomxz[0] + dx*farAlong,fuel_pump_length/4, bottomxz[1]+dz*farAlong])rotate([0,-angle,0])translate([0,0,-girder_thick])centred_cube(squarebit_width,squarebit_length,girder_thick);
 	}
+	
+	
+}
+
+module fuel_pump_box(){
+	fuel_box_height = 4;
+	fuel_box_length = 3.5;
+	
+	//box that's only on one side? or only on certain models?
+	translate([-(width/2-base_pipe_space/2 - girder_thick),-4,0])centred_cube(base_pipe_space,fuel_box_length,fuel_box_height+girder_thick);
 }
 
 module battery_holder(subtract=true){
@@ -631,6 +660,7 @@ module base(){
 				
 				translate([0,-base_arch_bottom_length/2+a_frame_spacing*1,0])fuel_pump();
 				translate([0,-base_arch_bottom_length/2+a_frame_spacing*3,0])fuel_pump();
+				fuel_pump_box();
 				
 				//a-frames in the arch
 				for(i=[0:4]){
