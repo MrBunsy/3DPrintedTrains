@@ -849,7 +849,8 @@ module bogie_cosmetics(box_end=true){
 	//arms to hold cosmetics
 	mirror_x()translate([0,bogie_end_axles_distance/4,bogie_top_gap+LAYER_THICK])centred_cube(bogie_inner_width,bogie_cosmetic_arm_length,bogie_thick);
 	
-	translate([0,(bogie_end_axles_distance/2 + end_y)/2 , 0])centred_cube(bogie_cosmetic_arm_length,end_y-bogie_end_axles_distance/2,bogie_top_gap_rear);
+	//this arm looks like it might catch a bit if turning on a gradient
+	//translate([0,(bogie_end_axles_distance/2 + end_y)/2 , 0])centred_cube(bogie_cosmetic_arm_length,end_y-bogie_end_axles_distance/2,bogie_top_gap_rear);
 	
 	//inner chunks between the wheels
 	mirror_xy()translate([bogie_inner_width/2-bogie_cosmetics_width/2,bogie_end_axles_distance/4,bogie_top_gap])centred_cube(bogie_cosmetics_width, bogie_chunks_length,bogie_top_thick);
