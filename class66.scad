@@ -16,18 +16,18 @@ include <constants.scad>
 //not sure how to fix this. A few internal walls? actually make the roof a separate peice? buttresses?
 
 //non-dummy base needs scaffolding
-GEN_BASE = false;
+GEN_BASE = true;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
 GEN_SHELL = false;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = true;
+GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
-GEN_IN_PLACE = false;
+GEN_IN_PLACE = true;
 
 //generate tiny things that won't print well
 GEN_TINY_BITS = false;
@@ -498,16 +498,19 @@ module battery_holder(subtract=true){
 	}
 }
 
+//large lights style, since I think that's easiest with LEDs
+	lights_box_width = 7;
+	lights_box_height = 4.5;
+headlight_z = -3;//-lights_box_height;//-3;
 //headlight box is split between base and shell. both will use this module, but slice it so they only get the half that fits on each - so it will be designed to slot together and hollow out space for LEDs
 //this is for the headlight in +ve x and y quad, with 0,0 of this module lining up with centre (in x) of lights box and y lining up with the front of the loco (lenght/2), z lining up with the top of the base/bottom of the shell
 //this is with +ve in the final upright position (so will be upside down for the default position of the base)
 //latest plan: since the plastic between the red and white LEDs snaps offeasily, the box connected to the base and shell will be less long, and a separate plate can be glued over the top afterwards
 module headlight_box(subtract = false){
-	//large lights style, since I think that's easiest with LEDs
-	lights_box_width = 7;
-	lights_box_height = 4.5;
 	
-	z = -3;
+	
+	//-3 looks to be most accurate, but it prints a lot more easily if the headlights are entirely contained in the shell or the base.
+	
 	//note - subtraction is done after the main shape (unlike most of teh shell)
 	if(subtract){
 		//want it against the edge same distance it is from top and bottom
@@ -516,19 +519,23 @@ module headlight_box(subtract = false){
 		
 		//space for LEDs and wires
 		//white LED
-		translate([white_led_x,-wall_thick,z+lights_box_height/2])led_3mm(2);
+		translate([white_led_x,-wall_thick,headlight_z+lights_box_height/2])led_3mm(2);
 		//red LED
 		//this is fairly far back, mainly so the box can be printable (walls were too thin otherwise
 		//but has the advantage I can put a diffuser on the front to hide the fact I bought red-casing red LED, when really I want a clear casing red/white LED - turns out on the large-style lights the smaller light is both a daytime white and a rear red
-		translate([-(lights_box_width/2-led_1_8mm_d/2-led_edge_space), -wall_thick,z+lights_box_height-led_1_8mm_d/2-led_edge_space])led_1_8mm(3,6);
+		translate([-(lights_box_width/2-led_1_8mm_d/2-led_edge_space), -wall_thick,headlight_z+lights_box_height-led_1_8mm_d/2-led_edge_space])led_1_8mm(3,6);
 		
 		
 		
 	}else{//shorter by lights_box_faceplate_thick
-			translate([-lights_box_width/2,0,z])cube([lights_box_width,lights_box_length-lights_box_faceplate_thick,lights_box_height]);
-		//the blank plate above the box
-		translate([-lights_box_width/2,0,z+lights_box_height])cube([lights_box_width,lights_box_length*0.75,lights_box_height]);
+			translate([-lights_box_width/2,0,headlight_z])cube([lights_box_width,lights_box_length-lights_box_faceplate_thick,lights_box_height]);
+		
 	}
+}
+
+module headlight_box_top(){
+	//the blank plate above the box + some drooping
+		translate([-lights_box_width/2,0,headlight_z+lights_box_height+0.2])cube([lights_box_width,lights_box_length*0.75,lights_box_height]);
 }
 
 module top_headlights(subtract = true){
@@ -692,16 +699,7 @@ module base(){
 				translate([0,-(length/2-door_centre_from_fuel_end),0])ladder_base();
 				translate([0,(length/2-door_centre_from_box_end),0])ladder_base();
 				
-				mirror_xy()translate([headlight_x, length/2,0])
-				{
-					difference(){
-						//only the bits that are part of teh base
-						
-						mirror([1,0,0])rotate([0,180,0])headlight_box(false);
-						translate([0,0,-10])centred_cube(10,10,10);
-					}
-					
-				};
+				mirror_xy()translate([headlight_x, length/2,0])mirror([1,0,0])rotate([0,180,0])headlight_box(false);
 				
 				
 				front_mountpoints();
@@ -713,18 +711,10 @@ module base(){
 			fuel_caps(true);
 			cosmetic_coupling(false, true, false);
 			
-			mirror_xy()translate([headlight_x, length/2,0])
-				{
-					difference(){
-						//only the bits that are part of teh base
-						mirror([1,0,0])rotate([0,180,0])headlight_box(true);
-						translate([0,0,-10-0.0001])centred_cube(10,10,10);
-					}
-					
-				};
+			mirror_xy()translate([headlight_x, length/2,0])mirror([1,0,0])rotate([0,180,0])headlight_box(true);
 				//bigger space for wires for LEDs behind the headlightboxes
 				wire_space_length1=buffer_box_length_top-wall_thick-0.2;
-				wire_space_depth = base_thick-1.75;
+				wire_space_depth = base_thick-1;//1.75;
 				
 				mirror_x()translate([0,length/2-wire_space_length1/2-wall_thick,-0.001])centred_cube(end_width-wall_thick*2,wire_space_length1,wire_space_depth);
 				wire_space_length2=2;
@@ -1789,17 +1779,9 @@ module shell(){
 			
 			mirror([1,0,0])translate([0,(middle_ridge_y+grill_y)/2,0])big_side_ridges(grill_y - middle_ridge_y);
 			
-			mirror_xy()translate([headlight_x, length/2,0])
-				{
-					difference(){
-						//only the bits that are part of teh base
-						
-						headlight_box(false);
-						translate([0,0,-10])centred_cube(10,10,10);
-					}
-					
-				};
-				top_headlights(false);
+			mirror_xy()translate([headlight_x, length/2,0])headlight_box_top();
+
+			top_headlights(false);
 			mirror_x()translate([0,length/2,front_ridge_height])front_socket();
 		}
 			
@@ -1837,16 +1819,11 @@ module shell(){
 			//notch in roof
 			roof_notches();
 			
-			mirror_xy()translate([headlight_x, length/2,0])
-			{
-				difference(){
-					//only the bits that are part of teh base
-					
-					headlight_box(true);
-					translate([0,0,-10-0.0001])centred_cube(10,10,10);
-				}
-				
-			};
+			mirror_xy()translate([headlight_x, length/2,0]){
+				headlight_box(true);
+				headlight_box(false);
+			}
+			
 			top_headlights(true);
 			roof_hoover(true);
 		}
