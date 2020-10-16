@@ -5,8 +5,10 @@ include <constants.scad>
 //the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body, likewise with the roof of the shell
 //the DC socket and switch holders still need scaffolding, as does the motor holder screwholes in the shell
 
-//TODO final detail on the roof (should just be some grills on top now)
 //TODO improve shape of rainguards?
+//TODO shapes around buffers in the pipe space have gone wrong again - going to have to leave these "wrong" to have space for LEDs
+
+//TODO fix led space so it slices without big gaps
 
 //TODO mountings for pi and camera - screholes in base and a new peice?
 
@@ -15,10 +17,23 @@ include <constants.scad>
 //TODO - when printing the shell, after the bridge layer the walls are pulled inwards slightly (presumably by the contracting bridge plastic) and so the roof shape on the final printed version isn't quite right.
 //not sure how to fix this. A few internal walls? actually make the roof a separate peice? buttresses?
 
+
+/*
+
+Known variations I've not taken intoaccount:
+
+ - full-height side grill for the grill that's on both sides
+ - extra door!
+ - different big vent styles in the roof
+ - different placements of petrol caps
+ - two other headlight styles (but given led sizes, these wouldn't be feasible)
+ - fuel tank sizes (related to petrol cap placement?)
+*/
+
 //non-dummy base needs scaffolding
 GEN_BASE = true;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
-GEN_SHELL = false;
+GEN_SHELL = true;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
 GEN_WALLS = false;
 GEN_ROOF = false;
@@ -121,8 +136,9 @@ motor_length = 60+5;
 //motor_length_offset_y = 2.5;
 motor_centre_from_end = 45;
 //doors are different at each end
+//these should line up perfectly with the furthest bogie springs, but nothign enforces that
 door_centre_from_fuel_end = 28;
-door_centre_from_box_end = 36;
+door_centre_from_box_end = 36-girder_thick;
 door_length = 6.5;//7;
 door_handrail_height = 15.6;
 door_handrail_z = 3;
@@ -296,12 +312,12 @@ module buffers(){
 				translate([0,-buffer_box_length_bottom/2,base_thick])centred_cube(buffer_width,buffer_box_length_bottom,buffer_box_height );
 				
 			}
-			
+			//note - this bit doesn't appear to be accurate, but all the models (n and OO) I can find do it. When trying to correct the shape I found out why - otherwise there isn't space for the LEDs!
 			hull(){
 				//bottom of base
-				translate([0,-buffer_box_length_top/2,base_thick-girder_thick*2])centred_cube(base_bottom_width,buffer_box_length_top,girder_thick );
+				translate([0,-buffer_box_length_top/2,base_thick-girder_thick*2])centred_cube(buffer_width,buffer_box_length_top,girder_thick );
 				//sloping bit at top of box
-				translate([0,-buffer_box_length_top/2-girder_thick/2,0])centred_cube(end_width,buffer_box_length_top-girder_thick,girder_thick);
+				translate([0,-buffer_box_length_top/2-girder_thick/2,0])centred_cube(base_bottom_width,buffer_box_length_top-girder_thick,girder_thick);
 			}
 			
 			//front face
@@ -472,7 +488,7 @@ module fuel_pump_box(){
 	fuel_box_length = 3.5;
 	
 	//box that's only on one side? or only on certain models?
-	translate([-(width/2-base_pipe_space/2 - girder_thick),-4,0])centred_cube(base_pipe_space,fuel_box_length,fuel_box_height+girder_thick);
+	translate([(width/2-base_pipe_space/2 - girder_thick),-4,0])centred_cube(base_pipe_space,fuel_box_length,fuel_box_height+girder_thick);
 }
 
 module battery_holder(subtract=true){
@@ -534,8 +550,9 @@ module headlight_box(subtract = false){
 }
 
 module headlight_box_top(){
+	headlight_wiggle_space = 0.1;
 	//the blank plate above the box + some drooping
-		translate([-lights_box_width/2,0,headlight_z+lights_box_height+0.2])cube([lights_box_width,lights_box_length*0.75,lights_box_height]);
+		translate([-lights_box_width/2,0,headlight_z+lights_box_height+headlight_wiggle_space])cube([lights_box_width,lights_box_length*0.75,lights_box_height]);
 }
 
 module top_headlights(subtract = true){
