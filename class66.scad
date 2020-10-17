@@ -32,7 +32,7 @@ Known variations I've not taken intoaccount:
 */
 
 //non-dummy base needs scaffolding
-GEN_BASE = true;
+GEN_BASE = false;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
 GEN_SHELL = false;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
@@ -54,7 +54,7 @@ LAYER_THICK = 0.2;
 ANGLE = 0;
 
 //dummy model has no motor
-DUMMY = true;
+DUMMY = false;
 
 //wiki says 21.4metre long, but oes this include buffers?
 //n-gauge model with buffers => 21.2m
@@ -968,8 +968,14 @@ module bogie_cosmetics(axle_height, box_end=true){
 	axle_holder_length = 9.5;
 	spring_r=axle_holder_box_width/2;
 	top_square_size = spring_r*2*0.75;
+	
+	axle_box_on_main_bogie_tall = 1.5;
+	axle_box_on_main_bogie_length = 3;
+	
 	// ============ axle holders ===============
 	mirror_y()triplicate_x([0,bogie_end_axles_distance/2,0]){
+		
+		translate([bogie_width/2,0,bogie_top_thick-axle_box_on_main_bogie_tall])centred_cube(girder_thick*2,axle_box_on_main_bogie_length,axle_box_on_main_bogie_tall);
 		
 		translate([bogie_width/2-bogie_thick_width,0,axle_height]){
 			
