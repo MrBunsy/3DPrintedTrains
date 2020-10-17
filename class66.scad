@@ -31,14 +31,14 @@ Known variations I've not taken intoaccount:
 */
 
 //non-dummy base needs scaffolding
-GEN_BASE = true;
+GEN_BASE = false;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
-GEN_SHELL = true;
+GEN_SHELL = false;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = false;
+GEN_BOGIES = true;
 GEN_MOTOR_CLIP = false;
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
@@ -829,20 +829,53 @@ module bogie_axle_holder(axle_height){
 	}
 	
 }
+bogie_top_gap = 1.5;
+bogie_top_gap_rear = 3.5;
+bogie_top_thick = 4.5;
+bogie_chunks_length = 9.5;
+//how much further inside the thinner bits are
+bogie_inner_width = bogie_width-2;
 
+bogie_cosmetic_arm_length = 3;
+bogie_cosmetics_width = 1.5;
+bogie_thick_width = (bogie_width - bogie_inner_width)/2 + bogie_cosmetics_width;
+
+//horizontal suspension
+module bogie_h_suspension(){
+	h_suspension_holder_height = 2;
+	h_suspension_length = 6.5;
+	h_suspension_height = 1.5;
+	h_suspension_y_offset = -1;
+	notch_r = h_suspension_holder_height*2;
+	dy = bogie_end_axles_distance/4 - bogie_chunks_length;
+	dz = bogie_top_gap;
+	angle = atan(dz/dy);
+	
+	//extra shape on the bottom of the "inner bits"
+	difference(){
+		mirror_y()translate([bogie_inner_width/2-bogie_cosmetics_width/2,0,bogie_top_gap + bogie_top_thick])centred_cube(bogie_cosmetics_width,bogie_chunks_length,h_suspension_holder_height);
+		translate([0,bogie_chunks_length/2+notch_r/2,bogie_top_gap + bogie_top_thick+notch_r*0.85])rotate([0,90,0])cylinder(r=notch_r,h=width,center=true);
+		
+		translate([0,-bogie_chunks_length/2,bogie_top_gap + bogie_top_thick])rotate([angle,0,0])centred_cube(width,20,20);
+		
+	}
+	//representation of the suspension
+	mirror_y(){
+		mirror_y()translate([bogie_inner_width/2-bogie_cosmetics_width/2+girder_thick/2, h_suspension_y_offset,bogie_top_gap + bogie_top_thick]){
+			centred_cube(bogie_cosmetics_width+girder_thick,h_suspension_length,h_suspension_height);
+			translate([(bogie_cosmetics_width+girder_thick)/2,0,h_suspension_height/2]){
+				rotate([90,0,0])cylinder(r=h_suspension_height/3,h=h_suspension_length*0.75,center=true);
+				mirror_x(){
+					translate([0,h_suspension_length*(0.5-0.25/4),-h_suspension_height/2])centred_cube(h_suspension_height,h_suspension_length*0.25/2,h_suspension_height);
+				}
+			}
+		}
+	}
+}
 
 //"front" is -ve y
 module bogie_cosmetics(box_end=true){
-	bogie_top_gap = 1.5;
-	bogie_top_gap_rear = 3.5;
-	bogie_top_thick = 4.5;
-	bogie_chunks_length = 9.5;
-	//how much further inside the thinner bits are
-	bogie_inner_width = bogie_width-2;
 	
-	bogie_cosmetic_arm_length = 3;
-	bogie_cosmetics_width = 1.5;
-	bogie_thick_width = (bogie_width - bogie_inner_width)/2 + bogie_cosmetics_width;
 	
 	end_y = bogie_end_axles_distance/2 + 1.6*bogie_wheel_d/2;
 	end_y2 = end_y - 7;
@@ -909,6 +942,11 @@ module bogie_cosmetics(box_end=true){
 			translate([bogie_width/2-bogie_thick_width/2,end_y2-0.1/2,0])centred_cube(bogie_thick_width,0.1,bogie_top_thick);
 		}
 	}
+	
+	
+	// =========== horizontal suspension bits =============
+	translate([0,bogie_end_axles_distance/4,0])bogie_h_suspension();
+	translate([0,-bogie_end_axles_distance/4,0])bogie_h_suspension();
 }
 
 //fuel end or box end? only need box for motorised 66, but will need both for dummy
