@@ -32,7 +32,7 @@ Known variations I've not taken intoaccount:
 */
 
 //non-dummy base needs scaffolding
-GEN_BASE = false;
+GEN_BASE = true;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
 GEN_SHELL = false;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
@@ -54,7 +54,7 @@ LAYER_THICK = 0.2;
 ANGLE = 0;
 
 //dummy model has no motor
-DUMMY = false;
+DUMMY = true;
 
 //wiki says 21.4metre long, but oes this include buffers?
 //n-gauge model with buffers => 21.2m
@@ -845,9 +845,9 @@ bogie_thick_width = (bogie_width - bogie_inner_width)/2 + bogie_cosmetics_width;
 //horizontal suspension
 module bogie_h_suspension(axle_height){
 	h_suspension_holder_height = 2;
-	h_suspension_length = 6.5;
+	h_suspension_length = 6;
 	h_suspension_height = 1.5;
-	h_suspension_y_offset = -1;
+	h_suspension_y_offset = -0.7;
 	notch_r = h_suspension_holder_height*2;
 	dy = bogie_end_axles_distance/4 - bogie_chunks_length;
 	dz = bogie_top_gap;
@@ -951,7 +951,8 @@ module bogie_cosmetics(axle_height, box_end=true){
 	translate([0,-bogie_end_axles_distance/4,0])bogie_h_suspension(axle_height);
 	
 	//big spring bases
-	spring_base_length = 7.5;
+	//won't print well if it sticks out from a bridge, so make it longer
+	spring_base_length = bogie_chunks_length+1.5;//7.5;
 	spring_base_offset = -1;
 	mirror_xy(){
 		translate([bogie_inner_width/2-bogie_cosmetics_width/2+girder_thick/2,bogie_wheel_d+spring_base_offset,bogie_top_gap])centred_cube(bogie_cosmetics_width+girder_thick,spring_base_length,girder_thick);
@@ -1013,6 +1014,41 @@ module bogie_cosmetics(axle_height, box_end=true){
 		
 	}// ============ end axle holders ===============
 	
+	//horizontal bars between axle holders
+	//between rear two axles
+	mirror_y()translate([bogie_width/2-bogie_thick_width+axle_holder_box_width/2,bogie_end_axles_distance/4,axle_height-girder_thick/2])centred_cube(axle_holder_box_width,bogie_end_axles_distance/2,girder_thick);
+	//front axle only
+	mirror_y()translate([bogie_width/2-bogie_thick_width+axle_holder_box_width/2,-bogie_end_axles_distance/4-bogie_end_axles_distance/8,axle_height-girder_thick/2])centred_cube(axle_holder_box_width,bogie_end_axles_distance/4,girder_thick);
+	
+	
+	//ladder!
+	ladder_length = box_end ? 4.5 :6.5;
+	ladder_height = 9;
+	ladder_width = bogie_thick_width+girder_thick;
+	
+	//budged up to one side of the door
+	ladder_y_box = -(motor_centre_from_end - door_centre_from_box_end)-door_length/2 + ladder_height/2;
+	ladder_y_fuel = -(motor_centre_from_end - door_centre_from_fuel_end)+door_length/2 - ladder_height/2;
+	//door_centre_from_loco_end  = box_end ? door_centre_from_box_end : door_centre_from_fuel_end;
+	
+	ladder_y = box_end ? ladder_y_box : ladder_y_fuel;
+	
+	rung_space_height = (ladder_height - girder_thick*3)/2;
+	mirror_y()translate([bogie_width/2-ladder_width/2+girder_thick,ladder_y,0])
+	difference(){
+		centred_cube(ladder_width,ladder_length,ladder_height);
+		
+		union(){
+			//top rung space
+			translate([ladder_width/2-girder_thick/2,0,girder_thick])centred_cube(girder_thick+0.1,ladder_length-girder_thick*2,rung_space_height);
+			if(box_end){
+				translate([ladder_width/2-girder_thick/2,0,girder_thick*2+rung_space_height])centred_cube(girder_thick+0.1,ladder_length-girder_thick*2,rung_space_height);
+			}else{
+				//only the left half of the bottom rung box
+				translate([ladder_width/2-girder_thick/2,-(ladder_length-girder_thick*2)/4,girder_thick*2+rung_space_height])centred_cube(girder_thick+0.1,(ladder_length-girder_thick*2)/2,rung_space_height);
+			}
+		}
+	}
 }
 
 //fuel end or box end? only need box for motorised 66, but will need both for dummy
@@ -2015,7 +2051,11 @@ optional_rotate([0,0,ANGLE],ANGLE != 0){
 
 	if(GEN_BOGIES){
 		echo("gen bogies");
-		mirror_x(GEN_IN_PLACE && DUMMY)mirror([0,1,0])optional_translate([0,-(length/2 - motor_centre_from_end),base_height_above_track-bogie_mount_height-m3_washer_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)bogies();
+		mirror([0,1,0])optional_translate([0,-(length/2 - motor_centre_from_end),base_height_above_track-bogie_mount_height-m3_washer_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)bogies(true);
+		if(DUMMY){
+			//other bogie
+			optional_translate([0,-(length/2 - motor_centre_from_end),base_height_above_track-bogie_mount_height-m3_washer_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)bogies(false);
+		}
 		
 	}
 
