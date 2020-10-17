@@ -1,5 +1,6 @@
 include <truck_bits.scad>
 include <constants.scad>
+include <threads.scad>
 
 
 //the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body, likewise with the roof of the shell
@@ -831,7 +832,8 @@ module bogie_axle_holder(axle_height){
 }
 bogie_top_gap = 1.5;
 bogie_top_gap_rear = 3.5;
-bogie_top_thick = 4.5;
+bogie_top_thick = 4.75;
+//bogie_inner_thick = 4.5;
 bogie_chunks_length = 9.5;
 //how much further inside the thinner bits are
 bogie_inner_width = bogie_width-2;
@@ -841,7 +843,7 @@ bogie_cosmetics_width = 1.5;
 bogie_thick_width = (bogie_width - bogie_inner_width)/2 + bogie_cosmetics_width;
 
 //horizontal suspension
-module bogie_h_suspension(){
+module bogie_h_suspension(axle_height){
 	h_suspension_holder_height = 2;
 	h_suspension_length = 6.5;
 	h_suspension_height = 1.5;
@@ -861,7 +863,7 @@ module bogie_h_suspension(){
 	}
 	//representation of the suspension
 	mirror_y(){
-		mirror_y()translate([bogie_inner_width/2-bogie_cosmetics_width/2+girder_thick/2, h_suspension_y_offset,bogie_top_gap + bogie_top_thick]){
+		mirror_y()translate([bogie_inner_width/2-bogie_cosmetics_width/2+girder_thick/2, h_suspension_y_offset,axle_height-h_suspension_height/2]){
 			centred_cube(bogie_cosmetics_width+girder_thick,h_suspension_length,h_suspension_height);
 			translate([(bogie_cosmetics_width+girder_thick)/2,0,h_suspension_height/2]){
 				rotate([90,0,0])cylinder(r=h_suspension_height/3,h=h_suspension_length*0.75,center=true);
@@ -874,7 +876,7 @@ module bogie_h_suspension(){
 }
 
 //"front" is -ve y
-module bogie_cosmetics(box_end=true){
+module bogie_cosmetics(axle_height, box_end=true){
 	
 	
 	end_y = bogie_end_axles_distance/2 + 1.6*bogie_wheel_d/2;
@@ -924,7 +926,8 @@ module bogie_cosmetics(box_end=true){
 	mirror_y()translate([bogie_width/2-bogie_thick_width/2,-(front_chunk_y2 + front_y)/2,0])
 	difference(){
 		centred_cube(bogie_thick_width,front_y-front_chunk_y2,bogie_top_thick);
-		translate([0,-((front_y-front_chunk_y2)/2-girder_thick),-0.1])centred_cube(bogie_thick_width+0.1,girder_thick*2+0.1,girder_thick+0.1);
+		//cut a chunk out of the top of the front
+		translate([0,-((front_y-front_chunk_y2)/2-girder_thick*2),-0.1])centred_cube(bogie_thick_width+0.1,girder_thick*4+0.1,girder_thick*2+0.1);
 	}
 	
 	//extra bits at back
@@ -943,10 +946,73 @@ module bogie_cosmetics(box_end=true){
 		}
 	}
 	
+	//horizontal suspension
+	translate([0,bogie_end_axles_distance/4,0])bogie_h_suspension(axle_height);
+	translate([0,-bogie_end_axles_distance/4,0])bogie_h_suspension(axle_height);
 	
-	// =========== horizontal suspension bits =============
-	translate([0,bogie_end_axles_distance/4,0])bogie_h_suspension();
-	translate([0,-bogie_end_axles_distance/4,0])bogie_h_suspension();
+	//big spring bases
+	spring_base_length = 7.5;
+	spring_base_offset = -1;
+	mirror_xy(){
+		translate([bogie_inner_width/2-bogie_cosmetics_width/2+girder_thick/2,bogie_wheel_d+spring_base_offset,bogie_top_gap])centred_cube(bogie_cosmetics_width+girder_thick,spring_base_length,girder_thick);
+	}
+	
+	axle_r=3.5/2;
+	axle_box_size = axle_r*2.6;
+	axle_holder_box_width = (bogie_thick_width+bogie_cosmetics_width)/2;
+	axle_box_mini_r=axle_box_size/8;
+	axle_box_base_height = axle_box_size/3;
+	axle_box_base_length = axle_box_size*1.4;
+	
+	axle_holder_length = 9.5;
+	spring_r=axle_holder_box_width/2;
+	top_square_size = spring_r*2*0.75;
+	// ============ axle holders ===============
+	mirror_y()triplicate_x([0,bogie_end_axles_distance/2,0]){
+		
+		translate([bogie_width/2-bogie_thick_width,0,axle_height]){
+			
+			//(0,0) here is back of the cosmetic arm, centred on the axle in yz, facing outwards
+			
+			//centre of the axle
+			hull(){
+				rotate([0,90,0])cylinder(r=axle_r,h=bogie_thick_width);
+				rotate([0,90,0])cylinder(r=axle_r*0.75,h=bogie_thick_width+girder_thick/2);
+			}
+			rotate([0,90,0])cylinder(r=axle_r*0.25,h=bogie_thick_width+girder_thick);
+			
+			//axle holder bit
+			hull(){
+				rotate([0,90,0])cylinder(r=axle_box_size/2,h=axle_holder_box_width);
+				translate([axle_holder_box_width/2,0,0])centred_cube(axle_holder_box_width,axle_box_size,axle_box_size/2);
+				mirror_x()translate([0,axle_box_size/4,-axle_box_size/2+axle_box_mini_r])rotate([0,90,0])cylinder(r=axle_box_mini_r,h=axle_holder_box_width);
+			}
+			//base of axle holder
+			translate([axle_holder_box_width/2,0,axle_box_size/2-axle_box_base_height])centred_cube(axle_holder_box_width,axle_box_base_length,axle_box_base_height);
+			
+			//horizontal bar
+			translate([axle_holder_box_width/2,0,-axle_r])centred_cube(axle_holder_box_width,axle_holder_length,girder_thick);
+			
+			//plate behind bar and behind springs
+			hull(){
+				//horizontal bar
+				translate([axle_holder_box_width/4,0,-axle_r-3])centred_cube(axle_holder_box_width/2,axle_holder_length,girder_thick+3);
+				//base
+				translate([axle_holder_box_width/4,0,axle_box_size/2-axle_box_base_height])centred_cube(axle_holder_box_width/2,axle_box_base_length,axle_box_base_height);
+			}
+			
+			//springs on top
+			mirror_x()translate([axle_holder_box_width/2,axle_holder_length/2-spring_r,-axle_r])
+			mirror([0,0,1])cylinder(r=spring_r,h=axle_height/2);
+			//metric_thread(diameter=spring_r*2, pitch=0.7,thread_size=0.5, groove=true, length=5);
+			//square bit on top
+			translate([top_square_size/2,0,-axle_r])mirror([0,0,1])centred_cube(top_square_size,top_square_size,3);
+			
+			
+		}
+		
+	}// ============ end axle holders ===============
+	
 }
 
 //fuel end or box end? only need box for motorised 66, but will need both for dummy
@@ -969,7 +1035,7 @@ module bogies(box_end=true){
 	mirror_x()translate([0,bogie_end_axles_distance/2,0])bogie_axle_holder(axle_height);
 	//centred_cube(wheel_holder_arm_width+10,bogie_arm_length,bogie_thick);
 	
-	bogie_cosmetics(box_end);
+	bogie_cosmetics(axle_height, box_end);
 	
 	coupling_arm_length = coupling_arm_from_mount - bogie_end_axles_distance/2 + wheel_mount_length/2;
 	
