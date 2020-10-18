@@ -32,15 +32,18 @@ Known variations I've not taken intoaccount:
 */
 
 //non-dummy base needs scaffolding
-GEN_BASE = false;
+GEN_BASE = true;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
 GEN_SHELL = false;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = true;
+GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
+
+GEN_PI_MOUNT = true;
+
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
 GEN_IN_PLACE = true;
@@ -222,6 +225,7 @@ screwhole_from_edge = 5.75;
 base_wall_screwholes = [[width/2-screwhole_from_edge,base_arch_top_length/2+screwhole_from_edge/2,0],[width/2-screwhole_from_edge,length/2-screwhole_from_edge*1.5,0]];
 shell_screwhole_thick = 2;
 
+//pi screwholes at end_width_start and mirror around the bogie mountpoint
 pi_screwholes_from_centre = 5;
 
 //for calculating roof shape at the front
@@ -425,7 +429,7 @@ module crane_mount_box(){
 		
 		centred_cube(base_pipe_space,crane_mount_box_length,base_thick);
 		
-		translate([girder_thick+0.01,0,base_thick/3])centred_cube(base_pipe_space-girder_thick*2,crane_mount_box_length-girder_thick*2,2*base_thick/3-girder_thick);
+		translate([girder_thick+0.01,0,base_thick/2])centred_cube(base_pipe_space-girder_thick*2,crane_mount_box_length-girder_thick*2,base_thick/2-girder_thick);
 		
 	}
 }
@@ -1471,23 +1475,22 @@ module wall_and_roof_slice(long = girder_thick,wall_gap=side_base_ridge_height,s
 		centred_cube(100,long,100);
 	}
 }
-
-module wall_and_roof_slice_simple(roof_only=false,ridge_height=1){
+//ridge height - how far off the base this should start
+module wall_and_roof_slice_simple(roof_only=false,ridge_height=1,length=girder_thick){
 	corners = roof_corners(width);
 		//square_size = module_slice_thick;
 		translate([0,0,wall_height]){
 			for(i=[0:len(corners)-2]){
 				hull(){
 					for(corner=[corners[i],corners[i+1]]){
-						//translate(corner)centred_cube(girder_thick,girder_thick,girder_thick);
-						translate(corner)rotate([90,0,0])cylinder(r=wall_thick/2,h=girder_thick,$fn=6,center=true);
+						translate(corner)rotate([90,0,0])cylinder(r=wall_thick/2,h=length,$fn=6,center=true);
 					}
 				}
 			}
 		}
 		if(!roof_only){
 			//down to ridges
-			mirror_y()translate([width/2-wall_thick/2,0,ridge_height])centred_cube(wall_thick,girder_thick,wall_height-ridge_height);
+			mirror_y()translate([width/2-wall_thick/2,0,ridge_height])centred_cube(wall_thick,length,wall_height-ridge_height);
 		}
 }
 
@@ -1788,21 +1791,23 @@ module roof_hoover(subtract=false){
 }
 }
 
+front_window_width = 13.5-0.5;
+front_window_height = 10.5-1;
+front_window_r = 2;
+front_window_z = 14+0.5;
+front_window_x = 8-0.25;
+side_window_length = 12;
+side_window_height = 9.5-0.5;
+side_window_z = 8.3+1;
+side_window_y = 4.9;
+side_window_bottom_corner_r=1.2;
+side_window_bottom_corner_z=side_window_z+1.9;
+side_window_bottom_corner_y=2.8;
+side_window_top_corner_y=2.15;
+
 module shell(){
 	
-	front_window_width = 13.5-0.5;
-	front_window_height = 10.5-1;
-	front_window_r = 2;
-	front_window_z = 14+0.5;
-	front_window_x = 8-0.25;
-	side_window_length = 12;
-	side_window_height = 9.5-0.5;
-	side_window_z = 8.3+1;
-	side_window_y = 4.9;
-	side_window_bottom_corner_r=1.2;
-	side_window_bottom_corner_z=side_window_z+1.9;
-	side_window_bottom_corner_y=2.8;
-	side_window_top_corner_y=2.15;
+	
 	
 	front_height = front_top_r+front_top_r_z;
 	
@@ -2048,6 +2053,31 @@ module roof(){
 	}
 }
 
+//centred around the motor/bogie hinge point, facing +ve y out the windows
+module pi_mount(){
+	camera_mount_width = width-wall_thick*2 - 2;
+	shell_scale = (width-wall_thick*2-2)/width;
+	base_thick=2+m2_head_length;
+	//wall slice with hole for camera
+	translate([0,motor_centre_from_end - end_width_start + m2_head_size/2+wall_thick/2,0])
+	difference(){
+		
+		//centred_cube(camera_mount_width,wall_thick,wall_height);
+		scale([shell_scale,1,shell_scale])hull()wall_and_roof_slice_simple(false,0, wall_thick);
+		translate([0,0,front_window_z])rotate([90,0,0])cylinder(r=pi_cam_d/2+0.1,h=wall_thick*2,center=true);
+	}
+	translate([0,motor_centre_from_end - end_width_start,0])difference(){
+		centred_cube((width)*shell_scale,m2_head_size*2,base_thick);
+		mirror_y(){
+			translate([pi_screwholes_from_centre,0,0]){
+				cylinder(r=m2_thread_size_loose/2,h=10,center=true);
+				translate([0,0,base_thick-m2_head_length])cylinder(r=m2_head_size/2,h=m2_head_length+1);
+			}
+		}
+	}
+	
+}
+
 optional_rotate([0,0,ANGLE],ANGLE != 0){
 	if(GEN_BASE){
 		echo("gen base");
@@ -2083,6 +2113,11 @@ optional_rotate([0,0,ANGLE],ANGLE != 0){
 	if(GEN_MOTOR_CLIP){
 		echo("gen motor clip");
 		optional_translate([0,-(length/2 - motor_centre_from_end),motor_clip_base_z+base_thick+base_height_above_track+motor_clip_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	
+	}
+	
+	if(GEN_PI_MOUNT){
+		echo("gen pi mount");
+		optional_translate([0,(length/2 - motor_centre_from_end),base_thick+base_height_above_track],GEN_IN_PLACE)pi_mount();	
 	}
 
 }

@@ -27,6 +27,8 @@ m3_thread_d = 3.0;
 m3_washer_thick = 0.55;
 axle_space=23;
 
+pi_cam_d = 7.3;
+
 //doesn't include tip
 aaa_battery_length = 43;
 //includes a little bit of space
