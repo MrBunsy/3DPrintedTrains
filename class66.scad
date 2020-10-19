@@ -2055,19 +2055,37 @@ module roof(){
 
 //centred around the motor/bogie hinge point, facing +ve y out the windows
 module pi_mount(){
+	mount_thick = wall_thick;
 	camera_mount_width = width-wall_thick*2 - 2;
 	shell_scale = (width-wall_thick*2-2)/width;
-	base_thick=2+m2_head_length;
+	base_thick=1.5+m2_head_length;
+	base_length = m2_head_size + mount_thick*2;
+	electronics_height = 10;
+	pi_holder_thick = 4;
+	pi_holder_wide = 12;
+	pi_mount_height = 5.5;
+	
+	//TODO
+	pi_offset = [1,-10,0];
+	
+	roof = roof_corners();
+	max_height = (wall_height+roof[2][2])*shell_scale;
+	
 	//wall slice with hole for camera
 	translate([0,motor_centre_from_end - end_width_start + m2_head_size/2+wall_thick/2,0])
 	difference(){
-		
-		//centred_cube(camera_mount_width,wall_thick,wall_height);
-		scale([shell_scale,1,shell_scale])hull()wall_and_roof_slice_simple(false,0, wall_thick);
-		translate([0,0,front_window_z])rotate([90,0,0])cylinder(r=pi_cam_d/2+0.1,h=wall_thick*2,center=true);
+		scale([shell_scale,1,shell_scale])hull()wall_and_roof_slice_simple(false,0, mount_thick);
+		union(){
+			//punch out camera hole
+			translate([0,0,front_window_z])rotate([90,0,0])cylinder(r=pi_cam_d/2+0.1,h=mount_thick*2,center=true);
+			//chop off top of roof
+		translate([0,0,max_height])centred_cube(width,mount_thick*2,10);
+		}
 	}
-	translate([0,motor_centre_from_end - end_width_start,0])difference(){
-		centred_cube((width)*shell_scale,m2_head_size*2,base_thick);
+		
+	//base with screw fixings for both camera and pi holder
+	mirror_x()translate([0,motor_centre_from_end - end_width_start,0])difference(){
+		centred_cube((width)*shell_scale,base_length,base_thick);
 		mirror_y(){
 			translate([pi_screwholes_from_centre,0,0]){
 				cylinder(r=m2_thread_size_loose/2,h=10,center=true);
@@ -2075,6 +2093,28 @@ module pi_mount(){
 			}
 		}
 	}
+	
+	//pi holder on a pole
+	translate([0,-(motor_centre_from_end - end_width_start),0]){
+		centred_cube(pi_holder_thick,pi_holder_thick,electronics_height);
+		translate([0,0,electronics_height]){
+			centred_cube(pi_holder_wide,pi_holder_wide,base_thick);
+			translate(pi_offset){
+				//lengthwise arm
+				centred_cube(pi_holder_thick,pi_mount_length,base_thick);
+				mirror_x()translate([0,pi_mount_length/2,0])centred_cube(pi_mount_width,pi_holder_thick,base_thick);
+				mirror_xy()translate([pi_mount_width/2,pi_mount_length/2,0]){
+					cylinder(r=pi_mount_d/2,h=base_thick+pi_mount_height);
+					cylinder(r=pi_mount_d,h=base_thick);
+				}
+			}
+			
+		}
+	}
+	
+
+		
+	
 	
 }
 

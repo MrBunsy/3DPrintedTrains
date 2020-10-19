@@ -45,6 +45,11 @@ buffer_holder_length = 4.5;
 //max_d doesn't apply within this space in the centre of the axle
 axle_centre_space = 8;
 
+//four cylinders that will hold a pi
+pi_mount_length=58;
+pi_mount_width=23;
+pi_mount_d=2.25;
+
 //for height of couplings and axle mounts - diameter of the thinner bit of
 //the wheel that rests on the rails
 //13.5 for the old coach wheels, truck wheels usually smaller (13.15)

@@ -42,7 +42,7 @@ full66Job.addVariable("GEN_IN_PLACE", "true")
 for v in ["base", "shell", "bogies"]:
     full66Job.addVariable("GEN_"+v.upper(), "true")
     
-full66Job.addVariable("dummy", "true")
+full66Job.addVariable("DUMMY", "true")
 
 for v in class66Variables:
     #full66Job.addVariable("GEN_"+v.upper(), "true")
