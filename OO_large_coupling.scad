@@ -19,7 +19,8 @@ module frontarc(height, radius, width, thickness){
 
 
 //the arc with arms and a base. No mechanism to hold hook or connect to train
-module coupling_base(arm_thickness, arm_length, coupling_height, coupling_width, arc_radius, min_thickness, base_width, flange_max, flange_min, min_front_thickness){
+//arm_thickness=1.8, arm_length = 9.7, coupling_height = 2.5, coupling_width=21, arc_radius = 26, min_thickness = min_thickness, base_width = 2.4, flange_max=2, flange_min=1, min_front_thickness=min_front_thickness
+module coupling_base(arm_thickness=1.8, arm_length= 9.7, coupling_height= 2.5, coupling_width=21, arc_radius= 26, min_thickness = 1.5, base_width= 2.4, flange_max=2, flange_min=1, min_front_thickness=0.8){
 
 
 
@@ -104,4 +105,18 @@ module hook_base_clip(x, y, width, length, height, hook_holder_radius, hook_hold
             cube([hook_holder_end_cap_thickness, length, hook_holder_height+hook_holder_radius]);
         };
     
+}
+
+
+//basic coupling shape, with no means to attach
+module wide_coupling(){
+	min_thickness = 1.5;
+	difference() {
+     
+		union(){
+				coupling_base(arm_thickness=1.8, arm_length = 9.7, coupling_height = 2.5, coupling_width=21, arc_radius = 26, min_thickness = min_thickness, base_width = 2.4, flange_max=2, flange_min=1, min_front_thickness=min_front_thickness);
+		
+				
+		};
+	}
 }
