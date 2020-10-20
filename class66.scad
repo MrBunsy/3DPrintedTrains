@@ -42,11 +42,11 @@ GEN_ROOF = false;
 GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
 
-GEN_PI_MOUNT = true;
+GEN_PI_MOUNT = false;
 
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
-GEN_IN_PLACE = true;
+GEN_IN_PLACE = false;
 
 //generate tiny things that won't print well
 GEN_TINY_BITS = false;
@@ -500,13 +500,13 @@ module battery_holder(subtract=true){
 	//big rectangle
 	translate([0,0,-0.01])centred_cube(battery_space_width*0.45,fuel_tank_length-wall_thick*2,base_arch_height+fuel_tank_height-wall_thick+0.01);
 	
-	battery_angle = -30;//-25;
+	battery_angle = -32;//-30;//-25;
 	//calculated by eye so the end of the battery can rest on the wall while still being as low down as possible
-	start_offset = 13.25;//8;
+	start_offset = 12.6+0.2*3;//13.25;//8;
 	
 	//battery_angle = -27.5;
 	//start_offset = 7;
-	battery_spacing = 1;//2;
+	battery_spacing = 0.8;//1;//2;
 	//TODO chop end of far end battery by (TODO angle related) as the end of the battery doesn't need to intersect the rear wall
 	difference(){
 		mirror_y()union(){
