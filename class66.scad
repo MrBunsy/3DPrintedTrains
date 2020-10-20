@@ -112,8 +112,8 @@ base_arch_top_length = 90;
 base_arch_bottom_length = 75;
 base_arch_height = 7;
 
-
-fuel_tank_height = 11;
+//think 11 is about accurate, need a tiny bit more space for batteries
+fuel_tank_height = 11;//11;
 //butted up to the end of the arch on one side
 fuel_tank_length = 60;
 a_frame_spacing = fuel_tank_length/4;
@@ -351,7 +351,7 @@ module fuel_tank(){
 		translate([0,0,little_r+straight_section])centred_cube(100,100,fuel_tank_height - (little_r+straight_section));
 	}
 	
-	translate([0,0,little_r])centred_cube(width,fuel_tank_length,little_r);
+	translate([0,0,little_r])centred_cube(width,fuel_tank_length,straight_section);
 	hull()mirror_y()translate([width/2-little_r,0,little_r])rotate([90,0,0])cylinder(r=little_r,h=fuel_tank_length,center=true);
 }
 
@@ -495,26 +495,30 @@ module fuel_pump_box(){
 	//box that's only on one side? or only on certain models?
 	translate([(width/2-base_pipe_space/2 - girder_thick),-4,0])centred_cube(base_pipe_space,fuel_box_length,fuel_box_height+girder_thick);
 }
-
+//0,0 is assumed to be the centre of the fuel holder in xy, and starting at the top of the base in z
 module battery_holder(subtract=true){
 	//big rectangle
-	translate([0,(fuel_tank_length-base_arch_bottom_length)/2,-0.01])centred_cube(battery_space_width*0.45,fuel_tank_length-wall_thick*2,base_arch_height+fuel_tank_height-wall_thick+0.01);
+	translate([0,0,-0.01])centred_cube(battery_space_width*0.45,fuel_tank_length-wall_thick*2,base_arch_height+fuel_tank_height-wall_thick+0.01);
 	
-	battery_angle = -25;
-	start_offset = 8;
+	battery_angle = -30;//-25;
+	//calculated by eye so the end of the battery can rest on the wall while still being as low down as possible
+	start_offset = 13.25;//8;
 	
 	//battery_angle = -27.5;
 	//start_offset = 7;
-	battery_spacing = 2;
-	
+	battery_spacing = 1;//2;
+	//TODO chop end of far end battery by (TODO angle related) as the end of the battery doesn't need to intersect the rear wall
 	difference(){
 		mirror_y()union(){
 			for(i=[0:3]){
-				translate([(battery_space_width/2-aaa_battery_d/2),start_offset-(i*(aaa_battery_d/cos(battery_angle)+battery_spacing)),0])rotate([battery_angle,0,0])cylinder(r=aaa_battery_d/2,h=aaa_battery_length*2,center=true);
+				//start_offset-(i*(aaa_battery_d/cos(battery_angle)+battery_spacing))
+				translate([(battery_space_width/2-aaa_battery_d/2),start_offset-fuel_tank_length/2 + (i*(aaa_battery_d/cos(battery_angle)+battery_spacing)),base_arch_height+fuel_tank_height-wall_thick])rotate([battery_angle+180,0,0])cylinder(r=aaa_battery_d/2,h=aaa_battery_length*2,center=true);
 			}
 		}
-		
-		translate([0,0,base_arch_height+fuel_tank_height-wall_thick])centred_cube(100,100,100);
+		union(){
+			translate([0,0,base_arch_height+fuel_tank_height-wall_thick])centred_cube(width,length,100);
+			translate([0,fuel_tank_length/2,0])centred_cube(width,wall_thick*2,100);
+		}
 		
 	}
 }
@@ -758,7 +762,7 @@ module base(){
 			
 			if(!DUMMY){
 				//hollow out fuel tank for batteries
-				battery_holder(true);
+				translate([0,(fuel_tank_length-base_arch_bottom_length)/2,0])battery_holder(true);
 
 				//TODO custom battery holder, I think we can hold eight batteries in here if they're at the right angle or position.
 				//for now, I'll leave it as it is to get the whole loco working then come back and improve this
