@@ -130,7 +130,7 @@ buffer_box_length_bottom = 3;
 buffer_box_bottom_height = 1.5;
 buffer_box_height = 3;
 //under the buffers, there's a front panel of the loco
-buffer_front_height = 5;
+buffer_front_height = 4;
 buffer_front_length = 1;
 
 //wall_thick = 2;
@@ -328,7 +328,7 @@ module buffers(){
 			//front face
 			translate([0,-buffer_front_length/2,base_thick])centred_cube(buffer_width,buffer_front_length,buffer_front_height);
 		}
-		
+		//buffer holders
 		mirror_y()translate([buffer_distance/2,0,base_thick+buffer_box_height/2])rotate([90,0,0])cylinder(r=buffer_holder_d/2,h=buffer_holder_length*2,center=true);
 		
 	}
