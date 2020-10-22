@@ -3,6 +3,7 @@
 top_of_coupling_from_top_of_rail = 8.4;
 
 coupling_from_edge=2.5;
+coupling_hook_x = 3.7;
 
 //again hornby seems higher than Lima and friends, but it makes my life easier so I'll take it
 //hornby seens to be 17.6, lima about 16.5. i'll go for 17
