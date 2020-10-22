@@ -95,16 +95,16 @@ module inline_hook(subtract = false){
 	hook_walls_size = hook_holder_diameter*1.5;
 	if(subtract){
 		//space for hook
-		translate([coupling_hook_x,main_arm_length,0])centred_cube(hook_holder_length+hook_wall_thick*2,hook_holder_diameter*2,10);
+		translate([coupling_hook_x,main_arm_length/2,0])centred_cube(hook_holder_length+hook_wall_thick*2,hook_holder_diameter*2,10);
 	}else{
 		
 		z = min_thickness > hook_holder_diameter ? min_thickness/2 : hook_holder_diameter/2;
 		
-		translate([coupling_hook_x,main_arm_length,z])rotate([0,90,0])cylinder(r=hook_holder_diameter/2,h=hook_holder_length,center=true);
+		translate([coupling_hook_x,main_arm_length/2,z])rotate([0,90,0])cylinder(r=hook_holder_diameter/2,h=hook_holder_length,center=true);
 		
 		
 		hook_arm_length = main_arm_length + hook_holder_diameter;
-		translate([coupling_hook_x,main_arm_length-hook_arm_length/2+hook_holder_diameter,0])mirror_y()translate([hook_holder_length/2+hook_wall_thick/2,0,0])centred_cube(hook_wall_thick,hook_arm_length,hook_walls_size);
+		translate([coupling_hook_x,main_arm_length/2,0])mirror_y()translate([hook_holder_length/2+hook_wall_thick/2,0,0])centred_cube(hook_wall_thick,hook_arm_length,hook_walls_size);
 	}
 	
 }
