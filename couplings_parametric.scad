@@ -36,8 +36,6 @@ dovetail - Hornby dovetail FIXING, I think intended to hold a NEM socket. I'll g
 */
 FIXING = "dovetail";
 
-
-
 min_thickness = 1.5;
 x8031_main_arm_length = 5.9;
 x8031_main_arm_width = 6;
@@ -93,7 +91,7 @@ module chunky_hook(subtract = false){
 
 		hook_base_clip(x=-hook_holder_end_cap_thickness*2, y=-x8031_main_arm_length, width=chunky_hook_base_width/2, length=hook_base_length, height=hook_height, hook_holder_radius=hook_holder_diameter/2, hook_holder_length=hook_holder_length, hook_holder_end_cap_thickness=hook_holder_end_cap_thickness*2, hook_holder_height=hook_holder_height, hook_holder_y=hook_holder_y);
 		
-		echo("x=",-hook_holder_end_cap_thickness*2 + chunky_hook_base_width/4,"y=",-x8031_main_arm_length+hook_base_length/2,"z=",hook_holder_height);
+		//echo("x=",-hook_holder_end_cap_thickness*2 + chunky_hook_base_width/4,"y=",-x8031_main_arm_length+hook_base_length/2,"z=",hook_holder_height);
 
 	}
 	
@@ -115,6 +113,34 @@ module inline_hook(subtract = false){
 		
 		hook_arm_length = main_arm_length + hook_holder_diameter;
 		translate([coupling_hook_x,main_arm_length/2,0])mirror_y()translate([hook_holder_length/2+hook_wall_thick/2,0,0])centred_cube(hook_wall_thick,hook_arm_length,hook_walls_size);
+	}
+	
+}
+
+
+module dovetail_fixing(subtract = false){
+	dovetail_length = 10; 
+	dovetail_main_width = 5;
+	dovetail_thick = 3.2;
+	
+	big_triangle_width = 7.4;
+	big_triangle_length = 3.75;//bit of a guess
+	big_triangle_y = 7;
+	little_triangle_width = 4.25;
+	little_triangle_length = 2.5;
+	little_triangle_end_thick = 0.5;
+	
+	translate([0,-(dovetail_length-little_triangle_length*0.75)/2,0])centred_cube(dovetail_main_width, dovetail_length-little_triangle_length*0.75,dovetail_thick);
+	
+	hull(){
+		translate([0,-(dovetail_length-little_triangle_end_thick/2),0])centred_cube(little_triangle_width,little_triangle_end_thick,dovetail_thick);
+		translate([0,-(dovetail_length-little_triangle_length-0.05),0])centred_cube(0.1,0.1,dovetail_thick);
+		
+	}
+	
+	hull(){
+		translate([0,-(big_triangle_y-little_triangle_end_thick/2),0])centred_cube(big_triangle_width,little_triangle_end_thick,dovetail_thick);
+		translate([0,-(big_triangle_y-big_triangle_length-0.05)])centred_cube(0.1,0.1,dovetail_thick);
 	}
 	
 }
@@ -141,8 +167,13 @@ module coupling_body(){
 }
 
 module fixing(subtract = false){
-	if(FIXING=="X8031"){
-		x8031_fixing(subtract);
+	if(!subtract){
+		if(FIXING=="X8031"){
+			x8031_fixing(subtract);
+		}
+		if(FIXING == "dovetail"){
+			dovetail_fixing(subtract);
+		}
 	}
 }
 if(GEN_COUPLING){

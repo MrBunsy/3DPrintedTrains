@@ -62,8 +62,9 @@ def class66_jobs():
 def couplings_jobs():
     jobs = []
 
-    for style in ["wide"]:
-        for hook in ["inline", "chunky", "no"]:
+
+    for hook in ["inline", "chunky", "no"]:
+        for style in ["wide"]:
             for fixing in ["X8031","dovetail"]:
                 job = JobDescription("couplings_parametric.scad", "coupling_{}_{}_{}_hook".format(style, fixing, hook))
                 job.addVariable("GEN_IN_PLACE", False)
@@ -73,6 +74,13 @@ def couplings_jobs():
                 job.addVariable("HOOK", hook)
                 job.addVariable("FIXING", fixing)
                 jobs.append(job)
+        if hook != "no":
+            job = JobDescription("couplings_parametric.scad", "coupling_hook_{}".format(hook))
+            job.addVariable("GEN_IN_PLACE", False)
+            job.addVariable("GEN_COUPLING", False)
+            job.addVariable("GEN_HOOK", True)
+            job.addVariable("HOOK", hook)
+            jobs.append(job)
 
     return jobs
 
@@ -90,5 +98,5 @@ if __name__ == '__main__':
     if args.couplings:
         jobs.extend(couplings_jobs())
 
-    p = Pool(multiprocessing.cpu_count()-1)
+    p = Pool(multiprocessing.cpu_count()-2)
     p.map(executeJob, jobs)
