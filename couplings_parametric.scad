@@ -51,18 +51,14 @@ module x8031_fixing(subtract=false){
 	
 	
 	if(subtract){
-		cylinder(h=min_thickness*3, r=hole_diameter/2, center = true, $fn=200);
-           translate([-second_hole_distance,0,0]){
-            cylinder(h=min_thickness*3, r=second_hole_diameters/2, center = true, $fn=200);
-           };
-           translate([second_hole_distance,0,0]){
-            cylinder(h=min_thickness*3, r=second_hole_diameters/2, center = true, $fn=200);
-           }
+		//big hole in centre
+		cylinder(h=10, r=hole_diameter/2, center = true, $fn=200);
+        //two smaller half holes
+		mirror_y()translate([second_hole_distance,0,0])cylinder(h=min_thickness*3, r=second_hole_diameters/2, center = true, $fn=200);
+           
 	}else{
 		
-		translate([-x8031_main_arm_width/2, -x8031_main_arm_length, 0]){
-		cube([x8031_main_arm_width, x8031_main_arm_length, min_thickness]);
-	}
+		translate([-x8031_main_arm_width/2, -x8031_main_arm_length, 0])cube([x8031_main_arm_width, x8031_main_arm_length, min_thickness]);
 		
 	}
 		
@@ -126,21 +122,25 @@ module dovetail_fixing(subtract = false){
 	big_triangle_width = 7.4;
 	big_triangle_length = 3.75;//bit of a guess
 	big_triangle_y = 7;
+	big_triangle_end_thick = 0.5;
 	little_triangle_width = 4.25;
 	little_triangle_length = 2.5;
-	little_triangle_end_thick = 0.5;
+	little_triangle_end_thick = 0.1;
 	
-	translate([0,-(dovetail_length-little_triangle_length*0.75)/2,0])centred_cube(dovetail_main_width, dovetail_length-little_triangle_length*0.75,dovetail_thick);
+	if(!subtract){
 	
-	hull(){
-		translate([0,-(dovetail_length-little_triangle_end_thick/2),0])centred_cube(little_triangle_width,little_triangle_end_thick,dovetail_thick);
-		translate([0,-(dovetail_length-little_triangle_length-0.05),0])centred_cube(0.1,0.1,dovetail_thick);
+		translate([0,-(dovetail_length-little_triangle_length*0.75)/2,0])centred_cube(dovetail_main_width, dovetail_length-little_triangle_length*0.75,dovetail_thick);
 		
-	}
-	
-	hull(){
-		translate([0,-(big_triangle_y-little_triangle_end_thick/2),0])centred_cube(big_triangle_width,little_triangle_end_thick,dovetail_thick);
-		translate([0,-(big_triangle_y-big_triangle_length-0.05)])centred_cube(0.1,0.1,dovetail_thick);
+		hull(){
+			translate([0,-(dovetail_length-little_triangle_end_thick/2),0])centred_cube(little_triangle_width,little_triangle_end_thick,dovetail_thick);
+			translate([0,-(dovetail_length-little_triangle_length-0.05),0])centred_cube(0.1,0.1,dovetail_thick);
+			
+		}
+		
+		hull(){
+			translate([0,-(big_triangle_y-big_triangle_end_thick/2),0])centred_cube(big_triangle_width,big_triangle_end_thick,dovetail_thick);
+			translate([0,-(big_triangle_y-big_triangle_length-0.05)])centred_cube(0.1,0.1,dovetail_thick);
+		}
 	}
 	
 }
@@ -167,14 +167,13 @@ module coupling_body(){
 }
 
 module fixing(subtract = false){
-	if(!subtract){
-		if(FIXING=="X8031"){
-			x8031_fixing(subtract);
-		}
-		if(FIXING == "dovetail"){
-			dovetail_fixing(subtract);
-		}
+	if(FIXING=="X8031"){
+		x8031_fixing(subtract);
 	}
+	if(FIXING == "dovetail"){
+		dovetail_fixing(subtract);
+	}
+	
 }
 if(GEN_COUPLING){
 	difference(){

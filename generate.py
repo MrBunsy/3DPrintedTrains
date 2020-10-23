@@ -67,7 +67,7 @@ def couplings_jobs():
         for style in ["wide"]:
             for fixing in ["X8031","dovetail"]:
                 job = JobDescription("couplings_parametric.scad", "coupling_{}_{}_{}_hook".format(style, fixing, hook))
-                job.addVariable("GEN_IN_PLACE", False)
+                job.addVariable("GEN_IN_SITU", False)
                 job.addVariable("GEN_COUPLING", True)
                 job.addVariable("GEN_HOOK", False)
                 job.addVariable("STYLE", style)
@@ -75,12 +75,12 @@ def couplings_jobs():
                 job.addVariable("FIXING", fixing)
                 jobs.append(job)
         if hook != "no":
-            job = JobDescription("couplings_parametric.scad", "coupling_hook_{}".format(hook))
-            job.addVariable("GEN_IN_PLACE", False)
-            job.addVariable("GEN_COUPLING", False)
-            job.addVariable("GEN_HOOK", True)
-            job.addVariable("HOOK", hook)
-            jobs.append(job)
+            job2 = JobDescription("couplings_parametric.scad", "coupling_hook_{}".format(hook))
+            job2.addVariable("GEN_IN_SITU", False)
+            job2.addVariable("GEN_COUPLING", False)
+            job2.addVariable("GEN_HOOK", True)
+            job2.addVariable("HOOK", hook)
+            jobs.append(job2)
 
     return jobs
 
