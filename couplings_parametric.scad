@@ -1,5 +1,6 @@
 include <OO_large_coupling.scad>
 include <constants.scad>
+include <hook_for_clip.scad>
 /*
 
 The Hornby X8031 style coupling was one of the first things I made in openscad.
@@ -8,10 +9,17 @@ I'd like to think I've got better at what to abstract and what not, since then.
 This is an attempt at one file which can be configured to generate various
 different types of coupling
 
+TODO: auto-generated hook from geometries of the hinge position and coupling size
+
+
+Notes:
+ - The inlike hook will likely clash with most holders for the X8031 FIXING.
+ - The chunky hook works with most holders for the X8031, but doesn't fit on some hornby locos. (too wide with the 3d printed hook)
+
 */
 GEN_COUPLING = true;
-GEN_HOOK = false;
-GEN_IN_SITU = false;
+GEN_HOOK = true;
+GEN_IN_SITU = true;
 
 //only "wide" currently
 STYLE = "wide";
@@ -24,9 +32,9 @@ HOOK = "inline";
 
 /*
 X8031 - Hornby/bachmann style, centralscrewhole with two dents on either side
-dovetail - Hornby dovetail fitting, I think intended to hold a NEM socket. I'll go for something that fits directly into the dovetail fixing
+dovetail - Hornby dovetail FIXING, I think intended to hold a NEM socket. I'll go for something that fits directly into the dovetail fixing
 */
-FITTING = "X8031";
+FIXING = "dovetail";
 
 
 
@@ -83,7 +91,9 @@ module chunky_hook(subtract = false){
 
 		anti_wobble = 3;
 
-		hook_base_clip(-hook_holder_end_cap_thickness*2, -x8031_main_arm_length, chunky_hook_base_width/2, hook_base_length, hook_height, hook_holder_diameter/2, hook_holder_length, hook_holder_end_cap_thickness*2, hook_holder_height, hook_holder_y);
+		hook_base_clip(x=-hook_holder_end_cap_thickness*2, y=-x8031_main_arm_length, width=chunky_hook_base_width/2, length=hook_base_length, height=hook_height, hook_holder_radius=hook_holder_diameter/2, hook_holder_length=hook_holder_length, hook_holder_end_cap_thickness=hook_holder_end_cap_thickness*2, hook_holder_height=hook_holder_height, hook_holder_y=hook_holder_y);
+		
+		echo("x=",-hook_holder_end_cap_thickness*2 + chunky_hook_base_width/4,"y=",-x8031_main_arm_length+hook_base_length/2,"z=",hook_holder_height);
 
 	}
 	
@@ -109,7 +119,7 @@ module inline_hook(subtract = false){
 	
 }
 
-module body(){
+module coupling_body(){
 	difference(){
 		if(STYLE=="wide"){
 			coupling_base();
@@ -131,17 +141,27 @@ module body(){
 }
 
 module fixing(subtract = false){
-	if(FITTING=="X8031"){
+	if(FIXING=="X8031"){
 		x8031_fixing(subtract);
 	}
 }
-
-difference(){
-	union(){
-		body();
-		fixing(false);
+if(GEN_COUPLING){
+	difference(){
+		union(){
+			coupling_body();
+			fixing(false);
+		}
+		fixing(true);
 	}
-	fixing(true);
+
 }
 
+if(GEN_HOOK){
+	//todo calculate these rather than hardcode?
+	hook_pos = HOOK == "chunky" ? [3.4+0.5,-4.2,4] : HOOK == "inline" ? [coupling_hook_x+0.5,2.4/2,hook_holder_diameter/2] : [0,0];
+	
+	//[hook_pos[0]+0.5,hook_pos[1]+3.5,hook_pos[2]+6.7]
+	optional_translate(hook_pos,GEN_IN_SITU)optional_rotate([-90,0,90],GEN_IN_SITU)wide_coupling_hook([hook_pos[1],hook_pos[2]]);
 
+	
+}
