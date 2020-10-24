@@ -13,7 +13,7 @@ TODO: auto-generated hook from geometries of the hinge position and coupling siz
 
 
 Notes:
- - The inlike hook will likely clash with most holders for the X8031 FIXING.
+ - The inline hook will likely clash with most holders for the X8031 fixing.
  - The chunky hook works with most holders for the X8031, but doesn't fit on some hornby locos. (too wide with the 3d printed hook)
 
 */
@@ -32,7 +32,8 @@ HOOK = "inline";
 
 /*
 X8031 - Hornby/bachmann style, centralscrewhole with two dents on either side
-dovetail - Hornby dovetail FIXING, I think intended to hold a NEM socket. I'll go for something that fits directly into the dovetail fixing
+dovetail - Hornby dovetail fixing, I think intended to hold a NEM socket. I'll go for something that fits directly into the dovetail fixing
+dapol - Dapol's clip-in fixing
 */
 FIXING = "dovetail";
 
@@ -42,6 +43,8 @@ x8031_main_arm_width = 6;
 
 hook_holder_diameter = 1.8;
 hook_holder_length = 1.3;
+wide_coupling_width = 21;
+wide_coupling_base_arm_length = 2.4;
 
 module x8031_fixing(subtract=false){
 	
@@ -62,6 +65,40 @@ module x8031_fixing(subtract=false){
 		
 	}
 		
+}
+
+module dapol_fixing(subtract=false){
+	if(!subtract){
+		base_width = 7.25;
+		base_length = 1.5;
+		base_extra_length = 2.5;
+		hole_r = 2.65;
+		main_arm_length = 4.2;
+		extra_length = main_arm_length-wide_coupling_base_arm_length;
+		
+		dapol_thick = 1.4;
+		
+		main_width = 4.6;
+		hole_y = 3.8+hole_r/2;
+		
+		//extend main arm in y, and take out notch for inline hinge
+		
+		difference(){
+			union(){
+				//main arm extension
+				translate([0,-extra_length/2,0])centred_cube(wide_coupling_width,extra_length,min_thickness);
+				
+				
+				hull(){
+					//start of tapered section
+					translate([0,-base_length/2-extra_length,0])centred_cube(base_width,base_length,dapol_thick);
+					translate([0,-base_length/2-extra_length-base_extra_length,0])centred_cube(base_width,base_length,dapol_thick);
+					
+				}
+			}
+			hook_base(true);
+		}
+	}
 }
 
 module chunky_hook(subtract = false){
@@ -99,7 +136,7 @@ module inline_hook(subtract = false){
 	hook_walls_size = hook_holder_diameter*1.5;
 	if(subtract){
 		//space for hook
-		translate([coupling_hook_x,main_arm_length/2,0])centred_cube(hook_holder_length+hook_wall_thick*2,hook_holder_diameter*2,10);
+		translate([coupling_hook_x,main_arm_length/2,0])centred_cube(hook_holder_length,hook_holder_diameter*3,10);
 	}else{
 		
 		z = min_thickness > hook_holder_diameter ? min_thickness/2 : hook_holder_diameter/2;
@@ -127,12 +164,15 @@ module dovetail_fixing(subtract = false){
 	little_triangle_length = 2.5;
 	little_triangle_end_thick = 0.1;
 	
+	little_triangle_bottom_width = 3.8;
+	
 	if(!subtract){
 	
 		translate([0,-(dovetail_length-little_triangle_length*0.75)/2,0])centred_cube(dovetail_main_width, dovetail_length-little_triangle_length*0.75,dovetail_thick);
 		
 		hull(){
-			translate([0,-(dovetail_length-little_triangle_end_thick/2),0])centred_cube(little_triangle_width,little_triangle_end_thick,dovetail_thick);
+			translate([0,-(dovetail_length-little_triangle_end_thick/2),dovetail_thick-0.05])centred_cube(little_triangle_width,little_triangle_end_thick,0.05);
+			translate([0,-(dovetail_length-little_triangle_end_thick/2),0])centred_cube(little_triangle_bottom_width,little_triangle_end_thick,0.05);
 			translate([0,-(dovetail_length-little_triangle_length-0.05),0])centred_cube(0.1,0.1,dovetail_thick);
 			
 		}
@@ -146,11 +186,11 @@ module dovetail_fixing(subtract = false){
 }
 
 module coupling_body(){
-	difference(){
+//	difference(){
 		if(STYLE=="wide"){
-			coupling_base();
+			coupling_base(base_width = wide_coupling_base_arm_length, coupling_width = wide_coupling_width);
 		}
-		if(HOOK == "chunky"){
+	/*	if(HOOK == "chunky"){
 			chunky_hook(true);
 		}
 		if(HOOK == "inline"){
@@ -163,6 +203,14 @@ module coupling_body(){
 	}
 	if(HOOK == "inline"){
 		inline_hook(false);
+	}*/
+}
+module hook_base(subtract=false){
+	if(HOOK == "chunky"){
+		chunky_hook(subtract);
+	}
+	if(HOOK == "inline"){
+		inline_hook(subtract);
 	}
 }
 
@@ -173,13 +221,19 @@ module fixing(subtract = false){
 	if(FIXING == "dovetail"){
 		dovetail_fixing(subtract);
 	}
-	
+	if(FIXING == "dapol"){
+		dapol_fixing(subtract);
+	}
 }
 if(GEN_COUPLING){
 	difference(){
 		union(){
-			coupling_body();
+			difference(){
+				coupling_body();
+				hook_base(true);
+			}
 			fixing(false);
+			hook_base(false);
 		}
 		fixing(true);
 	}
