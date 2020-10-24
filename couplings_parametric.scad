@@ -71,7 +71,7 @@ module dapol_fixing(subtract=false){
 	if(!subtract){
 		base_width = 7.25;
 		base_length = 1.8;
-		base_extra_length = 2.5;
+		base_extra_length = 2.4;
 		hole_d = 2.65;
 		coupling_arm_length = 4.2;
 		extra_length = coupling_arm_length-wide_coupling_base_arm_length;
@@ -105,7 +105,12 @@ module dapol_fixing(subtract=false){
 				
 				//bits for the fixing
 				
-				cylinder(r=hole_d/2,h=10,center=true);
+				translate([0,-extra_length-hole_y,0])cylinder(r=hole_d/2,h=10,center=true);
+				
+				hull(){
+						translate([0,-extra_length-hole_y-hole_d/3,0])cylinder(r=hole_d/4,h=10,center=true);
+					translate([0,-extra_length-main_length-0.5,0])centred_cube(main_width*0.8,1,5);
+				}
 			}
 		}
 	}
@@ -170,11 +175,11 @@ module dovetail_fixing(subtract = false){
 	big_triangle_length = 3.75;//bit of a guess
 	big_triangle_y = 7;
 	big_triangle_end_thick = 0.5;
-	little_triangle_width = 4.25;
+	little_triangle_width = 4.4;
 	little_triangle_length = 2.5;
 	little_triangle_end_thick = 0.1;
 	
-	little_triangle_bottom_width = 4;
+	little_triangle_bottom_width = 3.9;
 	
 	if(!subtract){
 	
