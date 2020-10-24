@@ -35,7 +35,7 @@ X8031 - Hornby/bachmann style, centralscrewhole with two dents on either side
 dovetail - Hornby dovetail fixing, I think intended to hold a NEM socket. I'll go for something that fits directly into the dovetail fixing
 dapol - Dapol's clip-in fixing
 */
-FIXING = "dovetail";
+FIXING = "dapol";
 
 min_thickness = 1.5;
 x8031_main_arm_length = 5.9;
@@ -70,33 +70,43 @@ module x8031_fixing(subtract=false){
 module dapol_fixing(subtract=false){
 	if(!subtract){
 		base_width = 7.25;
-		base_length = 1.5;
+		base_length = 1.8;
 		base_extra_length = 2.5;
-		hole_r = 2.65;
-		main_arm_length = 4.2;
-		extra_length = main_arm_length-wide_coupling_base_arm_length;
+		hole_d = 2.65;
+		coupling_arm_length = 4.2;
+		extra_length = coupling_arm_length-wide_coupling_base_arm_length;
 		
 		dapol_thick = 1.4;
 		
 		main_width = 4.6;
-		hole_y = 3.8+hole_r/2;
+		main_length = 7.75;
+		hole_y = 3.8+hole_d/2;
 		
 		//extend main arm in y, and take out notch for inline hinge
 		
 		difference(){
 			union(){
-				//main arm extension
+				//main coupling arm extension
 				translate([0,-extra_length/2,0])centred_cube(wide_coupling_width,extra_length,min_thickness);
 				
 				
 				hull(){
 					//start of tapered section
 					translate([0,-base_length/2-extra_length,0])centred_cube(base_width,base_length,dapol_thick);
-					translate([0,-base_length/2-extra_length-base_extra_length,0])centred_cube(base_width,base_length,dapol_thick);
+					translate([0,-base_length/2-extra_length-base_extra_length/2,0])centred_cube(main_width,base_extra_length,dapol_thick);
 					
 				}
+				//main fixing arm
+				translate([0,-main_length/2-extra_length,0])centred_cube(main_width,main_length,dapol_thick);
 			}
-			hook_base(true);
+			union(){
+				//take out the notch for the inline coupling. not quite as parametric as planned, hey?
+				hook_base(true);
+				
+				//bits for the fixing
+				
+				cylinder(r=hole_d/2,h=10,center=true);
+			}
 		}
 	}
 }
@@ -164,7 +174,7 @@ module dovetail_fixing(subtract = false){
 	little_triangle_length = 2.5;
 	little_triangle_end_thick = 0.1;
 	
-	little_triangle_bottom_width = 3.8;
+	little_triangle_bottom_width = 4;
 	
 	if(!subtract){
 	
