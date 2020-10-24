@@ -4,9 +4,12 @@ Various attempts to 3D print OO gauge trains and accessories.
 
 ## Couplings
 
-I've had some success at producing an equivilant to Hornby's X8031. This is compatible with Bachman's trucks as well (at least the ones from the 90s). With the hook holder, it is slightly wider than the original, so may not fit all situations (I can't mount them on a hornby loco). The version without the hook should fit.
+My first attempt at a coupling (hornby_bachman_style.scad) is an equivilant to Hornby's X8031. This is compatible with Bachman's trucks as well (at least the ones from the 90s). With the hook holder, it is slightly wider than the original, so may not fit all situations (I can't mount them on a hornby loco). The version without the hook should fit.
 
-Still TODO hornby/dapol X9660 style.
+A new configurable coupling generator (couplings_parametric.scad) is capable of producing not just a Hornby/Bachmann X8031, but a Dapol/Hornby/Airfix X9660 and Hornby dovetail fixing.
+
+### Hornby Dovetail
+Usually the real dovetail fixing creates a NEM socket, but I've skipped the middleman and produced a coupling that can slot straight into the Hornby chassis. In my experience, the real dovetail connectors fall out far too easily. The printed version isn't perfect, but stays in better than the real hornby ones I've used (when fitted with a wide coupling).
 
 ## Class 66
 

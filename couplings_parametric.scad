@@ -28,14 +28,14 @@ STYLE = "wide";
 'chunky' - my first stab at the x8031 hook, bit bigger than the real x8031
 'inline' - newer hornby/dapol style
 */
-HOOK = "inline";
+HOOK = "chunky";
 
 /*
 X8031 - Hornby/bachmann style, centralscrewhole with two dents on either side
 dovetail - Hornby dovetail fixing, I think intended to hold a NEM socket. I'll go for something that fits directly into the dovetail fixing
-dapol - Dapol's clip-in fixing
+dapol - Dapol's clip-in fixing. Possibly also Hornby X9660 and Airfix?
 */
-FIXING = "dovetail";
+FIXING = "X8031";
 
 min_thickness = 1.5;
 x8031_main_arm_length = 5.9;
