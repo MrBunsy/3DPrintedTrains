@@ -35,7 +35,7 @@ X8031 - Hornby/bachmann style, centralscrewhole with two dents on either side
 dovetail - Hornby dovetail fixing, I think intended to hold a NEM socket. I'll go for something that fits directly into the dovetail fixing
 dapol - Dapol's clip-in fixing
 */
-FIXING = "dapol";
+FIXING = "dovetail";
 
 min_thickness = 1.5;
 x8031_main_arm_length = 5.9;
@@ -175,11 +175,12 @@ module dovetail_fixing(subtract = false){
 	big_triangle_length = 3.75;//bit of a guess
 	big_triangle_y = 7;
 	big_triangle_end_thick = 0.5;
-	little_triangle_width = 4.4;
+	little_triangle_width = 4.5;
 	little_triangle_length = 2.5;
 	little_triangle_end_thick = 0.1;
 	
-	little_triangle_bottom_width = 3.9;
+	little_triangle_bottom_width = 3.8;
+	little_triangle_bottom_lesslong = 0.1;
 	
 	if(!subtract){
 	
@@ -187,7 +188,8 @@ module dovetail_fixing(subtract = false){
 		
 		hull(){
 			translate([0,-(dovetail_length-little_triangle_end_thick/2),dovetail_thick-0.05])centred_cube(little_triangle_width,little_triangle_end_thick,0.05);
-			translate([0,-(dovetail_length-little_triangle_end_thick/2),0])centred_cube(little_triangle_bottom_width,little_triangle_end_thick,0.05);
+			translate([0,-(dovetail_length-little_triangle_end_thick/2-little_triangle_bottom_lesslong),0])centred_cube(little_triangle_bottom_width,little_triangle_end_thick,0.05);
+			
 			translate([0,-(dovetail_length-little_triangle_length-0.05),0])centred_cube(0.1,0.1,dovetail_thick);
 			
 		}
