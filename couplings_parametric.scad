@@ -175,8 +175,8 @@ module dovetail_fixing(subtract = false){
 	big_triangle_length = 3.75;//bit of a guess
 	big_triangle_y = 7;
 	big_triangle_end_thick = 0.5;
-	little_triangle_width = 4.5;
-	little_triangle_length = 2.5;
+	little_triangle_width = 4.6;
+	little_triangle_length = 2.6;
 	little_triangle_end_thick = 0.1;
 	
 	little_triangle_bottom_width = 3.8;
