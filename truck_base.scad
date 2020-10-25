@@ -1,22 +1,40 @@
 include <truck_bits.scad>
 include <constants.scad>
-
+/*
 gen_pi_cam_wagon = false;
 gen_battery_wagon = false;
 
 dapol_wheels = true;
-spoked = true;
+//spoked = true;
 
-
-
-small_flanges = dapol_wheels;
-
-
-thick = 3.5;
 //for bog standard truck 75 (less than that and this design needs work for a space to contain the metal weight):
 length=gen_pi_cam_wagon ? 85 : 75;
+wheel_diameter = getWheelDiameter(dapol_wheels, spoked);
+
+small_flanges = dapol_wheels;
+//distance between the two axles (perpendicular to each axle)
+//I'd like to have the wheels slightly closer to the ends to help with coupling
+//but the closer the wheels are together, the better the handling around the corners
+//especially with the low-flange dapol wheels
+axle_distance = length - (small_flanges ? 35 : 30);
 //minimum of body width + girder_width*2 (31 by default)
 buffer_end_width=gen_pi_cam_wagon ? 36 : gen_battery_wagon ? 32 : 31;
+//diameter around which there can be no obstructions for the wheels
+//wheel_max_d =  getWheelMaxDiameter(dapol_wheels, spoked);
+
+//*/
+
+//if axle_distance_input is specified, it will override the default
+module truck_base(buffer_end_width = 31, length = 75, wheel_diameter=12.5, axle_distance_input = 0){
+
+axle_distance = axle_distance_input == 0 ? length - 30 : axle_distance_input;
+
+
+wheel_max_d = wheel_diameter+3.5;
+thick = 3.5;
+
+
+
 
 
 //distance between the two axle holders (along the axle)
@@ -25,17 +43,17 @@ axle_space = 23.0;
 //hornby is 23.0
 //bachman 22.2
 
-//diameter around which there can be no obstructions for the wheels
-wheel_max_d =  getWheelMaxDiameter(dapol_wheels, spoked);
+
 //max_d doesn't apply within this space in the centre of the axle
 wheel_centre_space = 8;
 
 
-wheel_diameter = getWheelDiameter(dapol_wheels, spoked);
+
 
 //how high for axle to be from the underside of the truck
 //bachman seem to be lower than the rest at 5, hornby + lima about 6
 //this should probably be adjusted for wheel size as it affects buffer height
+//FOR REASONS(??) this is the height 'above' the thickness of the base
 axle_height = top_of_buffer_from_top_of_rail - thick - wheel_diameter/2 ;//5.5;
 
 
@@ -55,11 +73,7 @@ weight_depth=3;
 weight_end_ledge_length = 4;
 weight_centre_ledge_length = 5;
 
-//distance between the two axles (perpendicular to each axle)
-//I'd like to have the wheels slightly closer to the ends to help with coupling
-//but the closer the wheels are together, the better the handling around the corners
-//especially with the low-flange dapol wheels
-axle_distance = length - (small_flanges ? 35 : 30);
+
 
 //width of the bar holding the buffers
 
@@ -179,9 +193,9 @@ difference(){
     
         //decorative brake system
         translate([0,0,thick]){
-            decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_d, axle_height*1.3,axle_distance/2+wheel_max_d*0.25, width/2);
+            decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_d, axle_height*1.3,axle_distance/2+wheel_max_d*0.25, width/2, thick);
             rotate([0,0,180]){
-                decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_d,axle_height*1.3, axle_distance/2+wheel_max_d*0.25, width/2);
+                decorative_brake_mounts(width/2-edge/2, axle_distance-wheel_max_d,axle_height*1.3, axle_distance/2+wheel_max_d*0.25, width/2, thick);
             }
         }
     }    
@@ -210,14 +224,11 @@ difference(){
 
         //holes for screws to hold the top half on (aligned along the x axis)
         //these two are deliberately large holes so the screw only grips into the top
-        translate([width/2-top_screw_holders_from_edge,0,screw_depth]){
+        mirror_y()translate([width/2-top_screw_holders_from_edge,0,screw_depth]){
             cylinder(r=m2_head_size/2,h=thick*3,$fn=200);
             cylinder(r=m2_thread_size_loose/2,h=thick*3,$fn=200,center=true);
         }
-        translate([-(width/2-top_screw_holders_from_edge),0,screw_depth]){
-            cylinder(r=m2_head_size/2,h=thick*3,$fn=200);
-            cylinder(r=m2_thread_size_loose/2,h=thick*3,$fn=200,center=true);
-        }
+        
         
         //holes for buffers
         translate([-buffer_distance/2,length/2,buffer_end_height/2]){
@@ -258,7 +269,8 @@ translate([0,-(length/2-coupling_from_edge),thick]){
         coupling_mount(coupling_height);
     }
 }
-
-axle_holder(axle_space, 20, axle_height);
-axle_holder_decoration(axle_space, 20, axle_height);
-
+translate([0,0,thick]){
+	axle_holder(axle_space, 20, axle_height, axle_distance);
+	axle_holder_decoration(axle_space, 20, axle_height, axle_distance);
+}
+}

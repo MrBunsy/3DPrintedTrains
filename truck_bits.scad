@@ -134,7 +134,7 @@ module axle_mount_decoration(width,length, axle_height, axle_depth){
 }
 
 //on the +ve x side
-module decorative_brake_mounts(x, length, height, lever_y, edge){
+module decorative_brake_mounts(x, length, height, lever_y, edge, thick){
     decoration_thick = 1;
     
    
@@ -193,39 +193,39 @@ module decorative_brake_mounts(x, length, height, lever_y, edge){
     }
 }
 
-module axle_holder(axle_space, x, axle_height, just_holes=false, grooves =true, width=2.5){
+module axle_holder(axle_space, x, axle_height, axle_distance, just_holes=false, grooves =true, width=2.5){
     
     length = 5;
     axle_depth = 1+(axle_width-axle_space)/2;
     
      mirror_xy() translate([-axle_space/2,-axle_distance/2,0]){
         if(just_holes){
-            translate([-width/2,0,0])axle_mount_holes(width,length, axle_height+thick, axle_depth, grooves);
+            translate([-width/2,0,0])axle_mount_holes(width,length, axle_height, axle_depth, grooves);
         }else{
-            axle_mount(width,length, axle_height+thick, axle_depth);
+            axle_mount(width,length, axle_height, axle_depth);
         }
     }
 }
-module axle_holder_decoration(axle_space, x, axle_height){
+module axle_holder_decoration(axle_space, x, axle_height, axle_distance){
     width = 2.5;
     length = 5;
     axle_depth = 1+(axle_width-axle_space)/2;
     
     translate([-axle_space/2,-axle_distance/2,0]){
-        axle_mount_decoration(width,length, axle_height+thick, axle_depth);
+        axle_mount_decoration(width,length, axle_height, axle_depth);
     }
     
     translate([-axle_space/2,axle_distance/2,0]){
-        axle_mount_decoration(width,length, axle_height+thick, axle_depth);
+        axle_mount_decoration(width,length, axle_height, axle_depth);
     }
     
     rotate([0,0,180]){
         translate([-axle_space/2,-axle_distance/2,0]){
-            axle_mount_decoration(width,length, axle_height+thick, axle_depth);
+            axle_mount_decoration(width,length, axle_height, axle_depth);
         }
         
         translate([-axle_space/2,axle_distance/2,0]){
-            axle_mount_decoration(width,length, axle_height+thick, axle_depth);
+            axle_mount_decoration(width,length, axle_height, axle_depth);
         }
     }  
 }
@@ -248,7 +248,7 @@ module coupling_mount(height, base_thick = 0){
 		}
        
         translate([0,0,-0.1]){
-            cylinder(h=(height+base_thick)*2,r=m2_thread_size/2, $fn=200, center=true);
+            cylinder(h=(height+base_thick)*4,r=m2_thread_size/2, $fn=200, center=true);
         }
     }
     

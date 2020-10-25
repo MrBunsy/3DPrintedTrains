@@ -1,15 +1,15 @@
+include <constants.scad>
 
 //set either of these to true for the special versions
-gen_pi_cam_wagon = true;
+/*
+
+gen_pi_cam_wagon = false;
 gen_battery_wagon = false;
 
 
 
 
-hole_for_battery_cables = gen_pi_cam_wagon ? true : gen_battery_wagon;
-hole_for_motor_cables = gen_pi_cam_wagon;
-hole_for_pi_cam = gen_pi_cam_wagon;
-pi_mounting = gen_pi_cam_wagon;
+
 
 
 
@@ -17,29 +17,15 @@ pi_mounting = gen_pi_cam_wagon;
 length=gen_pi_cam_wagon ? 85 : 75;
 //height of the apex of the ends
 height=gen_pi_cam_wagon ? 31+8 : 31;
-
-
-wall_thick=1.5;
-base_thick=4;
-
 //+1 for the girder thickness
 width=gen_pi_cam_wagon ? 35+1 : gen_battery_wagon ? 29+wall_thick*2 :30+1;
+*/
+wall_thick=1.5;
+door_width=0.5;
+door_adornments_width=1;
+plank_indent=0.25;
 
-echo("Width: ", width, ", length: ",length, ", height: ",height);
-
-//aiming for side height of 26;
-roof_radius=31.4;
-side_height= roof_radius*cos(asin((width/2)/roof_radius)) - (roof_radius-height);
-echo(side_height);
-//distance between the two axles (perpendicular to each axle)
-axle_distance = 40;
-wheel_max_space = 17;
-wheel_diameter = 14.0;
-axle_space = 23.0;
-axle_height = 5;
-
-
-
+base_thick=4;
 pi_mount_length=58;
 pi_mount_width=23;
 pi_mount_height=3.5;
@@ -50,42 +36,13 @@ pi_mount_offset_x = -0.5;
 //space for SD card
 pi_mount_from_end=6.5;
 
-//7.25+some wiggle room
-pi_cam_d = 7.5;
-pi_cam_from_top = -pi_cam_d/2;
-
-cable_d=5.5;
-motor_cable_d=6;
-
-plank_height= side_height/12;//2.25;
-plank_indent=0.25;
-support_width = 1.5;
-mid_support_width = 1.1;
-
-vent_height = plank_height*4.5;//height*0.35;
-vent_angle = 8;
-
-door_width=0.5;
-door_adornments_width=1;
-
-door_length=length/3;
-
-//from truck base
-//wall thickness + screw head size + wiggle room
-top_screw_holders_from_edge = 5;
-//turns out my screws weren't m2. 2.2 works for the screws provided with couplings
-//trying actually 2.0 for m2
-m2_thread_size=2.0;
-edge=5;
-truck_width=30;
-
 //similar but trying not the same as truck_base
-module centredCube(width,length, height){
+/*module centred_cube(width,length, height){
     translate([-width/2, -length/2,0]){
         cube([width,length, height]);
     }
     
-}
+}*/
 
 module pi_mount(height){
     translate([pi_mount_width/2,pi_mount_length/2,0]){
@@ -107,11 +64,11 @@ module pi_mount(height){
 }
 
 //facing +ve x
-module door(){
+module door(plank_height,side_height,door_length,height){
     translate([width/2,0,0]){
         hinges_height = side_height*0.15;
         difference(){
-            centredCube(door_width,door_length,height);
+            centred_cube(door_width,door_length,height);
             union(){
                 //plank effects
                 for(i=[-5:5]){
@@ -124,41 +81,41 @@ module door(){
             }
         }
         //centreline
-        centredCube(door_adornments_width,door_adornments_width,height);
+        centred_cube(door_adornments_width,door_adornments_width,height);
         
         handle_length = door_adornments_width*1.5;
         
         translate([0,-handle_length/2,side_height/2-door_adornments_width/2]){
             //handle/lock in the centre
-            centredCube(door_adornments_width,handle_length,door_adornments_width);
+            centred_cube(door_adornments_width,handle_length,door_adornments_width);
         }
         
         translate([0,0,0]){
             //handle/lock at the bottom
-            centredCube(door_adornments_width,door_adornments_width*2,door_adornments_width);
+            centred_cube(door_adornments_width,door_adornments_width*2,door_adornments_width);
         }
         
         
         //either side
         translate([0,door_length/2,0]){
-            centredCube(door_adornments_width,door_adornments_width,height);
+            centred_cube(door_adornments_width,door_adornments_width,height);
         }
         translate([0,-door_length/2,0]){
-            centredCube(door_adornments_width,door_adornments_width,height);
+            centred_cube(door_adornments_width,door_adornments_width,height);
         }
         hinge_length = door_length*0.4;
         //hinges
         translate([0,-door_length/2+hinge_length/2,hinges_height-door_adornments_width/2]){
-            centredCube(door_adornments_width,hinge_length,door_adornments_width);
+            centred_cube(door_adornments_width,hinge_length,door_adornments_width);
         }
         translate([0,-(-door_length/2+hinge_length/2),hinges_height-door_adornments_width/2]){
-            centredCube(door_adornments_width,hinge_length,door_adornments_width);
+            centred_cube(door_adornments_width,hinge_length,door_adornments_width);
         }
         translate([0,-door_length/2+hinge_length/2,side_height-hinges_height-door_adornments_width/2]){
-            centredCube(door_adornments_width,hinge_length,door_adornments_width);
+            centred_cube(door_adornments_width,hinge_length,door_adornments_width);
         }
         translate([0,-(-door_length/2+hinge_length/2),side_height-hinges_height-door_adornments_width/2]){
-            centredCube(door_adornments_width,hinge_length,door_adornments_width);
+            centred_cube(door_adornments_width,hinge_length,door_adornments_width);
         }
     }
     
@@ -179,6 +136,61 @@ module vent(width, height,angle){
     }
 }
 
+module fruit_van(width=31,length=75,height=31, gen_pi_cam_wagon=false,gen_battery_wagon=false, axle_distance = 40){
+
+
+hole_for_battery_cables = gen_pi_cam_wagon ? true : gen_battery_wagon;
+hole_for_motor_cables = gen_pi_cam_wagon;
+hole_for_pi_cam = gen_pi_cam_wagon;
+pi_mounting = gen_pi_cam_wagon;
+
+
+
+
+echo("Width: ", width, ", length: ",length, ", height: ",height);
+
+//aiming for side height of 26;
+roof_radius=31.4;
+side_height= roof_radius*cos(asin((width/2)/roof_radius)) - (roof_radius-height);
+echo(side_height);
+//distance between the two axles (perpendicular to each axle)
+//axle_distance = 40;
+wheel_max_space = 17;
+wheel_diameter = 14.0;
+axle_space = 23.0;
+axle_height = 5;
+
+
+
+
+//7.25+some wiggle room
+pi_cam_d = 7.5;
+pi_cam_from_top = -pi_cam_d/2;
+
+cable_d=5.5;
+motor_cable_d=6;
+
+plank_height= side_height/12;//2.25;
+
+support_width = 1.5;
+mid_support_width = 1.1;
+
+vent_height = plank_height*4.5;//height*0.35;
+vent_angle = 8;
+
+
+
+door_length=length/3;
+
+//from truck base
+//wall thickness + screw head size + wiggle room
+top_screw_holders_from_edge = 5;
+//turns out my screws weren't m2. 2.2 works for the screws provided with couplings
+//trying actually 2.0 for m2
+m2_thread_size=2.0;
+edge=5;
+truck_width=30;
+
 difference(){
 //intersect with horizontal cylinder for roof shape
 intersection(){
@@ -186,22 +198,22 @@ intersection(){
     union(){
         difference(){
             union(){
-            centredCube(width,length,base_thick);
+            centred_cube(width,length,base_thick);
 
             translate([width/2-wall_thick/2,0]){
-                centredCube(wall_thick,length,height);
+                centred_cube(wall_thick,length,height);
             }
 
             translate([-(width/2-wall_thick/2),0]){
-                centredCube(wall_thick,length,height);
+                centred_cube(wall_thick,length,height);
             }
 
             translate([0,length/2-wall_thick/2,0]){
-                centredCube(width,wall_thick,height);
+                centred_cube(width,wall_thick,height);
             }
 
             translate([0,-(length/2-wall_thick/2),0]){
-                centredCube(width,wall_thick,height);
+                centred_cube(width,wall_thick,height);
             }
         }
         
@@ -272,36 +284,36 @@ intersection(){
         
         //posts in corners
         translate([width/2,length/2,0]){
-            centredCube(support_width,support_width,height);
+            centred_cube(support_width,support_width,height);
         }
         //posts in corners
         translate([-width/2,length/2,0]){
-            centredCube(support_width,support_width,height);
+            centred_cube(support_width,support_width,height);
         }
         //posts in corners
         translate([-width/2,-length/2,0]){
-            centredCube(support_width,support_width,height);
+            centred_cube(support_width,support_width,height);
         }
         //posts in corners
         translate([width/2,-length/2,0]){
-            centredCube(support_width,support_width,height);
+            centred_cube(support_width,support_width,height);
         }
         
         //mid supports
         translate([width/2,(length-door_length)/2,0]){
-            centredCube(mid_support_width,mid_support_width,height);
+            centred_cube(mid_support_width,mid_support_width,height);
         }
         //mid supports
         translate([width/2,-(length-door_length)/2,0]){
-            centredCube(mid_support_width,mid_support_width,height);
+            centred_cube(mid_support_width,mid_support_width,height);
         }
         //mid supports
         translate([-width/2,(length-door_length)/2,0]){
-            centredCube(mid_support_width,mid_support_width,height);
+            centred_cube(mid_support_width,mid_support_width,height);
         }
         //mid supports
         translate([-width/2,-(length-door_length)/2,0]){
-            centredCube(mid_support_width,mid_support_width,height);
+            centred_cube(mid_support_width,mid_support_width,height);
         }
         section_width=(length-door_length)/2-mid_support_width;
         cross_support_angle = atan(side_height/section_width);
@@ -337,16 +349,16 @@ intersection(){
         
         //mid supports on the ends
         translate([(width/3)/2,-length/2,0]){
-            centredCube(mid_support_width,mid_support_width,height);
+            centred_cube(mid_support_width,mid_support_width,height);
         }
         translate([(-width/3)/2,-length/2,0]){
-            centredCube(mid_support_width,mid_support_width,height);
+            centred_cube(mid_support_width,mid_support_width,height);
         }
         translate([(width/3)/2, length/2,0]){
-            centredCube(mid_support_width,mid_support_width,height);
+            centred_cube(mid_support_width,mid_support_width,height);
         }
         translate([(-width/3)/2, length/2,0]){
-            centredCube(mid_support_width,mid_support_width,height);
+            centred_cube(mid_support_width,mid_support_width,height);
         }
         cross_support_angle_end = atan((height-vent_height)/(width/3));
         cross_support_length_end = sqrt((height-vent_height)*(height-vent_height) + (width/3)*(width/3));
@@ -357,7 +369,7 @@ intersection(){
         
         translate([-width/2,length/2,0]){
             rotate([0,90-cross_support_angle_end,0]){
-                centredCube(mid_support_width,mid_support_width,cross_support_length_end);
+                centred_cube(mid_support_width,mid_support_width,cross_support_length_end);
             }
         }
         
@@ -368,7 +380,7 @@ intersection(){
             }
             translate([-width/2,length/2,0]){
             rotate([0,90-cross_support_angle_end,0]){
-                centredCube(mid_support_width,mid_support_width,cross_support_length_end);
+                centred_cube(mid_support_width,mid_support_width,cross_support_length_end);
             }
         }
         }
@@ -378,7 +390,7 @@ intersection(){
             }
             translate([-width/2,length/2,0]){
             rotate([0,90-cross_support_angle_end,0]){
-                centredCube(mid_support_width,mid_support_width,cross_support_length_end);
+                centred_cube(mid_support_width,mid_support_width,cross_support_length_end);
             }
         }
             mirror([0,1,0]){
@@ -387,16 +399,16 @@ intersection(){
                 }
                 translate([-width/2,length/2,0]){
             rotate([0,90-cross_support_angle_end,0]){
-                centredCube(mid_support_width,mid_support_width,cross_support_length_end);
+                centred_cube(mid_support_width,mid_support_width,cross_support_length_end);
             }
         }
             }
         }
         rotate([0,0,180]){
-            door();
+            door(plank_height,side_height,door_length,height);
         }
         
-        door();
+        door(plank_height,side_height,door_length,height);
         if(pi_mounting){
             translate([pi_mount_offset_x,(length/2-pi_mount_length/2 -pi_mount_from_end-wall_thick),0]){
                 pi_mount(pi_mount_height+base_thick);
@@ -452,4 +464,5 @@ intersection(){
 }//end difference with chopping off floor
     
 
-
+}
+//fruit_van();
