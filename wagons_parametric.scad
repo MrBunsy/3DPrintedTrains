@@ -9,6 +9,7 @@ I've already created a fruit-van, which I will attempt to wrap up in this new co
 include <constants.scad>
 include <fruit_van.scad>
 include <truck_base.scad>
+include <fruit_van_roof.scad>
 
 //bit that holds the wheels
 GEN_BASE = true;
@@ -34,12 +35,15 @@ TYPE="van";
 
 VARIANT="normal";
 
-//for reasons entirely unknown, the following doesn't work, hence this workaroudn:
-//length=VARIANT == "pi" ? 85 : 75;
+WHEEL_DIAMETER = 12.5;
+
 gen_pi_cam_wagon = VARIANT == "pi";
 gen_battery_wagon = VARIANT == "battery";
 
-length=gen_pi_cam_wagon ? 85 : 75;
+//generally holds true in all cases, but not forced so
+wall_thick = 1.5;
+
+length=VARIANT == "pi" ? 85 : 75;
 //height of the apex of the ends
 van_height=gen_pi_cam_wagon ? 31+8 : 31;
 //+1 for the girder thickness
@@ -55,7 +59,16 @@ if(GEN_TOP){
 if(GEN_BASE){
 	optional_rotate([0,180,0],GEN_IN_SITU){
 		if(TYPE=="van"){
-			truck_base(width,length);
+			truck_base(width,length, WHEEL_DIAMETER);
+		}
+	}
+}
+
+if(GEN_ROOF){
+	//not exactly a calculated translation, but will do
+	optional_translate([0,0,van_height-4.5],GEN_IN_SITU){
+		if(TYPE=="van"){
+			fruit_van_roof(width,length,van_height);
 		}
 	}
 }

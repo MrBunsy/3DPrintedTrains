@@ -1,12 +1,16 @@
-gen_pi_cam_wagon = true;
+/*gen_pi_cam_wagon = true;
 gen_battery_wagon = false;
 
-//from fruit van:
-wall_thick=1.5;
-//+1 for the girder thickness
+
 width=gen_pi_cam_wagon ? 35+1 : gen_battery_wagon ? 29+wall_thick*2 :30+1;
 length=gen_pi_cam_wagon ? 85 : 75;
 height=gen_pi_cam_wagon ? 31+8 : 31;
+*/
+module fruit_van_roof(width,length,height){
+//from fruit van:
+wall_thick=1.5;
+//+1 for the girder thickness
+
 
 base_thick=2;
 roof_radius=31.4;
@@ -31,8 +35,8 @@ rain_guard_thick=0.6;
 
 side_height= roof_radius*cos(asin((roof_overhang+width/2)/roof_radius));
 side_height2 = sqrt(roof_radius*roof_radius - (width/2)*(width/2));
-echo(side_height);
-echo(side_height2);
+//echo(side_height);
+//echo(side_height2);
 
 difference(){
     //extra 0.2 to try and ensure sides of roof start on the plate, not floating in mid-air...
@@ -165,3 +169,4 @@ union(){
 
 
 
+}

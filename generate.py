@@ -84,11 +84,44 @@ def couplings_jobs():
 
     return jobs
 
+def wagon_jobs():
+    jobs = []
+
+    wagon_types = ["van"]
+    wagon_variants = ["normal", "battery","pi"]
+    wagon_options = ["base", "top", "roof"]
+    for type in wagon_types:
+        for variant in wagon_variants:
+            name = "wagon_{}_{}_".format(type, variant)
+            model_job = JobDescription("wagons_parametric.scad", name + "model")
+            model_job.addVariable("GEN_IN_SITU", True)
+            model_job.addVariable("VARIANT", variant)
+            model_job.addVariable("TYPE", type)
+            for option in wagon_options:
+                model_job.addVariable("GEN_{}".format(option.upper()), True)
+                job = JobDescription("wagons_parametric.scad", name + option)
+                job.addVariable("GEN_IN_SITU", False)
+                job.addVariable("VARIANT", variant)
+                job.addVariable("TYPE", type)
+                for option2 in wagon_options:
+                    #set all to false by default
+                    job.addVariable("GEN_{}".format(option2.upper()), False)
+                #set only the one we want to true
+                job.addVariable("GEN_{}".format(option.upper()), True)
+                jobs.append(job)
+            jobs.append(model_job)
+
+
+
+    return jobs
+
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Generate all variants of a parametric object")
     parser.add_argument("--class66",action='store_true')
     parser.add_argument("--couplings",action='store_true')
+    parser.add_argument("--wagons", action='store_true')
     args = parser.parse_args()
     jobs = []
 
@@ -97,6 +130,8 @@ if __name__ == '__main__':
         jobs.extend(class66_jobs())
     if args.couplings:
         jobs.extend(couplings_jobs())
+    if args.wagons:
+        jobs.extend(wagon_jobs())
 
-    p = Pool(multiprocessing.cpu_count()-2)
+    p = Pool(multiprocessing.cpu_count()-1)
     p.map(executeJob, jobs)

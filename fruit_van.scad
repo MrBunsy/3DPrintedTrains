@@ -20,6 +20,9 @@ height=gen_pi_cam_wagon ? 31+8 : 31;
 //+1 for the girder thickness
 width=gen_pi_cam_wagon ? 35+1 : gen_battery_wagon ? 29+wall_thick*2 :30+1;
 */
+
+module fruit_van(width=31,length=75,height=31, gen_pi_cam_wagon=false,gen_battery_wagon=false, axle_distance = 40){
+
 wall_thick=1.5;
 door_width=0.5;
 door_adornments_width=1;
@@ -136,7 +139,7 @@ module vent(width, height,angle){
     }
 }
 
-module fruit_van(width=31,length=75,height=31, gen_pi_cam_wagon=false,gen_battery_wagon=false, axle_distance = 40){
+
 
 
 hole_for_battery_cables = gen_pi_cam_wagon ? true : gen_battery_wagon;
