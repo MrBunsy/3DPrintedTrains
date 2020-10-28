@@ -1,5 +1,6 @@
+include <constants.scad>
 
-//centred in xy plane
+//centred in xy plane TODO deprecate this
 module centredCube(x,y,width,length, height){
     translate([x-width/2, y-length/2,0]){
         cube([width,length, height]);
@@ -7,7 +8,7 @@ module centredCube(x,y,width,length, height){
     
 }
 
-module axle_mount_holes(width,length, axle_height, axle_depth, groove){
+module axle_mount_holes(width,length, axle_height, axle_depth, groove=true){
     extra_height = axle_height*0.4;
     union(){
                 //cone for axle to rest in
@@ -20,7 +21,7 @@ module axle_mount_holes(width,length, axle_height, axle_depth, groove){
                     //groove to help slot axle in
                     translate([width/2,0,axle_height]){
                         rotate([0,0,45]){
-                            centredCube(0,0,axle_depth*0.2,axle_depth*0.2,extra_height+0.01);
+                            centred_cube(axle_depth*0.2,axle_depth*0.2,extra_height+0.01);
                         }
                     }
                 }
@@ -31,11 +32,6 @@ module axle_mount_holes(width,length, axle_height, axle_depth, groove){
 
 //single axle mount with insertion for axle, insertion facing right (+ve x)
 module axle_mount(width,length, axle_height, axle_depth){
-    //translate([width*0.5-0.01,0.1,axle_height]){
-      //          rotate([0,-90,0]){
-        //            cylinder(h=width+0.01,r1=width*0.2, r2=0,$fn=200);
-          //      }
-            //}
     
     extra_height = axle_height*0.4;
     
@@ -43,93 +39,138 @@ module axle_mount(width,length, axle_height, axle_depth){
     translate([-width/2,0,0]){
         
         difference(){
-            centredCube(0,0,width,length, axle_height+extra_height);
+            centred_cube(width,length, axle_height+extra_height);
             axle_mount_holes(width,length, axle_height, axle_depth);
         }
     }
     
     
 }
-//cartsprings, bracing and bearing box
-module axle_mount_decoration(width,length, axle_height, axle_depth){
-    
-    decoration_thick = 1;
-    bearing_mount_height = 3;
-    bearing_mount_length=2;
-    
-    //copy pasted...
-    extra_height = axle_height*0.4;
-    
-    //little ledge at the bottom
-    
-    translate([-width-decoration_thick/2, -length/2, axle_height+extra_height-decoration_thick/2]){
-        cube([decoration_thick/2, length, decoration_thick/2]);
-    }
-    
-    //try and make it look like a real axle mount
-    difference(){
-        union(){
+
+//facing +ve x, 'width' in x direction is thickness of springs
+//'length' in y direction
+module cartsprings(width, length, height, springs=4){
+    spring_thick = 0.4;
+    //radius = (height*height - length*length/4)/(2*height);
+    //hmm...
+    radius = length*0.7;
+    //good enough :/
+    //radius = 9;
+    for(i=[0:springs]){
+        spring_length = (i+1)*length/springs;
+        intersection(){
+        translate([0,0,-radius+height]){
             
-            //some sloping side holders for the axle mount
-            
-            //note, sticking with length in +ve, width in +ve x
-            wonkyBitAngle = 65;
-            //length along the angle
-            wonkyBitLength = axle_height*1.2/sin(wonkyBitAngle);
-            //length in y axis
-            wonkyBitYFootprint = wonkyBitLength*cos(wonkyBitAngle);
-            wonkyBitZHeight = wonkyBitLength*sin(wonkyBitAngle);
-            
-            translate([0,-wonkyBitYFootprint-length/2,0]){
-                rotate([wonkyBitAngle,0,0]){
-                    //surface we want is lying flat in the xy plane
-                    translate([-width, 0, -decoration_thick]){
-                        cube([decoration_thick, wonkyBitLength, decoration_thick]);
-                 }
-                }
-            }
-            
-            translate([decoration_thick-width*2,0,0]){
-                rotate([0,0,180]){
-                    translate([0,-wonkyBitYFootprint-length/2,0]){
-                        rotate([wonkyBitAngle,0,0]){
-                            //surface we want is lying flat in the xy plane
-                            translate([-width, 0, -decoration_thick]){
-                                cube([decoration_thick, wonkyBitLength, decoration_thick]);
-                         }
-                        }
-                    }
-                }
-            }   
-            //bearing mount
-            translate([-width-decoration_thick,-bearing_mount_length/2, axle_height-bearing_mount_height/2]){
-                cube([decoration_thick,bearing_mount_length,bearing_mount_height]);
-            }
-            
-            extraMountRatio=0.8;
-            
-            translate([-width-decoration_thick*extraMountRatio,-bearing_mount_length*extraMountRatio/2, axle_height-bearing_mount_height*(1/extraMountRatio)*0.8]){
-                cube([decoration_thick*extraMountRatio,bearing_mount_length*extraMountRatio,bearing_mount_height*(1/extraMountRatio)]);
-            }
-            //cart springs! or at least, crude representations of
-            radius = 9;
-            translate([-width-decoration_thick,0,-radius+axle_height-decoration_thick*2.2]){
-                rotate([0,90,0]){
+                rotate([0,-90,0]){
+                    //main spring
                     difference(){
-                    cylinder(h=decoration_thick,r=radius,$fn=200);
-                    cylinder(h=decoration_thick*3,r=radius-decoration_thick,$fn=200, center=true);
+                        cylinder(h=width,r=radius-i*spring_thick);
+                        cylinder(h=width*3,r=radius-spring_thick*(i+1), center=true);
+                    }
+                    //raised thinner bit
+                    difference(){
+                        cylinder(h=width+0.2,r=radius-i*spring_thick);
+                        cylinder(h=width*3,r=radius-spring_thick*(i+0.5), center=true);
                     }
                 }
+                
             }
         
-            
-        }//end of union
-        //lopping off anything that sticks through the bottom
-        translate([-500, -500, -100]){
-        cube([1000,1000,100]);
+            centred_cube(width*3,spring_length, height);
         }
     }
+}
+
+//cartsprings, bracing and bearing box, 0,0 is where the axle slots into the holder
+//width and length refer to the axle holder
+module axle_mount_decoration(width,length, axle_height, subtract = false){
+    small_thick = 0.4;
+    decoration_thick = 1;
+    bearing_mount_height = 3.5;
+    bearing_mount_length=2.6;
+	bearing_mount_back_scale = 1.4;
     
+    extraMountRatio=0.8;
+    mount_spring_link_y = axle_height-bearing_mount_height*(1/extraMountRatio)*0.8;
+
+    //copy pasted...
+    extra_height = axle_height*0.4;
+    if(subtract){
+        //carved out bit above the axle mount, above the springs
+        translate([-width,0,0])centred_cube(small_thick*2,length/2,mount_spring_link_y-0.4*5);
+    }else{
+        
+        //little ledge at the bottom
+        translate([-width-decoration_thick/2, -length/2, axle_height+extra_height-decoration_thick/2]){
+            cube([decoration_thick/2, length, decoration_thick/2]);
+        }
+        
+        //try and make it look like a real axle mount
+        difference(){
+            union(){
+                
+                //some sloping side holders for the axle mount
+                
+                //note, sticking with length in +ve, width in +ve x
+                wonkyBitAngle = 65;
+                //length along the angle
+                wonkyBitLength = axle_height*1.2/sin(wonkyBitAngle);
+                //length in y axis
+                wonkyBitYFootprint = wonkyBitLength*cos(wonkyBitAngle);
+                wonkyBitZHeight = wonkyBitLength*sin(wonkyBitAngle);
+                
+                translate([0,-wonkyBitYFootprint-length/2,0]){
+                    rotate([wonkyBitAngle,0,0]){
+                        //surface we want is lying flat in the xy plane
+                        translate([-width, 0, -decoration_thick]){
+                            cube([decoration_thick, wonkyBitLength, decoration_thick]);
+                    }
+                    }
+                }
+                
+                translate([decoration_thick-width*2,0,0]){
+                    rotate([0,0,180]){
+                        translate([0,-wonkyBitYFootprint-length/2,0]){
+                            rotate([wonkyBitAngle,0,0]){
+                                //surface we want is lying flat in the xy plane
+                                translate([-width, 0, -decoration_thick]){
+                                    cube([decoration_thick, wonkyBitLength, decoration_thick]);
+                            }
+                            }
+                        }
+                    }
+                }   
+                //bearing mount
+                translate([-width-decoration_thick/2,0, axle_height-bearing_mount_height/2]){
+                    centred_cube(decoration_thick,bearing_mount_length,bearing_mount_height);
+                }
+                
+                //ridge aroudn bearing mount
+                translate([-width-decoration_thick/4,0, axle_height-bearing_mount_height*bearing_mount_back_scale/2]){
+                    centred_cube(decoration_thick/2,bearing_mount_length*bearing_mount_back_scale,bearing_mount_height*(1+ (bearing_mount_back_scale-1)/2));
+                }
+                //sticky out bit at the bottom of hte mount
+                translate([-width-decoration_thick-small_thick/2,0,axle_height+bearing_mount_height/2-small_thick])centred_cube(small_thick,small_thick,small_thick);
+                //bar across the mount
+                translate([-width-decoration_thick/2,0,axle_height])centred_cube(decoration_thick+small_thick,bearing_mount_length*bearing_mount_back_scale+small_thick,small_thick);
+                
+                
+                //bit that links mount with cart springs
+                translate([-width-decoration_thick*extraMountRatio,-bearing_mount_length*extraMountRatio/2, mount_spring_link_y]){
+                    cube([decoration_thick*extraMountRatio,bearing_mount_length*extraMountRatio,bearing_mount_height*(1/extraMountRatio)]);
+                }
+                //cart springs! or at least, crude representations of
+                translate([-width,0,0])cartsprings(decoration_thick, 12.6, mount_spring_link_y+decoration_thick/4);
+                
+            
+                
+            }//end of union
+            //lopping off anything that sticks through the bottom
+            translate([0,0, -50]){
+            centred_cube(200,200,50);
+            }
+        }
+    }
     
 }
 
@@ -206,31 +247,18 @@ module axle_holder(axle_space, x, axle_height, axle_distance, just_holes=false, 
         }
     }
 }
-module axle_holder_decoration(axle_space, x, axle_height, axle_distance){
+module axle_holder_decoration(axle_space, x, axle_height, axle_distance, subtract = false){
     width = 2.5;
     length = 5;
     axle_depth = 1+(axle_width-axle_space)/2;
     
-    translate([-axle_space/2,-axle_distance/2,0]){
-        axle_mount_decoration(width,length, axle_height, axle_depth);
+    mirror_xy()translate([-axle_space/2,axle_distance/2,0]){
+        axle_mount_decoration(width,length, axle_height, subtract);
     }
-    
-    translate([-axle_space/2,axle_distance/2,0]){
-        axle_mount_decoration(width,length, axle_height, axle_depth);
-    }
-    
-    rotate([0,0,180]){
-        translate([-axle_space/2,-axle_distance/2,0]){
-            axle_mount_decoration(width,length, axle_height, axle_depth);
-        }
-        
-        translate([-axle_space/2,axle_distance/2,0]){
-            axle_mount_decoration(width,length, axle_height, axle_depth);
-        }
-    }  
 }
 coupling_mount_length=0.85*6;
 
+//For hornby/bachmann. 0,0 is the central screwhole which should be coupling_from_edge from the edge
 module coupling_mount(height, base_thick = 0){
    
     side_holders_top_r = 0.85;
@@ -248,7 +276,7 @@ module coupling_mount(height, base_thick = 0){
 		}
        
         translate([0,0,-0.1]){
-            cylinder(h=(height+base_thick)*4,r=m2_thread_size/2, $fn=200, center=true);
+            cylinder(h=(height+base_thick)*4,r=m2_thread_size_vertical/2, $fn=200, center=true);
         }
     }
     
@@ -272,12 +300,36 @@ module coupling_mount(height, base_thick = 0){
     
 }
 
+//0,0 is bottom of mount (as printed, top as finished) at the front. So 0,0 should be top centre of the base of a wagon (assumes overlap with base, unless minusHeight is used)
+//facing +ve y
+module coupling_mount_dapol(minusHeight=0){
+
+    cylinder_from_edge = 7.5;
+
+    wall_thick = 1;
+
+    base_from_edge = 2.7;
+
+    base_height = top_of_buffer_from_top_of_rail - top_of_coupling_from_top_of_rail - minusHeight;
+    base_length = 6.4;
+
+    r=2.4/2;
+
+    coupling_width = 7.5;
+    coupling_height = 1.65;
+    translate([0,-base_from_edge-base_length/2,0])centred_cube(coupling_width + wall_thick*2,base_length,base_height);
+    translate([0,-cylinder_from_edge,base_height])cylinder(r=r,h=coupling_height);
+    mirror_y()translate([coupling_width/2 + wall_thick/2,-base_from_edge-base_length/2,base_height])centred_cube(wall_thick,base_length,coupling_height+wall_thick);
+    translate([0,-base_from_edge-base_length/2,base_height+coupling_height])centred_cube(coupling_width,base_length,wall_thick);
+
+}
+
 //facing +ve y direction
 module buffer(buffer_end_width, buffer_end_height, buffer_distance, buffer_length){
     
     
     difference(){
-        centredCube(0,0,buffer_end_width, buffer_length, buffer_end_height);
+        centred_cube(buffer_end_width, buffer_length, buffer_end_height);
         union(){
             translate([-buffer_distance/2,0,buffer_end_height/2]){
                 rotate([90,0,0]){

@@ -25,7 +25,7 @@ buffer_end_width=gen_pi_cam_wagon ? 36 : gen_battery_wagon ? 32 : 31;
 //*/
 
 //if axle_distance_input is specified, it will override the default
-module truck_base(buffer_end_width = 31, length = 75, wheel_diameter=12.5, axle_distance_input = 0){
+module truck_base(buffer_end_width = 31, length = 75, wheel_diameter=12.5, axle_distance_input = 0, coupling="dapol"){
 
 axle_distance = axle_distance_input == 0 ? length - 30 : axle_distance_input;
 
@@ -84,6 +84,7 @@ buffer_length = 0.5;
 girder_thick=0.5;
 
 //aim to keep width same, and increase buffer width for larger payloads
+//TODO this is a bit too wide compared to most of my models and photos I can find?
 width=30;
 
 //for pi camera truck:
@@ -209,12 +210,12 @@ difference(){
         translate([0,axle_distance/2,axle_height+thick]){           
             axle_hole(wheel_max_d,axle_space,wheel_centre_space);
         }
-        //extra deep hole for couplings
-        translate([0,length/2-edge/2,-thick]){
-            cylinder(h=thick*4,r=m2_thread_size/2, $fn=200);
-        }
-        translate([0,-(length/2-edge/2),-thick]){
-            cylinder(h=thick*3,r=m2_thread_size/2, $fn=200);
+        if(coupling != "dapol"){
+            //extra deep hole for couplings
+            mirror_x()translate([0,length/2-edge/2,-thick]){
+                cylinder(h=thick*4,r=m2_thread_size_vertical/2, $fn=200);
+            }
+
         }
         //place for weight
         translate([0,0,-1]){
@@ -231,46 +232,34 @@ difference(){
         
         
         //holes for buffers
-        translate([-buffer_distance/2,length/2,buffer_end_height/2]){
+        mirror_xy()translate([buffer_distance/2,length/2,buffer_end_height/2]){
             rotate([90,0,0]){
             //holes to hold buffers
             cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
             }
         }
-        translate([buffer_distance/2,length/2,buffer_end_height/2]){
-            rotate([90,0,0]){
-            //holes to hold buffers
-            cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
-            }
-        }
-        translate([-buffer_distance/2,-(length/2),buffer_end_height/2]){
-            rotate([90,0,0]){
-            //holes to hold buffers
-            cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
-            }
-        }
-        translate([buffer_distance/2,-(length/2),buffer_end_height/2]){
-            rotate([90,0,0]){
-            //holes to hold buffers
-            cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
-            }
-        }
+        //extra space to make broken/stuck buffers easier to remove
+        mirror_xy()translate([buffer_distance/2,length/2-buffer_holder_length*0.75/2 - buffer_holder_length/4,1])centred_cube(buffer_holder_length*0.75,buffer_holder_length*0.75,thick);
+        
         
     }
 }
-
-
-translate([0,length/2-coupling_from_edge,thick]){
-    coupling_mount(coupling_height);
-}
-
-translate([0,-(length/2-coupling_from_edge),thick]){
-    rotate([0,0,180]){
-        coupling_mount(coupling_height);
+mirror_x(){
+    if(coupling == "dapol"){
+        translate([0,length/2,thick])coupling_mount_dapol(thick);
+    }else{
+        translate([0,length/2-coupling_from_edge,thick]){
+            coupling_mount(coupling_height);
+        }
     }
 }
+
 translate([0,0,thick]){
-	axle_holder(axle_space, 20, axle_height, axle_distance);
-	axle_holder_decoration(axle_space, 20, axle_height, axle_distance);
+    difference(){
+        axle_holder(axle_space, 20, axle_height, axle_distance);
+        axle_holder_decoration(axle_space, 20, axle_height, axle_distance, true);
+    }
+	
+	axle_holder_decoration(axle_space, 20, axle_height, axle_distance, false);
 }
 }
