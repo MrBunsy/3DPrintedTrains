@@ -20,6 +20,10 @@ GEN_ROOF = false;
 
 //generate all the parts in there final (not printable) positions, for pretty models and inspection
 GEN_IN_SITU = false;
+/*
+Coupling styles: X8031 or dapol
+*/
+COUPLING = "X8031";
 
 /*
  - van : fruit van, with variants for holding pi&camera or battery
@@ -60,7 +64,7 @@ if(GEN_TOP){
 if(GEN_BASE){
 	optional_rotate([0,180,0],GEN_IN_SITU){
 		if(TYPE=="van"){
-			truck_base(width,length, WHEEL_DIAMETER);
+			truck_base(width,length, WHEEL_DIAMETER, COUPLING);
 		}
 	}
 }

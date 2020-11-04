@@ -32,21 +32,21 @@ Known variations I've not taken intoaccount:
 */
 
 //non-dummy base needs scaffolding
-GEN_BASE = false;
+GEN_BASE = true;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
 GEN_SHELL = false;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = true;
+GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
 
 GEN_PI_MOUNT = false;
 
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
-GEN_IN_PLACE = false;
+GEN_IN_PLACE = true;
 
 //generate tiny things that won't print well
 GEN_TINY_BITS = false;
@@ -739,12 +739,12 @@ module base(){
 			
 			mirror_xy()translate([headlight_x, length/2,0])mirror([1,0,0])rotate([0,180,0])headlight_box(true);
 				//bigger space for wires for LEDs behind the headlightboxes
-				wire_space_length1=buffer_box_length_top-wall_thick-0.2;
+				wire_space_length1=buffer_box_length_top-wall_thick-girder_thick;
 				wire_space_depth = base_thick-1;//1.75;
 				
-				mirror_x()translate([0,length/2-wire_space_length1/2-wall_thick,-0.001])centred_cube(end_width-wall_thick*2,wire_space_length1,wire_space_depth);
+				mirror_x()translate([0,length/2-wire_space_length1/2-wall_thick,-0.001])centred_cube(end_width-wall_thick*3,wire_space_length1,wire_space_depth);
 				wire_space_length2=2;
-				mirror_x()translate([0,length/2-wire_space_length1-wire_space_length2/2-wall_thick,-0.001])centred_cube(width-base_pipe_space*2-girder_thick,wire_space_length2+0.01,wire_space_depth);
+				mirror_x()translate([0,length/2-wire_space_length1-wire_space_length2/2-wall_thick,-0.001])centred_cube(width-base_pipe_space*2-girder_thick*2,wire_space_length2+0.01,wire_space_depth*0.75);
 			
 			pi_screwholes();
 			if(!DUMMY){

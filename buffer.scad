@@ -20,7 +20,8 @@ total_length=5.5;
 pole_length = 1;
 end_length=0.8;
 //1.8 bit too big for the 2.0 diameter holes
-truck_fixing_d=1.7;//1.5;
+//this was 1.7, but since using the buffer fixings with holes behind them, it's a bit loose, going back to 1.8
+truck_fixing_d=1.7;//1.7;//1.5;
 
 endplate_d = end_diameter;
 endplate_length=0.5;

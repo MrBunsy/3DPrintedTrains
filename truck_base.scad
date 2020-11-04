@@ -25,7 +25,7 @@ buffer_end_width=gen_pi_cam_wagon ? 36 : gen_battery_wagon ? 32 : 31;
 //*/
 
 //if axle_distance_input is specified, it will override the default
-module truck_base(buffer_end_width = 31, length = 75, wheel_diameter=12.5, axle_distance_input = 0, coupling="dapol"){
+module truck_base(buffer_end_width = 31, length = 75, wheel_diameter=12.5, coupling="dapol", axle_distance_input = 0){
 
 axle_distance = axle_distance_input == 0 ? length - 30 : axle_distance_input;
 
@@ -239,7 +239,9 @@ difference(){
             }
         }
         //extra space to make broken/stuck buffers easier to remove
-        mirror_xy()translate([buffer_distance/2,length/2-buffer_holder_length*0.75/2 - buffer_holder_length/4,1])centred_cube(buffer_holder_length*0.75,buffer_holder_length*0.75,thick);
+        buffer_space_length = buffer_holder_length/2;
+        buffer_space_offset = buffer_holder_length/2;
+        mirror_xy()translate([buffer_distance/2,length/2-buffer_space_offset - buffer_space_length/2,1])centred_cube(buffer_holder_length*0.75,buffer_space_length,thick);
         
         
     }

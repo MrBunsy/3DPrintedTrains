@@ -2,3 +2,4 @@
 *.gcode
 /pictures
 /models
+/out

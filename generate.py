@@ -20,8 +20,10 @@ class JobDescription():
     def addVariable(self, name, value):
         if isinstance(value, str):
             self.variables[name] = "\\\"{}\\\"".format(value)
-        if type(value)==bool:
+        elif type(value)==bool:
             self.variables[name] = "true" if value else "false"
+        else:
+            self.variables[name] = value
 
     def getVariableString(self):
         return " ".join(["-D {varname}={varvalue}".format(varname=key,varvalue=self.variables[key]) for key in self.variables])
@@ -41,20 +43,20 @@ def class66_jobs():
     class66Variables = ["base", "shell", "bogies" ,"motor_clip", "pi_mount"]
     at_angle = ["base", "shell", "walls"]
     full66Job = JobDescription("class66.scad", "class66_model")
-    full66Job.addVariable("GEN_IN_PLACE", "true")
+    full66Job.addVariable("GEN_IN_PLACE", True)
     for v in ["base", "shell", "bogies"]:
-        full66Job.addVariable("GEN_"+v.upper(), "true")
+        full66Job.addVariable("GEN_"+v.upper(), True)
 
-    full66Job.addVariable("DUMMY", "true")
+    full66Job.addVariable("DUMMY", True)
 
     for v in class66Variables:
         #full66Job.addVariable("GEN_"+v.upper(), "true")
         job = JobDescription("class66.scad", "class66_{}".format(v))
-        job.addVariable("GEN_IN_PLACE", "false")
+        job.addVariable("GEN_IN_PLACE", False)
         #so it fits on the print bed without me having to fiddle it every tiem in the slicer
-        job.addVariable("ANGLE", "51" if v in at_angle else "0")
+        job.addVariable("ANGLE", 51 if v in at_angle else 0)
         for v2 in class66Variables:
-            job.addVariable("GEN_"+v2.upper(), "true" if v==v2 else "false")
+            job.addVariable("GEN_"+v2.upper(), v==v2)
         jobs.append(job)
     jobs.append(full66Job)
     return jobs
@@ -86,10 +88,11 @@ def couplings_jobs():
 
 def wagon_jobs():
     jobs = []
-
+    couplings = ["X8031","dapol"]
     wagon_types = ["van"]
     wagon_variants = ["normal", "battery","pi"]
     wagon_options = ["base", "top", "roof"]
+
     for type in wagon_types:
         for variant in wagon_variants:
             name = "wagon_{}_{}_".format(type, variant)
@@ -97,18 +100,27 @@ def wagon_jobs():
             model_job.addVariable("GEN_IN_SITU", True)
             model_job.addVariable("VARIANT", variant)
             model_job.addVariable("TYPE", type)
+            #model_job.addVariable("COUPLING", coupling)
             for option in wagon_options:
-                model_job.addVariable("GEN_{}".format(option.upper()), True)
-                job = JobDescription("wagons_parametric.scad", name + option)
-                job.addVariable("GEN_IN_SITU", False)
-                job.addVariable("VARIANT", variant)
-                job.addVariable("TYPE", type)
-                for option2 in wagon_options:
-                    #set all to false by default
-                    job.addVariable("GEN_{}".format(option2.upper()), False)
-                #set only the one we want to true
-                job.addVariable("GEN_{}".format(option.upper()), True)
-                jobs.append(job)
+                for coupling in couplings:
+                    couplingName = ""
+                    if option != "base" and coupling != couplings[0]:
+                        #don't need to generate anything other than the base with the coupling types!
+                        continue
+                    if option == "base":
+                        couplingName = "_"+coupling
+                    model_job.addVariable("GEN_{}".format(option.upper()), True)
+                    job = JobDescription("wagons_parametric.scad", name + option + couplingName)
+                    job.addVariable("GEN_IN_SITU", False)
+                    job.addVariable("VARIANT", variant)
+                    job.addVariable("TYPE", type)
+                    job.addVariable("COUPLING", coupling)
+                    for option2 in wagon_options:
+                        #set all to false by default
+                        job.addVariable("GEN_{}".format(option2.upper()), False)
+                    #set only the one we want to true
+                    job.addVariable("GEN_{}".format(option.upper()), True)
+                    jobs.append(job)
             jobs.append(model_job)
 
 
