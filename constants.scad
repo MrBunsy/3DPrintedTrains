@@ -1,3 +1,23 @@
+/*
+Copyright Luke Wallin 2020
+
+This file is part of Luke Wallin's 3DPrintedTrains project.
+
+The 3DPrintedTrains project is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+The 3DPrintedTrains project is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with The 3DPrintedTrains project.  If not, see <https:www.gnu.org/licenses/>.
+*/
+
+
 //hornby is a little higher than many of the others, 
 //was using 7.9, but then I had trouble with the coupling hook catching on pointwork
 top_of_coupling_from_top_of_rail = 8.4;

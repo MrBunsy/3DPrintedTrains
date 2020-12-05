@@ -1,3 +1,22 @@
+/*
+Copyright Luke Wallin 2020
+
+This file is part of Luke Wallin's 3DPrintedTrains project.
+
+The 3DPrintedTrains project is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+The 3DPrintedTrains project is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with The 3DPrintedTrains project.  If not, see <https:www.gnu.org/licenses/>.
+*/
+
 //diameters = [15,15, 12.7, 12.6];//not much gradient on the wheel part with this
 diameters = [16.5,16.5, 14.45, 14.0];
 depths = [0.4, 0.3, 2.7];//total 3.4

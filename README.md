@@ -1,6 +1,6 @@
 # 3DPrintedTrains
 
-Various attempts to 3D print OO gauge trains and accessories.
+Various attempts to 3D print OO gauge trains and accessories. Licenced under GNU GPL-3.0-or-later.
 
 ## Couplings
 
