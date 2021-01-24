@@ -51,7 +51,7 @@ Known variations I've not taken intoaccount:
 */
 
 //non-dummy base needs scaffolding
-GEN_BASE = true;
+GEN_BASE = false;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
 GEN_SHELL = false;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
@@ -59,13 +59,13 @@ GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
-GEN_MOTOR_CLIP = false;
+GEN_MOTOR_CLIP = true;
 
 GEN_PI_MOUNT = false;
 
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
-GEN_IN_PLACE = true;
+GEN_IN_PLACE = false;
 
 //generate tiny things that won't print well
 GEN_TINY_BITS = false;
@@ -220,7 +220,7 @@ bogie_axle_mount_width = 23;
 */
 motor_clip_above_rails = 37;
 motor_clip_hole_d = 4.4;//4 was too tight
-motor_clip_fudge_height = 0.5;
+motor_clip_fudge_height = 0.2;//0.5 is perfect for holding it in place but giving plenty of wobble. trying 0.2 for a lot less wobble
 //making it the perfect size doesn't result in enough side to side wobble to deal with the join in the motor, so make the clip smaller by the fudge
 motor_clip_thick = 4 - motor_clip_fudge_height;//or 4.1?
 //for old mechanism of screwing motor into the shell
@@ -1574,6 +1574,12 @@ module side_cabinet(){
 	
 }
 
+//some extra space for the batteries that rest up against the edge of the motor holder
+module motor_holder_battery_space(){
+	mirror_y()translate([-motor_holder_width/4,motor_hold_screws[1],0])
+	rotate([-45,0,-30])cube([20,20,20]);
+}
+
 //separate peice that clips onto motor and screws into the base
 module motor_holder(){
 	//first attempt, built into roof of shell
@@ -1608,13 +1614,16 @@ module motor_holder(){
 	}*/
 	//third attempt, this shape screws into the base and the motor clips into this
 	//this can be much smaller than 1.5 and still give plenty of play for gradient changes
-	lip_height = 1;//1.5;
+	lip_height = 1.3;//1 worked with the looser hole, trying thicker now;//1.5;
 	difference(){
 		union(){
 			centred_cube(motor_holder_width,motor_holder_length,motor_clip_thick-lip_height);
 			cylinder(r=motor_clip_hole_d,h=motor_clip_thick);
 		}
-		cylinder(r=motor_clip_hole_d/2,h=100,center=true);
+		union(){
+			cylinder(r=motor_clip_hole_d/2,h=100,center=true);
+			motor_holder_battery_space();
+		}
 	}
 	screw_depth = 10;
 	difference(){
@@ -1624,8 +1633,13 @@ module motor_holder(){
 			cylinder(r=motor_length/2,h=100);
 			//screwholes
 			translate([0,0,motor_clip_base_z+motor_clip_thick-screw_depth])mirror_xy()translate(motor_hold_screws)cylinder(r=m2_thread_size_vertical/2,h=100);
+			
+			//chop bits off for the batteries
+			motor_holder_battery_space();
 		}
 	}
+	
+	
 }
 //part of the shell with the screwholes for the motor_holder
 module motor_holder_holder(){
