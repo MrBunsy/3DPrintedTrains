@@ -33,6 +33,7 @@ Seen three obvious variants:
  
  as usual 'width' usually refers to anything in the x direction and 'length' in y
  
+ ideally want 10.5mm wheels but I've only got 12.5mm, so might just raise the whole thing up a bit
 
 */
 include <truck_bits.scad>
@@ -46,6 +47,11 @@ GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
 
+//copying intermodal wagon
+buffer_area_thick = 3.5;
+
+bogie_distance = m2mm(8.52);
+//bogie axles on the y25 are 1.8m apart (I think) so use that for a first guess for this
 
 //total length includes buffers
 total_length = m2mm(13.97);
@@ -70,10 +76,25 @@ top_ridge_thick = top_ridge_height*0.5;
 top_ridge_flange_height=5.5;
 side_ridge_thick=side_ridge_length*0.5;
 
+little_door_height = 13;
+little_door_length = 10.5;
+little_door_thick=0.5;
+little_door_ridge_thick=0.5;
+little_door_z = 10.5;//wagon_height - 10.5 - little_door_height;
+
 //the thin bits, giong to assume the others are same as sides
 //too much thinner and it won't be sliced for printing
 end_ridge_thick = 0.6;
 end_flange_taper_height = 0.8;
+
+side_ridge_from_end=13.5;
+buffer_ledge_length = 7.4;
+buffer_ledge_taper_length = side_ridge_from_end-buffer_ledge_length-side_ridge_length/2;
+buffer_ledge_height = 1.5;//2;
+
+//how much higher or lower than the main base the buffers should be
+//TODO once I've got an idea of the height of bogies then this should be adjusted to meet top_of_buffer_from_top_of_rail
+buffer_z_from_base = -0.75;
 
 end_ridge_x = 1.5*wagon_width/7;
 
@@ -108,10 +129,13 @@ module wagon_end_indents(){
 	mirror_x()translate([0,wagon_length/2+wagon_end_flange_length,top_ridge_height])centred_cube(wagon_width-end_ridge_thick*2,side_ridge_thick*2,end_bottom_ledge_z-top_ridge_height);
 }
 
+module little_door(){
+	
+}
 
 // main body of the wagon
 //upside down, so 0,0,0 is centre of top of wagon (the open bit)
-module wagon(){
+module wagon_body(){
 	difference(){
 		centred_cube(wagon_width, wagon_length, wagon_height);
 		union(){
@@ -141,7 +165,7 @@ module wagon(){
 		translate([0,-inner_ridges_distance/2 - inner_ridge_d,0])side_ridge(side_ridge_length2);
 	}
 	//last side ridges, different distance
-	side_ridge_from_end=14.5;
+	
 	mirror_xy(){
 		translate([0,wagon_length/2 - side_ridge_from_end,0])side_ridge(side_ridge_length);
 	}
@@ -191,8 +215,37 @@ module wagon(){
 	}
 	
 	//extra ledge for the buffers
+	mirror_x() hull(){
+		translate([0,wagon_length/2-buffer_ledge_length/2,wagon_height])centred_cube(wagon_width,buffer_ledge_length,buffer_ledge_height);
+		translate([0,wagon_length/2-(buffer_ledge_length + buffer_ledge_taper_length)/2,wagon_height-0.1])centred_cube(wagon_width,buffer_ledge_length + buffer_ledge_taper_length,0.1);
+	}
 	
+	//little door thing
+	mirror_rotate180(){
+		difference(){
+			translate([wagon_width/2+little_door_thick/2,wagon_length/2 - side_ridge_from_end+ side_ridge_length/2 + little_door_length/2, little_door_z])centred_cube(little_door_thick,little_door_length,little_door_height);
+			translate([wagon_width/2+little_door_thick,wagon_length/2 - side_ridge_from_end+ side_ridge_length/2 + little_door_length/2, little_door_z+little_door_ridge_thick])centred_cube(min_thick*2,little_door_length-little_door_ridge_thick*2,little_door_height-little_door_ridge_thick*2);
+		}
+	}
 		
+}
+
+module wagon(){
+	difference(){
+		wagon_body();
+		
+		union(){
+			//holes for buffers
+            mirror_xy(){
+				translate([-buffer_distance/2,wagon_length/2,wagon_height+buffer_z_from_base]){
+					rotate([90,0,0]){
+					//holes to hold buffers
+					cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
+					}
+				}
+			}
+		}
+	}
 }
 
 

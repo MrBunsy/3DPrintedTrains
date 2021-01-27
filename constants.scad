@@ -27,6 +27,7 @@ coupling_hook_x = 3.7;
 
 //again hornby seems higher than Lima and friends, but it makes my life easier so I'll take it
 //hornby seens to be 17.6, lima about 16.5. i'll go for 17
+//should probably calculate a centre of buffer for things that aren't trucks
 top_of_buffer_from_top_of_rail = 17;//16.0;
 //real standard flat deck is apparently 940mm => 12.34.
 //no real way to achieve that with any of the wheels I've seen
@@ -118,6 +119,12 @@ module mirror_y(doMirror=true){
 
 module mirror_xy(doMirror=true){
     mirror_x(doMirror) mirror_y(doMirror) children();
+}
+
+//mirror in the opposite quadrant
+module mirror_rotate180(){
+	children();
+	mirror([1,0,0])mirror([0,1,0]) children();
 }
 
 SCALE = 76.2;
