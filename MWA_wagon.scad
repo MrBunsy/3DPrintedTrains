@@ -81,6 +81,14 @@ little_door_length = 10.5;
 little_door_thick=0.5;
 little_door_ridge_thick=0.5;
 little_door_z = 10.5;//wagon_height - 10.5 - little_door_height;
+little_door_hinge_length = 2;
+little_door_hinge_height = 1.6;
+little_door_hinge_thick = little_door_ridge_thick*2;
+
+plaque_length = 4.9;
+plaque_height = 4.1;
+plaque_z = wagon_height - 7.3;
+plaque_from_end = 30.1+2.3;
 
 //the thin bits, giong to assume the others are same as sides
 //too much thinner and it won't be sliced for printing
@@ -117,7 +125,7 @@ min_thick = 0.2;
 
 //facing +ve x
 module side_ridge(length){
-	translate([wagon_width/2+side_ridge_thick/2,0,0])hull(){
+	color("green")translate([wagon_width/2+side_ridge_thick/2,0,0])hull(){
 			centred_cube(side_ridge_thick,length,side_ridge_height);
 			translate([-side_ridge_thick/2-0.1/2,0,0])centred_cube(0.1,length,side_ridge_height2);
 		}
@@ -129,8 +137,28 @@ module wagon_end_indents(){
 	mirror_x()translate([0,wagon_length/2+wagon_end_flange_length,top_ridge_height])centred_cube(wagon_width-end_ridge_thick*2,side_ridge_thick*2,end_bottom_ledge_z-top_ridge_height);
 }
 
+//facing +ve x up against the side of the wagon
 module little_door(){
-	
+	translate([little_door_thick/2,0,0])union(){
+		difference(){
+			centred_cube(little_door_thick,little_door_length,little_door_height);
+		//take out the inset
+			translate([little_door_thick/2,0,little_door_ridge_thick])centred_cube(min_thick*2,little_door_length-little_door_ridge_thick*2,little_door_height-little_door_ridge_thick*2);
+		}
+		
+		//add centre armridge thing
+		translate([0,0,little_door_height/2-little_door_ridge_thick/2])centred_cube(little_door_thick,little_door_length,little_door_ridge_thick);
+		
+		translate([0,-little_door_length*0.05,little_door_height/2])centred_cube(little_door_thick,little_door_ridge_thick,little_door_height*0.275);
+		
+		hinge_pos = 0.2;
+		
+		//hinges
+		translate([0,little_door_length/2,little_door_height*hinge_pos-little_door_hinge_height/2])centred_cube(little_door_hinge_thick,little_door_hinge_length,little_door_hinge_height);
+		
+		translate([0,little_door_length/2,little_door_height*(1-hinge_pos)-little_door_hinge_height/2])centred_cube(little_door_hinge_thick,little_door_hinge_length,little_door_hinge_height);
+	}
+		
 }
 
 // main body of the wagon
@@ -145,7 +173,7 @@ module wagon_body(){
 	}
 	
 	//top side ridge
-	mirror_y()translate([wagon_width/2+top_ridge_thick/2,0,0])centred_cube(top_ridge_thick,wagon_length+wagon_end_flange_length*2,top_ridge_height);
+	color("green")mirror_y()translate([wagon_width/2+top_ridge_thick/2,0,0])centred_cube(top_ridge_thick,wagon_length+wagon_end_flange_length*2,top_ridge_height);
 	//top end ridge
 	mirror_x()translate([0,wagon_length/2+wagon_end_flange_length/2,0])centred_cube(wagon_width,wagon_end_flange_length,top_ridge_height);
 	
@@ -171,7 +199,7 @@ module wagon_body(){
 	}
 	nameplate_thick = side_ridge_thick+min_thick;
 	//name plate
-	mirror_y()translate([wagon_width/2+nameplate_thick/2,0,nameplate_z])centred_cube(nameplate_thick,nameplate_length,nameplate_height);
+	color("yellow")mirror_y()translate([wagon_width/2+nameplate_thick/2,0,nameplate_z])centred_cube(nameplate_thick,nameplate_length,nameplate_height);
 	
 	//end flanges
 	mirror_xy()hull(){
@@ -204,7 +232,7 @@ module wagon_body(){
 	notch_width = end_ridge_x*2 -side_ridge_length - min_thick*2;
 	notch_length = wagon_end_flange_length - min_thick*2;
 	//bottom end ledge
-	mirror_x(){
+	color("green")mirror_x(){
 		difference(){
 			translate([0,wagon_length/2,end_bottom_ledge_z-ledge_thick])centred_cube(wagon_width,side_ridge_thick+min_thick*2,ledge_thick);
 			
@@ -221,12 +249,10 @@ module wagon_body(){
 	}
 	
 	//little door thing
-	mirror_rotate180(){
-		difference(){
-			translate([wagon_width/2+little_door_thick/2,wagon_length/2 - side_ridge_from_end+ side_ridge_length/2 + little_door_length/2, little_door_z])centred_cube(little_door_thick,little_door_length,little_door_height);
-			translate([wagon_width/2+little_door_thick,wagon_length/2 - side_ridge_from_end+ side_ridge_length/2 + little_door_length/2, little_door_z+little_door_ridge_thick])centred_cube(min_thick*2,little_door_length-little_door_ridge_thick*2,little_door_height-little_door_ridge_thick*2);
-		}
-	}
+	mirror_rotate180()translate([wagon_width/2,wagon_length/2 - side_ridge_from_end+ side_ridge_length/2 + little_door_length/2, little_door_z])little_door();
+	
+	//little plaque
+	color("gray")mirror_rotate180()translate([wagon_width/2+min_thick/2,wagon_length/2-plaque_from_end,plaque_z])centred_cube(min_thick,plaque_length,plaque_height);
 		
 }
 
