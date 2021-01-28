@@ -249,7 +249,7 @@ difference(){
         //m3 hole to connect to main chassis
         cylinder(h=100,r=m3_thread_loose_size/2, $fn=200, center=true);
         //punch out the holes for the axle
-        axle_holder(axle_space, 20, axle_height, true, false);
+        axle_holder(axle_space, 20, axle_height+thick, axle_distance, true, false);
     }
 }
 
