@@ -29,6 +29,8 @@ coupling_hook_x = 3.7;
 //hornby seens to be 17.6, lima about 16.5. i'll go for 17
 //should probably calculate a centre of buffer for things that aren't trucks
 top_of_buffer_from_top_of_rail = 17;//16.0;
+//truck and intermodal wagon both used a buffer bit thickness of 3.5
+centre_of_buffer_from_top_of_rail = 17 - 3.5/2;
 //real standard flat deck is apparently 940mm => 12.34.
 //no real way to achieve that with any of the wheels I've seen
 

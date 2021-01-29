@@ -40,9 +40,11 @@ include <truck_bits.scad>
 include <constants.scad>
 include <threads.scad>
 
+wheel_diameter = 12.5;
+
 GEN_IN_SITU = false;
-GEN_WAGON = true;
-GEN_BOGIE = false;
+GEN_WAGON = false;
+GEN_BOGIE = true;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
@@ -51,14 +53,25 @@ GEN_BUFFER = false;
 buffer_area_thick = 3.5;
 
 bogie_distance = m2mm(8.52);
-//bogie axles on the y25 are 1.8m apart (I think) so use that for a first guess for this
+//bogie axles appear to be 2metres apart
+bogie_axle_distance = m2mm(2);
+
+bogie_inner_width = 22;
+
+//as measured from picture
+axle_to_top_of_bogie = 5.8;
 
 //total length includes buffers
 total_length = m2mm(13.97);
 //these are mostly dervived from a picture I un-perspectvied and printed out at the right size
 
+//height of the base of the wagon above rails.
+//this is not measured, this is tweaked so the buffers, at centre_of_buffer_from_top_of_rail, look like they're in the right place
+//the total height may therefore be 'wrong' but they'll match other OO gauge wagons
+wagon_base_above_rails = 14.5;
+
 //length of the base,not including buffers
-wagon_length = 168.5;//170.1;
+wagon_length = m2mm(13.97-0.62*2);//168.5;//170.1;
 wagon_end_flange_length = (170.1-wagon_length)/2;
 //complete guess if I'm honest, same as the container wagons
 wagon_width = 30;
@@ -88,7 +101,7 @@ little_door_hinge_thick = little_door_ridge_thick*2;
 plaque_length = 4.9;
 plaque_height = 4.1;
 plaque_z = wagon_height - 7.3;
-plaque_from_end = 30.1+2.3;
+plaque_from_end = 30.1+2;//+2.75;
 
 //the thin bits, giong to assume the others are same as sides
 //too much thinner and it won't be sliced for printing
@@ -102,7 +115,12 @@ buffer_ledge_height = 1.5;//2;
 
 //how much higher or lower than the main base the buffers should be
 //TODO once I've got an idea of the height of bogies then this should be adjusted to meet top_of_buffer_from_top_of_rail
-buffer_z_from_base = -0.75;
+buffer_z_from_base = wagon_base_above_rails - centre_of_buffer_from_top_of_rail;//-0.75;
+
+//buffer_z_from_base negative because wagon is constructed upside down
+bogie_mount_height = centre_of_buffer_from_top_of_rail  -wheel_diameter/2 - axle_to_top_of_bogie  - m3_washer_thick;
+
+echo(bogie_mount_height);
 
 end_ridge_x = 1.5*wagon_width/7;
 
@@ -149,7 +167,7 @@ module little_door(){
 		//add centre armridge thing
 		translate([0,0,little_door_height/2-little_door_ridge_thick/2])centred_cube(little_door_thick,little_door_length,little_door_ridge_thick);
 		
-		translate([0,-little_door_length*0.05,little_door_height/2])centred_cube(little_door_thick,little_door_ridge_thick,little_door_height*0.275);
+		translate([0,-little_door_length*0.1,little_door_height/2])centred_cube(little_door_thick,little_door_ridge_thick,little_door_height*0.275);
 		
 		hinge_pos = 0.2;
 		
@@ -182,15 +200,17 @@ module wagon_body(){
 	//then two outer ones of thickerness but same distance
 	//finfall two outmost ones same thickness as central ones, but further out
 	//the 9 central ones
-	inner_ridges_distance = 90;
-	inner_ridge_d = inner_ridges_distance/8;
+	//inner_ridges_distance = 90;
+	//the 11 inner ridges line up with the bogies, which we do have exact positions for
+	inner_ridges_distance = bogie_distance;
+	inner_ridge_d = inner_ridges_distance/10;
 	//inner ridges
-	mirror_y()for(i=[0:8]){
+	mirror_y()for(i=[1:9]){
 		translate([0,-inner_ridges_distance/2 + inner_ridge_d*i,0])side_ridge(side_ridge_length);
 	}
 	//next ridges, same distance, more thick
 	mirror_xy(){
-		translate([0,-inner_ridges_distance/2 - inner_ridge_d,0])side_ridge(side_ridge_length2);
+		translate([0,-inner_ridges_distance/2,0])side_ridge(side_ridge_length2);
 	}
 	//last side ridges, different distance
 	
@@ -254,6 +274,10 @@ module wagon_body(){
 	//little plaque
 	color("gray")mirror_rotate180()translate([wagon_width/2+min_thick/2,wagon_length/2-plaque_from_end,plaque_z])centred_cube(min_thick,plaque_length,plaque_height);
 		
+	
+	//bogie mounts
+	mirror_x()translate([0,bogie_distance/2,wagon_height])cylinder(h=bogie_mount_height,r=m3_thread_d);
+	
 }
 
 module wagon(){
@@ -270,13 +294,79 @@ module wagon(){
 					}
 				}
 			}
+			
+			//holes for bogie screws
+			mirror_x()translate([0,bogie_distance/2,wagon_height-base_thick+min_thick*4])cylinder(h=bogie_mount_height+100,r=m3_thread_d/2);
 		}
 	}
 }
+//base and top here refer when the bogie is the real way up, z is when being constructed (upside down)
+bogie_flange_width = 2.5;
+bogie_centre_bottom_length = 4;
+bogie_centre_top_length = 7;
+bogie_centre_gap_length = bogie_centre_top_length - bogie_centre_bottom_length;
+bogie_flange_thick = 0.4;
+bogie_centre_top_z = 0.7;
+bogie_centre_bottom_z = 6.3;
+bogie_top_flat_from_centre = 10.7;
+bogie_top_cylinder_r = bogie_flange_width;
+bogie_top_cylinder_h = 2.1;
 
+//y,z, bottom of the point in z but centred in y
+bogie_top_centre = [bogie_centre_top_length/2,bogie_centre_top_z];
+bogie_top_inner_wheel = [bogie_top_flat_from_centre,0];
+bogie_top_wheel = [bogie_axle_distance/2,0];
+
+bogie_bottom_centre = [bogie_centre_bottom_length/2,bogie_centre_bottom_z];
+bogie_bottom_inner_wheel = [bogie_axle_distance/2,bogie_top_cylinder_h-bogie_flange_thick];
+
+bogie_arm_height = bogie_centre_bottom_z+bogie_flange_thick;//7.6;//is deeper but not sure I can be bothered to work out the taper and stuff
+
+
+//facing +ve x
+module bogie_edge(){
+	
+	mirror_x(){
+		//top ledge of the edge of the bogie:
+		translate([0,0,bogie_centre_top_z])cube([bogie_flange_width,bogie_centre_top_length/2,bogie_flange_thick]);
+		hull(){
+			translate([0,bogie_centre_top_length/2,bogie_centre_top_z])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
+			translate([0,bogie_top_flat_from_centre,0])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
+		}
+		translate([0,bogie_top_flat_from_centre,0])cube([bogie_flange_width,bogie_axle_distance/2-bogie_top_flat_from_centre,bogie_flange_thick]);
+		//half a cylinder
+		intersection(){
+			translate([0,bogie_axle_distance/2,0])cylinder(r=bogie_top_cylinder_r,h=bogie_top_cylinder_h);
+			translate([0,bogie_top_flat_from_centre,0])cube([bogie_flange_width,10,10]);
+		}
+		
+		
+		//bottom ledge
+		translate([0,0,bogie_centre_bottom_z])cube([bogie_flange_width,bogie_centre_bottom_length/2,bogie_flange_thick]);
+		
+		hull(){
+			translate([0,bogie_centre_bottom_length/2,bogie_centre_bottom_z])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
+			translate([0,bogie_axle_distance/2,bogie_top_cylinder_h-bogie_flange_thick])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
+		}
+	}
+	
+	
+}
+
+module bogie(){
+	
+	mirror_y()translate([bogie_inner_width/2,0,0])bogie_edge();
+	
+	//centre arm
+	centred_cube(bogie_inner_width,bogie_centre_bottom_length,bogie_arm_height);
+}
 
 
 if(GEN_WAGON){
 	//TODO optional positioning if in situ
-	wagon();
+	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)wagon();
+}
+
+if(GEN_BOGIE){
+	bogie();
 }
