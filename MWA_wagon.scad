@@ -312,42 +312,108 @@ bogie_top_flat_from_centre = 10.7;
 bogie_top_cylinder_r = bogie_flange_width;
 bogie_top_cylinder_h = 2.1;
 
-//y,z, bottom of the point in z but centred in y
-bogie_top_centre = [bogie_centre_top_length/2,bogie_centre_top_z];
-bogie_top_inner_wheel = [bogie_top_flat_from_centre,0];
-bogie_top_wheel = [bogie_axle_distance/2,0];
+bogie_backing_plate_thick=1;
 
-bogie_bottom_centre = [bogie_centre_bottom_length/2,bogie_centre_bottom_z];
-bogie_bottom_inner_wheel = [bogie_axle_distance/2,bogie_top_cylinder_h-bogie_flange_thick];
+//TODO - readjust these all to centres, too fiddly otherwise?
+//[y,z] for centre of flange thickness
+bogie_top_centre = [bogie_centre_top_length/2,bogie_centre_top_z+bogie_flange_thick/2];
+bogie_top_inner_wheel = [bogie_top_flat_from_centre,bogie_flange_thick/2];
+bogie_top_wheel = [bogie_axle_distance/2,bogie_flange_thick/2];
+bogie_top_outer_wheel = [16.3,bogie_flange_thick/2];
 
-bogie_arm_height = bogie_centre_bottom_z+bogie_flange_thick;//7.6;//is deeper but not sure I can be bothered to work out the taper and stuff
+bogie_bottom_centre = [bogie_centre_bottom_length/2,bogie_centre_bottom_z-bogie_flange_thick/2];
+bogie_bottom_inner_wheel = [bogie_axle_distance/2,bogie_top_cylinder_h-bogie_flange_thick/2];
 
+bogie_bottom_outer_wheel = [16.3,bogie_top_cylinder_h-bogie_flange_thick/2];
+
+bogie_arm_height = bogie_centre_bottom_z;//7.6;//is deeper but not sure I can be bothered to work out the taper and stuff
+
+//used for the backing of the bogie flanges and for intersections
+module bogie_hull_shape(width=bogie_backing_plate_thick){
+	//backing plate
+		
+		hull(){
+			//centre
+			translate([width/2,0,bogie_top_centre[1]-bogie_flange_thick/2])centred_cube(width,bogie_flange_thick,bogie_flange_thick);
+			
+			translate([width/2,0,bogie_bottom_centre[1]-bogie_flange_thick/2])centred_cube(width,bogie_flange_thick,bogie_flange_thick);
+			
+			//first bend
+			translate([width/2,bogie_top_centre[0]-bogie_flange_thick/2,bogie_top_centre[1]-bogie_flange_thick/2])centred_cube(width,bogie_flange_thick,bogie_flange_thick);
+			
+			translate([width/2,bogie_bottom_centre[0]-bogie_flange_thick/2,bogie_bottom_centre[1]-bogie_flange_thick/2])centred_cube(width,bogie_flange_thick,bogie_flange_thick);
+		}
+		
+		hull(){
+			
+			//first bend
+			translate([width/2,bogie_top_centre[0]-bogie_flange_thick/2,bogie_top_centre[1]-bogie_flange_thick/2])centred_cube(width,bogie_flange_thick,bogie_flange_thick);
+			
+			translate([width/2,bogie_bottom_centre[0]-bogie_flange_thick/2,bogie_bottom_centre[1]-bogie_flange_thick/2])centred_cube(width,bogie_flange_thick,bogie_flange_thick);
+			
+			//'inner wheel'
+			translate([width/2,bogie_top_inner_wheel[0]-bogie_flange_thick/2,bogie_top_inner_wheel[1]-bogie_flange_thick/2])centred_cube(width,bogie_flange_thick,bogie_flange_thick);
+			
+			translate([width/2,bogie_bottom_inner_wheel[0]-bogie_flange_thick/2,bogie_bottom_inner_wheel[1]-bogie_flange_thick/2])centred_cube(width,bogie_flange_thick,bogie_flange_thick);
+			
+		}
+		
+		
+		//above the wheel
+		hull(){
+			//'inner wheel'
+			translate([width/2,bogie_top_inner_wheel[0],bogie_top_inner_wheel[1]-bogie_flange_thick/2])centred_cube(width,bogie_flange_thick,bogie_flange_thick);
+			
+			translate([width/2,bogie_bottom_inner_wheel[0],bogie_bottom_inner_wheel[1]-bogie_flange_thick/2])centred_cube(width,bogie_flange_thick,bogie_flange_thick);
+
+			//'outer wheel'
+			translate([width/2,bogie_top_outer_wheel[0]-bogie_flange_thick/2,bogie_top_outer_wheel[1]-bogie_flange_thick/2])centred_cube(width,bogie_flange_thick,bogie_flange_thick);
+			
+			translate([width/2,bogie_bottom_outer_wheel[0]-bogie_flange_thick/2,bogie_bottom_outer_wheel[1]-bogie_flange_thick/2])centred_cube(width,bogie_flange_thick,bogie_flange_thick);
+		}
+}
 
 //facing +ve x
 module bogie_edge(){
 	
 	mirror_x(){
 		//top ledge of the edge of the bogie:
-		translate([0,0,bogie_centre_top_z])cube([bogie_flange_width,bogie_centre_top_length/2,bogie_flange_thick]);
+		translate([0,0,bogie_top_centre[1]-bogie_flange_thick/2])cube([bogie_flange_width,bogie_top_centre[0],bogie_flange_thick]);
 		hull(){
-			translate([0,bogie_centre_top_length/2,bogie_centre_top_z])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
-			translate([0,bogie_top_flat_from_centre,0])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
+			translate([0,bogie_top_centre[0]-bogie_flange_thick,bogie_top_centre[1]-bogie_flange_thick/2])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
+			translate([0,bogie_top_inner_wheel[0]-bogie_flange_thick,0])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
 		}
-		translate([0,bogie_top_flat_from_centre,0])cube([bogie_flange_width,bogie_axle_distance/2-bogie_top_flat_from_centre,bogie_flange_thick]);
+		translate([0,bogie_top_inner_wheel[0],0])cube([bogie_flange_width,bogie_axle_distance/2-bogie_top_inner_wheel[0],bogie_flange_thick]);
 		//half a cylinder
 		intersection(){
-			translate([0,bogie_axle_distance/2,0])cylinder(r=bogie_top_cylinder_r,h=bogie_top_cylinder_h);
-			translate([0,bogie_top_flat_from_centre,0])cube([bogie_flange_width,10,10]);
+			//the cylinder
+			translate([0,bogie_axle_distance/2,0])cylinder(r=bogie_top_cylinder_r,h=bogie_top_cylinder_h*2);
+			//keep within confines of bogie
+			union(){
+				//translate([0,bogie_top_inner_wheel[0],0])cube([bogie_flange_width,10,10]);
+				bogie_hull_shape(bogie_top_cylinder_r);
+			}
 		}
-		
+		//bogie_hull_shape(bogie_top_cylinder_r*2);
 		
 		//bottom ledge
-		translate([0,0,bogie_centre_bottom_z])cube([bogie_flange_width,bogie_centre_bottom_length/2,bogie_flange_thick]);
+		translate([0,0,bogie_bottom_centre[1]-bogie_flange_thick/2])cube([bogie_flange_width,bogie_bottom_centre[0],bogie_flange_thick]);
 		
 		hull(){
-			translate([0,bogie_centre_bottom_length/2,bogie_centre_bottom_z])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
-			translate([0,bogie_axle_distance/2,bogie_top_cylinder_h-bogie_flange_thick])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
+			translate([0,bogie_bottom_centre[0]-bogie_flange_thick,bogie_bottom_centre[1]-bogie_flange_thick/2])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
+			translate([0,bogie_bottom_inner_wheel[0]-bogie_flange_thick,bogie_bottom_inner_wheel[1]-bogie_flange_thick/2])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
 		}
+		
+		hull(){
+			translate([0,bogie_bottom_inner_wheel[0]-bogie_flange_thick,bogie_bottom_inner_wheel[1]-bogie_flange_thick/2])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
+			
+			translate([0,bogie_bottom_outer_wheel[0]-bogie_flange_thick,bogie_bottom_outer_wheel[1]-bogie_flange_thick/2])cube([bogie_flange_width,bogie_flange_thick,bogie_flange_thick]);
+		}
+		
+		
+		bogie_hull_shape();
+		
+		
 	}
 	
 	
