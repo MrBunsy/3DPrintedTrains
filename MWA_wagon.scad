@@ -56,7 +56,7 @@ bogie_distance = m2mm(8.52);
 //bogie axles appear to be 2metres apart
 bogie_axle_distance = m2mm(2);
 
-bogie_inner_width = 23;
+bogie_inner_width = 24;
 
 //as measured from picture
 axle_to_top_of_bogie = 6.3;// 5.8;
@@ -582,10 +582,14 @@ module bogie(){
 
 			//extra arm behind the cosmetics - hoping it's strong enough without changing the visual appearance much
 			mirror_y(){
-				translate([bogie_inner_width/2+bogie_padding_width/2,0,0])centred_cube(bogie_padding_width,bogie_bottom_outer_wheel[0]*2,bogie_offset_hole_pos[1]-bogie_offset_hole_d/2);
+				translate([bogie_inner_width/2+bogie_padding_width/2,0,0])
+					intersection(){
+						centred_cube(bogie_padding_width,bogie_bottom_outer_wheel[0]*2,bogie_offset_hole_pos[1]-bogie_offset_hole_d/2);
+						mirror_x()bogie_hull_shape(bogie_padding_width);
+				}
 			}
 			mirror_xy(){
-				translate([bogie_inner_width/2+bogie_padding_width/2,bogie_axle_distance/2,0])centred_cube(bogie_padding_width,4,axle_to_top_of_bogie+2);
+				translate([bogie_inner_width/2+bogie_padding_width/2,bogie_axle_distance/2+0.5,0])centred_cube(bogie_padding_width,4,axle_to_top_of_bogie+1.5);
 			}
 
 			mirror_xy()translate([bogie_inner_width/2+bogie_padding_width,bogie_axle_distance/2,axle_to_top_of_bogie])bogie_axle_holder_cosmetics();

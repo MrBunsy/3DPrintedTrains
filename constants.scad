@@ -37,7 +37,7 @@ centre_of_buffer_from_top_of_rail = 17 - 3.5/2;
 //pointy bit to pointy bit of spare hornby axles (also works for dapol axles)
 axle_width = 25.65;
 //same as axle_holder in truck bits
-axle_holder_width = axle_width+1;
+axle_holder_width = axle_width+1.5;
 
 m2_thread_size = 2;
 m2_thread_size_vertical = 1.95;
