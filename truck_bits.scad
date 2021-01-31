@@ -257,6 +257,7 @@ module axle_holder(axle_space, x, axle_height, axle_distance, just_holes=false, 
     
     length = 5;
     axle_depth = 1+(axle_width-axle_space)/2;
+	//echo("axle_depth",axle_depth);
     
      mirror_xy() translate([-axle_space/2,-axle_distance/2,0]){
         if(just_holes){

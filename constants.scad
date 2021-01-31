@@ -36,6 +36,8 @@ centre_of_buffer_from_top_of_rail = 17 - 3.5/2;
 
 //pointy bit to pointy bit of spare hornby axles (also works for dapol axles)
 axle_width = 25.65;
+//same as axle_holder in truck bits
+axle_holder_width = axle_width+1;
 
 m2_thread_size = 2;
 m2_thread_size_vertical = 1.95;
@@ -129,6 +131,13 @@ module mirror_rotate180(){
 	mirror([1,0,0])mirror([0,1,0]) children();
 }
 
+//similar to mirror_xy but with rotation to avoid mirroring
+module rotate_allquads(){
+	for(i=[0:3]){
+		rotate([0,0,i*360/4])children();
+	}
+}
+
 SCALE = 76.2;
 
 //stolen from container
@@ -202,4 +211,15 @@ module led_1_8mm(extra_base_length = led_base_extra, extra_front_length = 0){
 		
 		translate([0,(led_1_8mm_base_length+extra_base_length)/2-extra_base_length,-led_1_8_base_width/2])centred_cube(2.4+0.2,led_1_8mm_base_length+extra_base_length,led_1_8_base_width);
 	}
+}
+
+//representation of the axle, for punching out holes
+//0,0 is at centre of axle, axle is along the x axis
+module axle_punch(){
+	//same as in the more convoluted axle_holder()
+	cone_height = 2.325;
+	
+	mirror_y()translate([axle_holder_width/2-cone_height,0,0])rotate([0,90,0])cylinder(r1=cone_height/2,h=cone_height,r2=0,$fn=200);
+	
+	rotate([0,90,0])cylinder(r=cone_height/2,h=axle_holder_width-cone_height*2,center=true);
 }
