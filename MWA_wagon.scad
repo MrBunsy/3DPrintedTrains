@@ -340,8 +340,8 @@ bogie_arm_height = bogie_centre_bottom_z;//7.6;//is deeper but not sure I can be
 
 bogie_small_cylinder_d1=1.6;
 bogie_small_cylinder_d=1.3;
-bogie_small_cylinder_h=5.2;
-bogie_small_cylinder_h1=2;
+bogie_small_cylinder_h=6;
+bogie_small_cylinder_h1=4.5;
 bogie_small_cylinder_pos=[16,1];
 
 //positions [y,z]
@@ -480,18 +480,27 @@ module bogie_edge(){
 					color("blue")translate([0,bolt[0],bolt[1]])rotate([0,90,0])cylinder(r=bogie_bolt_d/2,h=bogie_bolt_width,$fn=20);
 
 				}
-
+				pivot_bit_height = 1.7;
 				//axle hinge point
 				translate([0,bogie_axle_pivot_pos[0],bogie_axle_pivot_pos[1]])rotate([0,90,0])cylinder(r=bogie_axle_pivot_d/2,h=bogie_axle_pivot_width);
+				//link from hinge to axle
+				hull(){
+					translate([0,bogie_axle_pivot_pos[0],bogie_axle_pivot_pos[1]])rotate([0,90,0])cylinder(r=1.3/2,h=bogie_axle_pivot_width);
+					translate([bogie_axle_pivot_width/2,bogie_axle_distance/2,axle_to_top_of_bogie-pivot_bit_height])centred_cube(bogie_axle_pivot_width,0.1,pivot_bit_height);
+				}
 
 				//spring done elsewhere to avoid mirroring it
 				
-				//other suspension thingie
+				//other suspension cylinder thingie
 				translate([bogie_small_cylinder_d1/2,bogie_small_cylinder_pos[0],bogie_small_cylinder_pos[1]])cylinder(r=bogie_small_cylinder_d/2,h=bogie_small_cylinder_h);
 				translate([bogie_small_cylinder_d1/2,bogie_small_cylinder_pos[0],bogie_small_cylinder_pos[1]])cylinder(r=bogie_small_cylinder_d1/2,h=bogie_small_cylinder_h1);
 				//bit at 'top' of suspension thingie
 				size=bogie_small_cylinder_d1*1.2;
 				translate([bogie_flange_width/2,bogie_bottom_outer_wheel[0]-size/2,bogie_flange_thick])centred_cube(size,size,bogie_bottom_inner_wheel[1]-bogie_flange_thick);
+				//bit at 'bottom' of suspension thingie
+				topLength = bogie_small_cylinder_d1*1.25;
+				topHeight = 1.2;
+				translate([topLength/2,bogie_small_cylinder_pos[0]+bogie_small_cylinder_d/2-topLength/2,bogie_small_cylinder_pos[1]+bogie_small_cylinder_h])centred_cube(topLength,topLength,topHeight);
 				
 			}//end addititve union
 			union(){
@@ -519,8 +528,8 @@ module bogie_axle_holder_cosmetics(){
 	//"hubcap"
 	rotate([0,90,0])cylinder(r=hubcap_d/2,h=hubcap_width);
 	rotate([0,90,0])cylinder(r=hubcap2_d/2,h=hubcap2_width);
-	bolt_d = 0.4;
-	bolt_length = 0.2;
+	bolt_d = 0.4+0.1;
+	bolt_length = 0.2+0.05;
 	bolt_pos_r = hubcap_d/2-bolt_d*0.75;
 	
 	
@@ -575,7 +584,7 @@ module bogie(){
 					for(i=[0:3]){
 						xpos = (i%2 == 0) ? 1 : -1;
 						ypos = (i < 2) ? 1: -1;
-						translate([(bogie_inner_width/2+bogie_padding_width+bogie_flange_width-bogie_top_cylinder_r)*xpos,ypos*bogie_axle_distance/2,bogie_top_cylinder_h])metric_thread(diameter=bogie_spring_d, thread_size=0.5, groove=true, pitch=0.7, length=axle_to_top_of_bogie-bogie_top_cylinder_h-bogie_axle_holder_size/2);
+						translate([(bogie_inner_width/2+bogie_padding_width+bogie_flange_width-bogie_top_cylinder_r)*xpos,ypos*bogie_axle_distance/2,bogie_top_cylinder_h])metric_thread(diameter=bogie_spring_d, thread_size=1.5, groove=false, pitch=1, length=axle_to_top_of_bogie-bogie_top_cylinder_h-bogie_axle_holder_size/2);
 					}
 				}
 				centred_cube(bogie_inner_width+bogie_padding_width*2,bogie_axle_distance*1.5,axle_to_top_of_bogie*2);
