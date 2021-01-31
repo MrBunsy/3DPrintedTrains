@@ -29,6 +29,7 @@ module centredCube(x,y,width,length, height){
 
 module axle_mount_holes(width,length, axle_height, axle_depth, groove=true){
     extra_height = axle_height*0.4;
+	//echo ("axle_mount_holes width:",width,"axle_depth",axle_depth);
     union(){
                 //cone for axle to rest in
                  translate([width/2+0.01,0,axle_height]){

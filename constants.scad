@@ -22,6 +22,7 @@ along with The 3DPrintedTrains project.  If not, see <https:www.gnu.org/licenses
 //was using 7.9, but then I had trouble with the coupling hook catching on pointwork
 top_of_coupling_from_top_of_rail = 8.4;
 
+//coupling is set back from the edge inwards to the wagon a bit
 coupling_from_edge=2.5;
 coupling_hook_x = 3.7;
 
@@ -37,7 +38,7 @@ centre_of_buffer_from_top_of_rail = 17 - 3.5/2;
 //pointy bit to pointy bit of spare hornby axles (also works for dapol axles)
 axle_width = 25.65;
 //same as axle_holder in truck bits
-axle_holder_width = axle_width+1.5;
+axle_holder_width = axle_width+2;
 
 m2_thread_size = 2;
 m2_thread_size_vertical = 1.95;

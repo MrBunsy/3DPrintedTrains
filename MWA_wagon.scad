@@ -56,7 +56,7 @@ bogie_distance = m2mm(8.52);
 //bogie axles appear to be 2metres apart
 bogie_axle_distance = m2mm(2);
 
-bogie_inner_width = 24;
+bogie_inner_width = 23;
 
 //as measured from picture
 axle_to_top_of_bogie = 6.3;// 5.8;
@@ -78,6 +78,10 @@ wagon_width = 30;
 //starting from 'base' which is the flat bit above the bogies
 //wagon_height = 28.5; - possibly correct if my photo really is squashed
 wagon_height = 28.5;//30;
+
+
+coupling_from_bogie_centre = wagon_length/2-bogie_distance/2 - coupling_from_edge;
+bogie_coupling_height = axle_to_top_of_bogie + wheel_diameter/2 - top_of_coupling_from_top_of_rail;
 
 brake_wheel_d = 7;
 
@@ -606,6 +610,14 @@ module bogie(){
 				}
 				centred_cube(bogie_inner_width+bogie_padding_width*2,bogie_axle_distance*1.5,axle_to_top_of_bogie*2);
 			}
+			coupling_arm_height = bogie_centre_arm_height*0.6;
+			//coupling holder
+			translate([0,coupling_from_bogie_centre, coupling_arm_height]){
+				coupling_mount(bogie_coupling_height-coupling_arm_height,coupling_arm_height);
+			}
+			coupling_arm_length = coupling_from_bogie_centre-m2_thread_size;
+			translate([0,coupling_arm_length/2,0])centred_cube(5,coupling_arm_length,coupling_arm_height);
+
 		}//end of additive bits
 		union(){
 			//wheel holder
@@ -617,7 +629,7 @@ module bogie(){
 
 		
 	}
-	//mirror_x()translate([0,bogie_axle_distance/2,axle_to_top_of_bogie])axle_punch();
+	//mirror_x()translate([0,bogie_axle_distance,axle_to_top_of_bogie])axle_punch();
 }
 
 
