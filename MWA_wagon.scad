@@ -484,11 +484,8 @@ module bogie_edge(){
 				//axle hinge point
 				translate([0,bogie_axle_pivot_pos[0],bogie_axle_pivot_pos[1]])rotate([0,90,0])cylinder(r=bogie_axle_pivot_d/2,h=bogie_axle_pivot_width);
 
-				//spring
-				difference(){
-					translate([bogie_flange_width-bogie_top_cylinder_r,bogie_axle_distance/2,bogie_top_cylinder_h])metric_thread(diameter=bogie_spring_d, thread_size=0.5, groove=true, pitch=0.7, length=axle_to_top_of_bogie-bogie_top_cylinder_h-bogie_axle_holder_size/2);
-					translate([-10,bogie_axle_distance/2,0])centred_cube(20,bogie_spring_d*2,100);
-				}
+				//spring done elsewhere to avoid mirroring it
+				
 				//other suspension thingie
 				translate([bogie_small_cylinder_d1/2,bogie_small_cylinder_pos[0],bogie_small_cylinder_pos[1]])cylinder(r=bogie_small_cylinder_d/2,h=bogie_small_cylinder_h);
 				translate([bogie_small_cylinder_d1/2,bogie_small_cylinder_pos[0],bogie_small_cylinder_pos[1]])cylinder(r=bogie_small_cylinder_d1/2,h=bogie_small_cylinder_h1);
@@ -570,9 +567,24 @@ module bogie(){
 			}
 
 			mirror_xy()translate([bogie_inner_width/2+bogie_padding_width,bogie_axle_distance/2,axle_to_top_of_bogie])bogie_axle_holder_cosmetics();
+
+			
+			//springs for suspension, done here to avoid mirroring
+			difference(){
+				union(){
+					for(i=[0:3]){
+						xpos = (i%2 == 0) ? 1 : -1;
+						ypos = (i < 2) ? 1: -1;
+						translate([(bogie_inner_width/2+bogie_padding_width+bogie_flange_width-bogie_top_cylinder_r)*xpos,ypos*bogie_axle_distance/2,bogie_top_cylinder_h])metric_thread(diameter=bogie_spring_d, thread_size=0.5, groove=true, pitch=0.7, length=axle_to_top_of_bogie-bogie_top_cylinder_h-bogie_axle_holder_size/2);
+					}
+				}
+				centred_cube(bogie_inner_width+bogie_padding_width*2,bogie_axle_distance*1.5,axle_to_top_of_bogie*2);
+			}
 		}
 		//wheel holder
 		mirror_x()translate([0,bogie_axle_distance/2,axle_to_top_of_bogie])axle_punch();
+
+		
 	}
 	//mirror_x()translate([0,bogie_axle_distance/2,axle_to_top_of_bogie])axle_punch();
 }

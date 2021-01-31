@@ -58,8 +58,8 @@ GEN_SHELL = false;
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = false;
-GEN_MOTOR_CLIP = true;
+GEN_BOGIES = true;
+GEN_MOTOR_CLIP = false;
 
 GEN_PI_MOUNT = false;
 
