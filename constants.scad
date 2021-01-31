@@ -138,6 +138,11 @@ module rotate_allquads(){
 	}
 }
 
+module rotate_mirror(){
+	children();
+	rotate([0,0,180])children();
+}
+
 SCALE = 76.2;
 
 //stolen from container

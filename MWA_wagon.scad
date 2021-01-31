@@ -372,8 +372,8 @@ bogie_bolt_positions = [
 bogie_padding_width = 1;
 
 //part of the suspension
-bogie_axle_pivot_pos = [4.9,4.9];
-bogie_axle_pivot_d = 2;
+bogie_axle_pivot_pos = [5.2,4.9];
+bogie_axle_pivot_d = 2.2;
 bogie_axle_pivot_width = 1.5;
 bogie_axle_holder_size = 4.5;
 
@@ -480,6 +480,7 @@ module bogie_edge(){
 					color("blue")translate([0,bolt[0],bolt[1]])rotate([0,90,0])cylinder(r=bogie_bolt_d/2,h=bogie_bolt_width,$fn=20);
 
 				}
+
 				pivot_bit_height = 1.7;
 				//axle hinge point
 				translate([0,bogie_axle_pivot_pos[0],bogie_axle_pivot_pos[1]])rotate([0,90,0])cylinder(r=bogie_axle_pivot_d/2,h=bogie_axle_pivot_width);
@@ -516,7 +517,14 @@ module bogie_edge(){
 			}
 		}//end difference
 
-	
+	//non-mirrored bits
+
+	//some other sticky out bits
+	color("blue")translate([0,4.4,3.1])rotate([0,90,0])cylinder(r=0.9/2,h=bogie_bolt_width,$fn=20);
+	color("blue")hull(){
+		translate([0,-4.4,3.1])rotate([0,90,0])cylinder(r=0.9/2,h=bogie_bolt_width,$fn=20);
+		translate([0,-4.4-0.9,3.1])rotate([0,90,0])cylinder(r=0.9/2,h=bogie_bolt_width,$fn=20);
+	}
 	
 }
 //bit that represents the axle holder +ve xy quad, with 0,0 at the back inline the axle and the bogie_edge cosmetics
@@ -562,17 +570,22 @@ module bogie_axle_holder_cosmetics(){
 	
 }
 
+bogie_centre_arm_height = 3.4;
 module bogie(){
 	difference(){
 		union(){
-			mirror_y()translate([bogie_inner_width/2+bogie_padding_width,0,0])bogie_edge();
+			//some cosmetics need rotating, so far I've not done any that need mirroring, but will have to split this if I do
+			rotate_mirror()translate([bogie_inner_width/2+bogie_padding_width,0,0])bogie_edge();
 			
 			//centre arm
-			centred_cube(bogie_inner_width+bogie_padding_width*2,bogie_centre_bottom_length,bogie_arm_height);
+			centred_cube(bogie_inner_width+bogie_padding_width*2,m3_thread_d*2,bogie_centre_arm_height);
 
-			//extra slab behind the cosmetics - very clumsy needs rethinking
+			//extra arm behind the cosmetics - hoping it's strong enough without changing the visual appearance much
 			mirror_y(){
-				//translate([bogie_inner_width/2+bogie_padding_width/2,0,0])centred_cube(bogie_padding_width,bogie_bottom_outer_wheel[0]*2,7.5);
+				translate([bogie_inner_width/2+bogie_padding_width/2,0,0])centred_cube(bogie_padding_width,bogie_bottom_outer_wheel[0]*2,bogie_offset_hole_pos[1]-bogie_offset_hole_d/2);
+			}
+			mirror_xy(){
+				translate([bogie_inner_width/2+bogie_padding_width/2,bogie_axle_distance/2,0])centred_cube(bogie_padding_width,4,axle_to_top_of_bogie+2);
 			}
 
 			mirror_xy()translate([bogie_inner_width/2+bogie_padding_width,bogie_axle_distance/2,axle_to_top_of_bogie])bogie_axle_holder_cosmetics();
@@ -589,9 +602,14 @@ module bogie(){
 				}
 				centred_cube(bogie_inner_width+bogie_padding_width*2,bogie_axle_distance*1.5,axle_to_top_of_bogie*2);
 			}
+		}//end of additive bits
+		union(){
+			//wheel holder
+			mirror_x()translate([0,bogie_axle_distance/2,axle_to_top_of_bogie])axle_punch();
+			//m3 bolt holder
+			translate([0,0,-1])cylinder(r=m3_thread_loose_size/2,h=20);
+
 		}
-		//wheel holder
-		mirror_x()translate([0,bogie_axle_distance/2,axle_to_top_of_bogie])axle_punch();
 
 		
 	}
@@ -600,10 +618,10 @@ module bogie(){
 
 
 if(GEN_WAGON){
-	//TODO optional positioning if in situ
 	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)wagon();
 }
 
 if(GEN_BOGIE){
+	//TODO, rotate rather than mirror!
 	mirror_x(GEN_IN_SITU)optional_translate([0,bogie_distance/2,axle_to_top_of_bogie+wheel_diameter/2],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)bogie();
 }
