@@ -146,6 +146,22 @@ def wagon_jobs():
 
     return jobs
 
+def mwa_wagon_jobs():
+    jobs = []
+    MWAariables = ["wagon", "bogie"]
+    fullMWAJob = JobDescription("MWA_wagon.scad", "mwa_wagon_model")
+    fullMWAJob.addVariable("GEN_IN_SITU", True)
+    for v in MWAariables:
+        fullMWAJob.addVariable("GEN_"+v.upper(), True)
+
+    for v in MWAariables:
+        job = JobDescription("MWA_wagon.scad", "MWA_wagon_{}".format(v))
+        job.addVariable("GEN_IN_SITU", False)
+        for v2 in MWAariables:
+            job.addVariable("GEN_"+v2.upper(), v==v2)
+        jobs.append(job)
+    jobs.append(fullMWAJob)
+    return jobs
 
 if __name__ == '__main__':
 
@@ -153,6 +169,7 @@ if __name__ == '__main__':
     parser.add_argument("--class66",action='store_true')
     parser.add_argument("--couplings",action='store_true')
     parser.add_argument("--wagons", action='store_true')
+    parser.add_argument("--mwa", action='store_true')
     args = parser.parse_args()
     jobs = []
 
@@ -163,6 +180,8 @@ if __name__ == '__main__':
         jobs.extend(couplings_jobs())
     if args.wagons:
         jobs.extend(wagon_jobs())
+    if args.mwa:
+        jobs.extend(mwa_wagon_jobs())
 
     p = Pool(multiprocessing.cpu_count()-1)
     p.map(executeJob, jobs)

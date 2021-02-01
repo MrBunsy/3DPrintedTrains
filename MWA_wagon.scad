@@ -18,10 +18,10 @@ along with The 3DPrintedTrains project.  If not, see <https:www.gnu.org/licenses
 */
 
 /*
-Seen three obvious variants:
+Seen a few variants:
 
- - MWA Green freightliner with thin panel for logo on side and parking break roughly centre of wagon
- - MWA-B Grey freightliner with tall panel for logo on side and parking break on one bogie
+ - MWA Green freightliner with thin panel for logo on side and parking brake roughly centre of wagon
+ - MWA-B Grey freightliner with tall panel for logo on side and parking brake on one bogie
  
  not to be confused with
  - MMA Red DB different numbers of ridges, different ends but parking brake in same place as green freightliner
@@ -42,11 +42,11 @@ include <threads.scad>
 
 wheel_diameter = 12.5;
 
-GEN_IN_SITU = false;
-GEN_WAGON = false;
+GEN_IN_SITU = true;
+GEN_WAGON = true;
 GEN_BOGIE = true;
 GEN_BRAKE_WHEEL = false;
-GEN_BRAKE_CYLINDER = false;
+GEN_BRAKE_CYLINDER = true;
 GEN_BUFFER = false;
 
 //copying intermodal wagon
@@ -56,7 +56,7 @@ bogie_distance = m2mm(8.52);
 //bogie axles appear to be 2metres apart
 bogie_axle_distance = m2mm(2);
 
-bogie_inner_width = 23;
+bogie_inner_width = 22.5;
 
 //as measured from picture
 axle_to_top_of_bogie = 6.3;// 5.8;
@@ -144,6 +144,27 @@ wall_thick = 1;
 base_thick = 5;
 
 min_thick = 0.2;
+//y coord of tallest edge
+wagon_under_triangle_from_end = 56;//56.6;
+wagon_under_triangle_height = 4.6;
+wagon_under_triangle_flat_length = 1.3;
+wagon_under_triangle_total_length = 5.7;
+//guesses:
+wagon_under_triangle_from_side = 1;
+wagon_under_triangle_width = 3;
+
+wagon_big_cylinder_squashed_r = 1.3;
+
+//[ [x,y of centre], radius, length, bigstyle]
+wagon_cylinders=[
+	//big cylinder
+	[[-(wagon_width/2-3),wagon_length/2-78.3],5.5/2,17.6, true],
+	//little cylinder
+	[[(wagon_width/2-3),-(wagon_length/2-73.5)],5.5/2,6.2, false]
+	];
+
+
+
 
 //facing +ve x
 module side_ridge(length){
@@ -189,7 +210,7 @@ module wagon_body(){
 	difference(){
 		centred_cube(wagon_width, wagon_length, wagon_height);
 		union(){
-			translate([0,0,-0.01])centred_cube(wagon_width-wall_thick*2, wagon_length-wall_thick*2-wagon_end_flange_length*2, wagon_height-base_thick);
+			translate([0,0,-0.01])centred_cube(wagon_width-wall_thick*2, wagon_length-wall_thick*2, wagon_height-base_thick);
 			wagon_end_indents();
 		}
 	}
@@ -281,7 +302,43 @@ module wagon_body(){
 	
 	//bogie mounts
 	mirror_x()translate([0,bogie_distance/2,wagon_height])cylinder(h=bogie_mount_height,r=m3_thread_d);
+
+	//triangular bits underneath, part of the real bogie suspension I think
+	mirror_xy()hull(){
+		translate([wagon_width/2 - wagon_under_triangle_from_side-wagon_under_triangle_width/2,wagon_length/2-wagon_under_triangle_from_end+wagon_under_triangle_flat_length/2,wagon_height-0.1])centred_cube(wagon_under_triangle_width,wagon_under_triangle_flat_length,wagon_under_triangle_height+0.1);
+
+		translate([wagon_width/2 - wagon_under_triangle_from_side-wagon_under_triangle_width/2,wagon_length/2-wagon_under_triangle_from_end+wagon_under_triangle_flat_length+wagon_under_triangle_total_length,wagon_height-0.1])centred_cube(wagon_under_triangle_width,0.1,0.1);
+
+	}
 	
+}
+
+
+//if punchout is true this is for subtracting from the wagon body
+//if false this is a shape to be printed into the holes subtracted by the punchout
+//cylinder has its little leggies facing -ve z and 0,0 is this side ('top' of the cylinder as finished)
+//I forgot that bot cylinders are different styles, so only useful abstraction to share code for punching holes
+module brake_cylinder(cylinder_def, punchout = false){
+
+	leg_length = punchout ? 5 : 4;
+	leg_r = punchout ? buffer_holder_d/2 : buffer_d/2;
+
+	pos = cylinder_def[0];
+	r = cylinder_def[1];
+	length = cylinder_def[2];
+	bigStyle = cylinder_def[3];
+	//the little one is a different style, but not sure I'll bother to reproduce it, it'll be hard to give it two pegs
+	if(bigStyle || true){
+		//translate([0,0,+r])rotate([90,0,0])cylinder(r=r,h=length,center=true);
+		hull(){
+			mirror_x()translate([0,length/2-wagon_big_cylinder_squashed_r,r])scale([1,wagon_big_cylinder_squashed_r/r,1])sphere(r=r,$fn=40);
+		}
+	}else{
+
+	}
+
+	
+	mirror_x()translate([0,length/3,-leg_length])cylinder(r=leg_r,h=leg_length+r);
 }
 
 module wagon(){
@@ -301,6 +358,14 @@ module wagon(){
 			
 			//holes for bogie screws
 			mirror_x()translate([0,bogie_distance/2,wagon_height-base_thick+min_thick*4])cylinder(h=bogie_mount_height+100,r=m3_thread_d/2);
+
+			//holes for the cylinders to be inserted
+			for(cylinder_def = wagon_cylinders){
+				pos = cylinder_def[0];
+				r = cylinder_def[1];
+				length = cylinder_def[2];
+				translate([pos[0],pos[1],wagon_height])brake_cylinder(cylinder_def,true);
+			}
 		}
 	}
 }
@@ -485,13 +550,15 @@ module bogie_edge(){
 
 				}
 
-				pivot_bit_height = 1.7;
+				pivot_bit_height = 2.2;
 				//axle hinge point
 				translate([0,bogie_axle_pivot_pos[0],bogie_axle_pivot_pos[1]])rotate([0,90,0])cylinder(r=bogie_axle_pivot_d/2,h=bogie_axle_pivot_width);
 				//link from hinge to axle
+				hinge_point_d = 1.3;
 				hull(){
-					translate([0,bogie_axle_pivot_pos[0],bogie_axle_pivot_pos[1]])rotate([0,90,0])cylinder(r=1.3/2,h=bogie_axle_pivot_width);
-					translate([bogie_axle_pivot_width/2,bogie_axle_distance/2,axle_to_top_of_bogie-pivot_bit_height])centred_cube(bogie_axle_pivot_width,0.1,pivot_bit_height);
+					translate([0,bogie_axle_pivot_pos[0],bogie_axle_pivot_pos[1]])rotate([0,90,0])cylinder(r=hinge_point_d/2,h=bogie_axle_pivot_width);
+					//ensure bottom (as printed) is level so it prints easily
+					translate([bogie_axle_pivot_width/2,bogie_axle_distance/2,bogie_axle_pivot_pos[1]-hinge_point_d/2])centred_cube(bogie_axle_pivot_width,0.1,pivot_bit_height);
 				}
 
 				//spring done elsewhere to avoid mirroring it
@@ -623,7 +690,7 @@ module bogie(){
 			//wheel holder
 			mirror_x()translate([0,bogie_axle_distance/2,axle_to_top_of_bogie])axle_punch();
 			//m3 bolt holder
-			translate([0,0,-1])cylinder(r=m3_thread_loose_size/2,h=20);
+			translate([0,0,-1])cylinder(r=m3_thread_loose_size/2,h=20,$fn=100);
 
 		}
 
@@ -639,5 +706,17 @@ if(GEN_WAGON){
 
 if(GEN_BOGIE){
 	//TODO, rotate rather than mirror!
-	mirror_x(GEN_IN_SITU)optional_translate([0,bogie_distance/2,axle_to_top_of_bogie+wheel_diameter/2],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)bogie();
+	rotate_mirror(GEN_IN_SITU)optional_translate([0,bogie_distance/2,axle_to_top_of_bogie+wheel_diameter/2],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)bogie();
+}
+
+if(GEN_BRAKE_CYLINDER){
+
+	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU){
+		for(cylinder_def = wagon_cylinders){
+				pos = cylinder_def[0];
+				r = cylinder_def[1];
+				length = cylinder_def[2];
+				translate([pos[0],pos[1],wagon_height])brake_cylinder(cylinder_def,false);
+			}
+	}
 }

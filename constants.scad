@@ -38,7 +38,7 @@ centre_of_buffer_from_top_of_rail = 17 - 3.5/2;
 //pointy bit to pointy bit of spare hornby axles (also works for dapol axles)
 axle_width = 25.65;
 //same as axle_holder in truck bits
-axle_holder_width = axle_width+2;
+axle_holder_width = axle_width+1.5;
 
 m2_thread_size = 2;
 m2_thread_size_vertical = 1.95;
@@ -66,6 +66,7 @@ $fn=200;
 //how far apart the centres of the buffers are
 buffer_distance = 22.2;
 buffer_holder_d = 2;
+buffer_d = 1.7;
 //how deep the buffer holder hole needs to be
 buffer_holder_length = 4.5;
 
@@ -139,9 +140,11 @@ module rotate_allquads(){
 	}
 }
 
-module rotate_mirror(){
+module rotate_mirror(doRotate = true){
 	children();
-	rotate([0,0,180])children();
+	if(doRotate){
+		rotate([0,0,180])children();
+	}
 }
 
 SCALE = 76.2;
