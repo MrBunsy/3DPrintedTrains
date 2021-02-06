@@ -250,9 +250,9 @@ module wagon_body(){
 	mirror_xy(){
 		translate([0,wagon_length/2 - side_ridge_from_end,0])side_ridge(side_ridge_length);
 	}
-	nameplate_thick = side_ridge_thick+min_thick;
+	nameplate_thick = side_ridge_thick+min_thick+wall_thick;
 	//name plate
-	color("yellow")mirror_y()translate([wagon_width/2+nameplate_thick/2,0,nameplate_z])centred_cube(nameplate_thick,nameplate_length,nameplate_height);
+	color("yellow")mirror_y()translate([wagon_width/2-wall_thick+nameplate_thick/2,0,nameplate_z])centred_cube(nameplate_thick,nameplate_length,nameplate_height);
 	
 	//end flanges
 	mirror_xy()hull(){
@@ -726,6 +726,12 @@ module bogie(){
 		
 	}
 	//mirror_x()translate([0,bogie_axle_distance,axle_to_top_of_bogie])axle_punch();
+}
+
+module brake_wheel(){
+
+	
+
 }
 
 
