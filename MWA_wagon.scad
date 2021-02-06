@@ -83,7 +83,7 @@ wagon_height = 28.5;//30;
 coupling_from_bogie_centre = wagon_length/2-bogie_distance/2 - coupling_from_edge;
 bogie_coupling_height = axle_to_top_of_bogie + wheel_diameter/2 - top_of_coupling_from_top_of_rail;
 
-brake_wheel_d = 7;
+
 
 side_ridge_length = 2.2;
 side_ridge_length2 = 3.1;
@@ -124,8 +124,6 @@ buffer_z_from_base = wagon_base_above_rails - centre_of_buffer_from_top_of_rail;
 //buffer_z_from_base negative because wagon is constructed upside down
 bogie_mount_height = centre_of_buffer_from_top_of_rail  -wheel_diameter/2 - axle_to_top_of_bogie  - m3_washer_thick --buffer_z_from_base;
 
-echo(bogie_mount_height);
-
 end_ridge_x = 1.5*wagon_width/7;
 
 nameplate_length = 44.2;
@@ -154,17 +152,27 @@ wagon_under_triangle_from_side = 1;
 wagon_under_triangle_width = 3;
 
 wagon_big_cylinder_squashed_r = 1.3;
+wagon_little_cylinder_squashed_r1 = 1.5;
+wagon_little_cylinder_r2 = 2;
 
+brake_wheel_d = 7;
+brake_wheel_space_d = 7+0.9*2;
 //[ [x,y of centre], radius, length, bigstyle]
 wagon_cylinders=[
-	//big cylinder
+	//big cylinder, -ve x, +ve y
 	[[-(wagon_width/2-3),wagon_length/2-78.3],5.5/2,17.6, true],
 	//little cylinder
-	[[(wagon_width/2-3),-(wagon_length/2-73.5)],5.5/2,6.2, false]
+	[[(wagon_width/2-3),-(wagon_length/2-73.5)],5.5/2,7, false]
 	];
 
 
-
+//same as edge_thick in intermodal wagon, as it worked well there
+brake_wheel_holder_thick = 2;
+brake_wheel_holder_length = buffer_holder_d+2;
+brake_wheel_holder_height_above_wheel = buffer_holder_d/2+1;
+//[x,y,z] 
+big_cylinder_brake_wheel_pos = [-(wagon_width/2-1), wagon_length/2-66 , wagon_height + brake_wheel_d/2];
+little_cylinder_brake_wheel_pos = [(wagon_width/2-1), wagon_length/2-66 , wagon_height + brake_wheel_d/2 + 1];
 
 //facing +ve x
 module side_ridge(length){
@@ -310,6 +318,13 @@ module wagon_body(){
 		translate([wagon_width/2 - wagon_under_triangle_from_side-wagon_under_triangle_width/2,wagon_length/2-wagon_under_triangle_from_end+wagon_under_triangle_flat_length+wagon_under_triangle_total_length,wagon_height-0.1])centred_cube(wagon_under_triangle_width,0.1,0.1);
 
 	}
+
+	//mounts for the brake wheels
+	//for(hole = [big_cylinder_brake_wheel_pos, little_cylinder_brake_wheel_pos]){
+	big_height = big_cylinder_brake_wheel_pos[2]-wagon_height + brake_wheel_holder_height_above_wheel;
+	translate([big_cylinder_brake_wheel_pos[0]+brake_wheel_holder_thick/2, big_cylinder_brake_wheel_pos[1],wagon_height])centred_cube(brake_wheel_holder_thick,brake_wheel_holder_length, big_height);
+	little_height = little_cylinder_brake_wheel_pos[2]-wagon_height + brake_wheel_holder_height_above_wheel;
+	translate([little_cylinder_brake_wheel_pos[0]-brake_wheel_holder_thick/2, little_cylinder_brake_wheel_pos[1],wagon_height])centred_cube(brake_wheel_holder_thick,brake_wheel_holder_length, little_height);
 	
 }
 
@@ -317,10 +332,10 @@ module wagon_body(){
 //if punchout is true this is for subtracting from the wagon body
 //if false this is a shape to be printed into the holes subtracted by the punchout
 //cylinder has its little leggies facing -ve z and 0,0 is this side ('top' of the cylinder as finished)
-//I forgot that bot cylinders are different styles, so only useful abstraction to share code for punching holes
+//I forgot that bot cylinders are different styles, so this abstraction is a bit of a waste, but makes punching holes in the base easier
 module brake_cylinder(cylinder_def, punchout = false){
 
-	leg_length = punchout ? 5 : 4;
+	leg_length = punchout ? 4.4 : 3.5;
 	leg_r = punchout ? buffer_holder_d/2 : buffer_d/2;
 
 	pos = cylinder_def[0];
@@ -328,17 +343,24 @@ module brake_cylinder(cylinder_def, punchout = false){
 	length = cylinder_def[2];
 	bigStyle = cylinder_def[3];
 	//the little one is a different style, but not sure I'll bother to reproduce it, it'll be hard to give it two pegs
-	if(bigStyle || true){
+	if(bigStyle){
 		//translate([0,0,+r])rotate([90,0,0])cylinder(r=r,h=length,center=true);
 		hull(){
 			mirror_x()translate([0,length/2-wagon_big_cylinder_squashed_r,r])scale([1,wagon_big_cylinder_squashed_r/r,1])sphere(r=r,$fn=40);
 		}
 	}else{
-
+		hull(){
+			//one end same as big cylinder, squashed sphere
+			translate([0,-(length/2-wagon_little_cylinder_squashed_r1),r])scale([1,wagon_little_cylinder_squashed_r1/r,1])sphere(r=r,$fn=40);
+			translate([0,(length/2-wagon_little_cylinder_r2),r])rotate([90,0,0])cylinder(r=r,h=0.1,$fn=20);
+		}
+			//other end just a sphere
+			translate([0,(length/2-wagon_little_cylinder_r2),r])sphere(r=wagon_little_cylinder_r2,$fn=40);
+		
 	}
 
 	
-	mirror_x()translate([0,length/3,-leg_length])cylinder(r=leg_r,h=leg_length+r);
+	mirror_x()translate([0,length*0.2,-leg_length])cylinder(r=leg_r,h=leg_length+r);
 }
 
 module wagon(){
@@ -366,6 +388,13 @@ module wagon(){
 				length = cylinder_def[2];
 				translate([pos[0],pos[1],wagon_height])brake_cylinder(cylinder_def,true);
 			}
+
+			//holes for the brake wheels to be inserted
+			for(hole = [big_cylinder_brake_wheel_pos, little_cylinder_brake_wheel_pos]){
+				translate(hole)rotate([0,90,0])cylinder(r=buffer_holder_d/2,h= 10, center=true);
+			}
+			//extra padding around the big cylinder brake wheel
+			translate(big_cylinder_brake_wheel_pos)rotate([0,-90,0])cylinder(r=brake_wheel_space_d/2,h=10);
 		}
 	}
 }
