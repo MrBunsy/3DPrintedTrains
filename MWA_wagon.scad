@@ -35,6 +35,17 @@ Seen a few variants:
  
  ideally want 10.5mm wheels but I've only got 12.5mm, so might just raise the whole thing up a bit
 
+
+
+First print observations:
+ - back ridges weren't connected (fixed)
+ - Warping caused by the bridging of the wagon base is visible. Might want to ensure that happens where I want a line, or design a more narrow bit or split into base + top half, like the trucks?
+ - I forgot to make extra space behind the buffer holes, in case they snap.
+ - The couplings could snag slightly on the base of the wagon, I think raise them up and print the bogies with scaffolding?
+
+I think splitting into base and top half might be the easiest solution? There's a seam on the real wagon, which is the perfect place to put the join
+
+
 */
 include <truck_bits.scad>
 include <constants.scad>
@@ -42,15 +53,18 @@ include <threads.scad>
 
 wheel_diameter = 12.5;
 
-GEN_IN_SITU = true;
-GEN_WAGON = true;
-GEN_BOGIE = true;
+GEN_IN_SITU = false;
+//depreacted, now wagon is split into base and top
+GEN_WAGON = false;
+GEN_BASE = true;
+GEN_TOP = false;
+GEN_BOGIE = false;
 GEN_BRAKE_WHEEL = false;
-GEN_BRAKE_CYLINDER = true;
+GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
 
 //copying intermodal wagon
-buffer_area_thick = 3.5;
+//buffer_area_thick = 3.5; - buffer_ledge_height is used instead
 
 bogie_distance = m2mm(8.52);
 //bogie axles appear to be 2metres apart
@@ -115,6 +129,7 @@ end_flange_taper_height = 0.8;
 side_ridge_from_end=13.5;
 buffer_ledge_length = 7.4;
 buffer_ledge_taper_length = side_ridge_from_end-buffer_ledge_length-side_ridge_length/2;
+//height 'above' the base
 buffer_ledge_height = 1.5;//2;
 
 //how much higher or lower than the main base the buffers should be
@@ -214,6 +229,7 @@ module little_door(){
 
 // main body of the wagon
 //upside down, so 0,0,0 is centre of top of wagon (the open bit)
+//note - although it can be printed like this, it warped, so it's split into two (base and top). only the base is still printed upside down, but everything here assumes it's upside down
 module wagon_body(){
 	difference(){
 		centred_cube(wagon_width, wagon_length, wagon_height);
@@ -256,6 +272,7 @@ module wagon_body(){
 	
 	//end flanges
 	mirror_xy()hull(){
+		
 		translate([wagon_width/2+top_ridge_thick/2,wagon_length/2-end_ridge_thick/2+wagon_end_flange_length,0]){
 			centred_cube(top_ridge_thick,end_ridge_thick,top_ridge_height);
 			translate([-top_ridge_thick/2-0.1/2,0,0])centred_cube(0.1,end_ridge_thick,top_ridge_flange_height);
@@ -271,9 +288,9 @@ module wagon_body(){
 			translate([0,-wagon_end_flange_length/2-0.1/2,end_bottom_ledge_z])centred_cube(end_ridge_thick,0.1,end_flange_taper_height );
 		}
 	}
-	
+	end_ridge_length = wall_thick + side_ridge_thick;
 	//two end vertical ridges
-	mirror_xy()translate([end_ridge_x,wagon_length/2+wagon_end_flange_length-side_ridge_thick/2-min_thick,0])centred_cube(side_ridge_length,side_ridge_thick,end_bottom_ledge_z);
+	mirror_xy()translate([end_ridge_x,wagon_length/2-wall_thick+end_ridge_length/2,0])centred_cube(side_ridge_length,end_ridge_length,end_bottom_ledge_z);
 	
 	//mid end ledge
 	ledge_length = side_ridge_thick-min_thick*2;
@@ -376,6 +393,9 @@ module wagon(){
 					cylinder(h=buffer_holder_length*2, r=buffer_holder_d/2, $fn=200, center=true);
 					}
 				}
+				//space to access holes if (when) the buffer snaps off and gets stuck
+				//dimensions from intermodal wagon: [6, 3.8, 3.5], centred at 4.56 from end
+				translate([-buffer_distance/2, wagon_length/2 - 4.56, wagon_height+ buffer_ledge_height - 3.5])centred_cube(5,3.8,3.5+1);
 			}
 			
 			//holes for bogie screws
@@ -734,9 +754,62 @@ module brake_wheel(){
 
 }
 
+wagon_base_thick = wagon_height - side_ridge_height;
+//buffer_ledge_height
+//[ [x,y, base_thick] ]
+//mirrored xys
+base_top_screws = [
+	[7, wagon_length/2 - buffer_ledge_length/2, wagon_base_thick + buffer_ledge_height],
+	[wagon_width/2-5, 24, wagon_base_thick]
+	];
+
+module wagon_base(){
+	fudge_factor=0.01;
+	wheel_space_r = 21;
+	wheel_space_r2 = 15;
+	edge_thick = 1;
+
+	difference(){
+		//just the bottom of the wagon
+		translate([0,0,-side_ridge_height-fudge_factor])intersection(){
+			translate([0,0,side_ridge_height+0.01])centred_cube(wagon_width*2,wagon_length*2,100);
+			wagon();
+		}
+		union(){
+			if(false){
+				//I'm undecided if this is a good idea - it reduces wheels rubbing on gradient changes (but so does tightening the screw) but risks derailing around corners if the bogies catch
+				//subtract out some extra clearance for the wheels
+				mirror_x()translate([0, bogie_distance/2,0])union(){
+					difference(){
+						intersection(){
+							translate([0,0,-1])cylinder(r=wheel_space_r,h=20);
+							translate([0,0,-2])centred_cube(wagon_width-edge_thick*2,wheel_space_r*3,30);
+						}
+						//translate([0,0,-3])cylinder(r=wheel_space_r2,h=40);
+						centred_cube(wagon_width,wheel_space_r2,40);
+					}
+				}
+			}
+		//and some screwholes to attach this to the main wagon
+			mirror_xy(){
+				for(screw = base_top_screws){
+					translate(screw){
+						cylinder(r=m2_thread_size_loose/2,h=20,center=true);
+						translate([0,0,-m2_head_length])cylinder(r=m2_head_size/2,h=10);
+					}
+				}
+			}
+		}
+	}
+}
+
 
 if(GEN_WAGON){
 	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)wagon();
+}
+
+if(GEN_BASE){
+	wagon_base();
 }
 
 if(GEN_BOGIE){
