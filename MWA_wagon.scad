@@ -50,17 +50,18 @@ I think splitting into base and top half might be the easiest solution? There's 
 include <truck_bits.scad>
 include <constants.scad>
 include <threads.scad>
+include <intermodal_wagon_accessories.scad>
 
 wheel_diameter = 12.5;
 
-GEN_IN_SITU = false;
+GEN_IN_SITU = true;
 //depreacted, now wagon is split into base and top
-GEN_WAGON = false;
+GEN_WAGON = true;
 GEN_BASE = false;
-GEN_TOP = true;
+GEN_TOP = false;
 GEN_BOGIE = false;
-GEN_BRAKE_WHEEL = false;
-GEN_BRAKE_CYLINDER = false;
+GEN_BRAKE_WHEEL = true;
+GEN_BRAKE_CYLINDER = true;
 GEN_BUFFER = false;
 
 //copying intermodal wagon
@@ -748,8 +749,9 @@ module bogie(){
 	//mirror_x()translate([0,bogie_axle_distance,axle_to_top_of_bogie])axle_punch();
 }
 
-module brake_wheel(){
-
+module gen_brake_wheel(){
+	//from intermodal wagon, with options now
+	brake_wheel(buffer_holder_length/3, brake_wheel_d, 4);
 	
 
 }
@@ -848,5 +850,16 @@ if(GEN_BRAKE_CYLINDER){
 				length = cylinder_def[2];
 				translate([pos[0],pos[1],wagon_height])brake_cylinder(cylinder_def,false);
 			}
+	}
+}
+
+if(GEN_BRAKE_WHEEL){
+	if(GEN_IN_SITU){
+		//big_cylinder_brake_wheel_pos, little_cylinder_brake_wheel_pos
+		optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)translate(big_cylinder_brake_wheel_pos)translate([-0.5,0,0])rotate([0,90,0])gen_brake_wheel();
+
+		optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)translate(little_cylinder_brake_wheel_pos)translate([0.5,0,0])rotate([0,-90,0])gen_brake_wheel();
+	}else{
+		gen_brake_wheel();
 	}
 }

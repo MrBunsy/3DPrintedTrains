@@ -19,7 +19,7 @@ along with The 3DPrintedTrains project.  If not, see <https:www.gnu.org/licenses
 
 include <constants.scad>
 
-gen_brake_wheel = true;
+gen_brake_wheel = false;
 gen_brake_cylinder = false;
 //only for one prototype with the wrong sized buffer holes
 gen_buffer_fixing = false;
@@ -35,7 +35,7 @@ cylinder_d = 6;
 cylinder_length = 3*4;
 cylinder_hole_spacing = 2*4;
 
-module brake_wheel(height=buffer_holder_length){
+module brake_wheel(height=buffer_holder_length, wheel_d = 6, arms=3, wheel_thick = 0.5){
 	 //stick to slot into wagon
     translate([0,0,wheel_thick+sticks_out])cylinder(h=height+sticks_out,r=truck_fixing_d/2);
 
