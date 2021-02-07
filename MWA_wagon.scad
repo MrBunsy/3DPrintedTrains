@@ -56,8 +56,8 @@ wheel_diameter = 12.5;
 GEN_IN_SITU = false;
 //depreacted, now wagon is split into base and top
 GEN_WAGON = false;
-GEN_BASE = true;
-GEN_TOP = false;
+GEN_BASE = false;
+GEN_TOP = true;
 GEN_BOGIE = false;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
@@ -154,7 +154,7 @@ side_ridge_height = wagon_height-3;
 side_ridge_height2 = wagon_height-0.9;
 
 wall_thick = 1;
-base_thick = 5;
+base_thick = 6;
 
 min_thick = 0.2;
 //y coord of tallest edge
@@ -804,12 +804,34 @@ module wagon_base(){
 }
 
 
+module wagon_top(){
+	translate([0,0,wagon_height - wagon_base_thick])rotate([0,180,0])difference(){
+		wagon();
+		union(){
+			//lop off the base
+			translate([0,0,wagon_height-wagon_base_thick])centred_cube(wagon_width*2,wagon_length*2,20);
+			//add the screwholes
+			mirror_xy(){
+				for(screw = base_top_screws){
+					translate([screw[0], screw[1], wagon_height - base_thick + min_thick*2]){
+						cylinder(r=m2_thread_size/2,h=20);
+					}
+				}
+			}
+		}
+	}
+}
+
 if(GEN_WAGON){
 	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)wagon();
 }
 
 if(GEN_BASE){
 	wagon_base();
+}
+
+if(GEN_TOP){
+	wagon_top();
 }
 
 if(GEN_BOGIE){
