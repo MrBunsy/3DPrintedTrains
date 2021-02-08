@@ -49,8 +49,10 @@ Second print observations:
  - Forgot the cosmetic coupling hook, should be easy to make a slot for a black PETG part to slot in
  - Still some warping at the line between the base of the wagon and the walls - although not as bad when printing the 'right' way up.
  	 Not sure it's better enough to be worth splitting the wagon in two - maybe some adaptation to the model to counter the warping would be better?
-
+ - Need to make base a bit thicker and have more height between top of the screwholes and inside base of the wagon
 If printing the top, ensure the bridging of the overhang is in the right orientation - lengthwise with the wagon
+
+
 */
 include <truck_bits.scad>
 include <constants.scad>
@@ -61,9 +63,9 @@ wheel_diameter = 12.5;
 
 GEN_IN_SITU = false;
 //depreacted, now wagon is split into base and top
-GEN_WAGON = true;
+GEN_WAGON = false;
 GEN_BASE = false;
-GEN_TOP = false;
+GEN_TOP = true;
 GEN_BOGIE = false;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
@@ -147,6 +149,16 @@ buffer_z_from_base = wagon_base_above_rails - centre_of_buffer_from_top_of_rail;
 bogie_mount_height = centre_of_buffer_from_top_of_rail  -wheel_diameter/2 - axle_to_top_of_bogie  - m3_washer_thick --buffer_z_from_base;
 
 end_ridge_x = 1.5*wagon_width/7;
+
+//of the PNG
+//logo_dimensions = [1235,240, 5];
+//logo_file = "freightliner-logo.png";
+// logo_dimensions = [515,100, 5];
+// logo_file = "freightliner-logo-small.png";
+
+
+logo_dimensions = [39.73169, 8.64314];
+logo_file = "Freightliner-logo.svg";
 
 nameplate_length = 44.2;
 nameplate_height = 10.8;
@@ -239,7 +251,7 @@ module little_door(){
 // main body of the wagon
 //upside down, so 0,0,0 is centre of top of wagon (the open bit)
 //note - although it can be printed like this, it warped, so it's split into two (base and top). only the base is still printed upside down, but everything here assumes it's upside down
-module wagon_body(){
+module wagon_body(logo=false){
 	difference(){
 		centred_cube(wagon_width, wagon_length, wagon_height);
 		union(){
@@ -278,6 +290,12 @@ module wagon_body(){
 	nameplate_thick = side_ridge_thick+min_thick+wall_thick;
 	//name plate
 	color("yellow")mirror_y()translate([wagon_width/2-wall_thick+nameplate_thick/2,0,nameplate_z])centred_cube(nameplate_thick,nameplate_length,nameplate_height);
+	nameplate_margin = 0;
+	if(logo){
+		//mirror_y()translate([wagon_width/2-wall_thick+nameplate_thick-0.1,0,nameplate_z+nameplate_height/2])rotate([-90,0,0])rotate([0,90,0])scale([(nameplate_length-nameplate_margin*2)/logo_dimensions[0], (nameplate_height-nameplate_margin*2)/logo_dimensions[1] ,min_thick/logo_dimensions[2]])translate([-logo_dimensions[0]/2,-logo_dimensions[1]/2, logo_dimensions[2]])surface(logo_file, invert = true);
+		scaleby = (nameplate_length-nameplate_margin*2)/logo_dimensions[0];
+		mirror_rotate180()translate([wagon_width/2-wall_thick+nameplate_thick,0,nameplate_z+nameplate_height/2])rotate([-90,0,0])rotate([0,90,0])scale([scaleby,scaleby , 1])linear_extrude(height=min_thick)import("Freightliner_logo.svg", center=true);
+	}
 	
 	//end flanges
 	mirror_xy()hull(){
@@ -297,9 +315,21 @@ module wagon_body(){
 			translate([0,-wagon_end_flange_length/2-0.1/2,end_bottom_ledge_z])centred_cube(end_ridge_thick,0.1,end_flange_taper_height );
 		}
 	}
+	
+
 	end_ridge_length = wall_thick + side_ridge_thick;
 	//two end vertical ridges
 	mirror_xy()translate([end_ridge_x,wagon_length/2-wall_thick+end_ridge_length/2,0])centred_cube(side_ridge_length,end_ridge_length,end_bottom_ledge_z);
+	//triangular supports under the ledge, in line with the ridges
+	triangle_thick = min_thick*3;
+	mirror_xy(){
+		translate([end_ridge_x,wagon_length/2-wall_thick,0])mirror_y(){
+			hull(){
+				translate([side_ridge_length/2-triangle_thick/2,end_ridge_length/2,end_bottom_ledge_z-0.1])centred_cube(triangle_thick,end_ridge_length,0.1);
+				translate([side_ridge_length/2-triangle_thick/2, wall_thick, end_bottom_ledge_z])centred_cube(triangle_thick,0.1,end_flange_taper_height);
+			}
+		}
+	}
 	
 	//mid end ledge
 	ledge_length = side_ridge_thick-min_thick*2;
@@ -389,9 +419,9 @@ module brake_cylinder(cylinder_def, punchout = false){
 	mirror_x()translate([0,length*0.2,-leg_length])cylinder(r=leg_r,h=leg_length+r);
 }
 
-module wagon(){
+module wagon(logo=false){
 	difference(){
-		wagon_body();
+		wagon_body(logo);
 		
 		union(){
 			//holes for buffers
@@ -816,7 +846,7 @@ module wagon_base(){
 
 module wagon_top(){
 	translate([0,0,wagon_height - wagon_base_thick])rotate([0,180,0])difference(){
-		wagon();
+		wagon(true);
 		union(){
 			//lop off the base
 			translate([0,0,wagon_height-wagon_base_thick])centred_cube(wagon_width*2,wagon_length*2,20);
