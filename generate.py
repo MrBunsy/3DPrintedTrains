@@ -148,8 +148,8 @@ def wagon_jobs():
 
 def mwa_wagon_jobs():
     jobs = []
-    MWAariables = ["bogie", "brake_cylinder", "base", "top", "brake_wheel"]
-    fullMWAJob = JobDescription("MWA_wagon.scad", "mwa_wagon_model")
+    MWAariables = ["bogie", "brake_cylinder", "base", "top", "brake_wheel", "wagon"]
+    fullMWAJob = JobDescription("MWA_wagon.scad", "MWA_wagon_model")
     fullMWAJob.addVariable("GEN_IN_SITU", True)
     for v in ["wagon", "bogie", "brake_cylinder", "brake_wheel"]:
         fullMWAJob.addVariable("GEN_"+v.upper(), True)

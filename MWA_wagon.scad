@@ -45,7 +45,12 @@ First print observations:
 
 I think splitting into base and top half might be the easiest solution? There's a seam on the real wagon, which is the perfect place to put the join
 
+Second print observations:
+ - Forgot the cosmetic coupling hook, should be easy to make a slot for a black PETG part to slot in
+ - Still some warping at the line between the base of the wagon and the walls - although not as bad when printing the 'right' way up.
+ 	 Not sure it's better enough to be worth splitting the wagon in two - maybe some adaptation to the model to counter the warping would be better?
 
+If printing the top, ensure the bridging of the overhang is in the right orientation - lengthwise with the wagon
 */
 include <truck_bits.scad>
 include <constants.scad>
@@ -54,15 +59,16 @@ include <intermodal_wagon_accessories.scad>
 
 wheel_diameter = 12.5;
 
-GEN_IN_SITU = true;
+GEN_IN_SITU = false;
 //depreacted, now wagon is split into base and top
 GEN_WAGON = true;
 GEN_BASE = false;
 GEN_TOP = false;
 GEN_BOGIE = false;
-GEN_BRAKE_WHEEL = true;
-GEN_BRAKE_CYLINDER = true;
+GEN_BRAKE_WHEEL = false;
+GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
+GEN_COSMETIC_COUPLING = false;
 
 //copying intermodal wagon
 //buffer_area_thick = 3.5; - buffer_ledge_height is used instead
@@ -146,13 +152,15 @@ nameplate_length = 44.2;
 nameplate_height = 10.8;
 nameplate_z = 7;
 
-end_bottom_ledge_z = wagon_height -3;//27;
+side_ridge_height = wagon_height-3;
+side_ridge_height2 = wagon_height-0.9;
+
+end_bottom_ledge_z = side_ridge_height-end_flange_taper_height;//wagon_height -3;//27;
 //guessing a bit here
 end_mid_ledge_z = end_bottom_ledge_z * 0.6;
 ledge_thick = 0.4;
 
-side_ridge_height = wagon_height-3;
-side_ridge_height2 = wagon_height-0.9;
+
 
 wall_thick = 1;
 base_thick = 6;
