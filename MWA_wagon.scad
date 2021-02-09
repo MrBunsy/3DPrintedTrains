@@ -49,9 +49,17 @@ Second print observations:
  - Forgot the cosmetic coupling hook, should be easy to make a slot for a black PETG part to slot in
  - Still some warping at the line between the base of the wagon and the walls - although not as bad when printing the 'right' way up.
  	 Not sure it's better enough to be worth splitting the wagon in two - maybe some adaptation to the model to counter the warping would be better?
+	  after looking properly in the light I think it's fine
  - Need to make base a bit thicker and have more height between top of the screwholes and inside base of the wagon
 If printing the top, ensure the bridging of the overhang is in the right orientation - lengthwise with the wagon
 
+therefore, TODO:
+ - cosmetic coupling hook, or at least a space for one
+ - thicken base to fit screws better
+ - Ladder? complicated: holes for bent wire. Easy: ledges small enough to print
+ - bolts that hold the nameplate on?
+ - I think my wagon is a tiny bit too short - compared to my (potentially squished) printout and when looking at the photos. the 'little door' isn't in quite the right place and there's not enough space below the nameplate. Might be more obvious if I try the ladder
+ - few more details: there're some levers on teh side that I think I could pritn successfully using the min_thick style embossing like the logo
 
 */
 include <truck_bits.scad>
@@ -71,6 +79,10 @@ GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
 GEN_COSMETIC_COUPLING = false;
+//MWA, MWA-B
+STYLE = "MWA";
+
+//LADDER = STYLE == "MWA";
 
 //copying intermodal wagon
 //buffer_area_thick = 3.5; - buffer_ledge_height is used instead
@@ -100,7 +112,7 @@ wagon_end_flange_length = (170.1-wagon_length)/2;
 wagon_width = 30;
 //starting from 'base' which is the flat bit above the bogies
 //wagon_height = 28.5; - possibly correct if my photo really is squashed
-wagon_height = 28.5;//30;
+wagon_height = 30;//28.5;//30;
 
 
 coupling_from_bogie_centre = wagon_length/2-bogie_distance/2 - coupling_from_edge;
@@ -175,7 +187,7 @@ ledge_thick = 0.4;
 
 
 wall_thick = 1;
-base_thick = 6;
+base_thick = 7;
 
 min_thick = 0.2;
 //y coord of tallest edge
@@ -853,7 +865,7 @@ module wagon_top(){
 			//add the screwholes
 			mirror_xy(){
 				for(screw = base_top_screws){
-					translate([screw[0], screw[1], wagon_height - base_thick + min_thick*2]){
+					translate([screw[0], screw[1], wagon_height - base_thick + min_thick*4]){
 						cylinder(r=m2_thread_size/2,h=20);
 					}
 				}
