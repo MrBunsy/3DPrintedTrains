@@ -87,9 +87,9 @@ wheel_diameter = 12.5;
 GEN_IN_SITU = false;
 //depreacted, now wagon is split into base and top
 GEN_WAGON = false;
-GEN_BASE = false;
+GEN_BASE = true;
 GEN_TOP = false;
-GEN_BOGIE = true;
+GEN_BOGIE = false;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
@@ -829,7 +829,7 @@ module bogie(){
 			//coupling holder
 			translate([0,coupling_from_bogie_centre, coupling_arm_height+coupling_arm_z]){
 				if(COUPLING_TYPE == "dapol"){
-					coupling_mount_dapol_alone(coupling_arm_height);
+					coupling_mount_dapol_alone(coupling_arm_height, 0.2);
 				}else{
 					coupling_mount(bogie_coupling_height-coupling_arm_height-coupling_arm_z,coupling_arm_height);
 				}
@@ -868,9 +868,18 @@ wagon_base_thick = wagon_height - side_ridge_height;
 //[ [x,y, base_thick] ]
 //mirrored xys
 base_top_screws = [
+	//screws at far ends
 	[7, wagon_length/2 - buffer_ledge_length/2, wagon_base_thick + buffer_ledge_height],
+	//screws near middle
 	[wagon_width/2-5, 24, wagon_base_thick]
 	];
+
+//trying gluing in centre and screwing & gluing at ends
+//[y coord, width]
+base_top_glue_holes_y = [[24, wagon_width - 17], [wagon_length/2 - buffer_ledge_length/2-1, 5]];
+//glue_hole_width = wagon_width - 10;
+glue_hole_length = 7;
+glue_hole_thick = 0.5;
 
 module wagon_base(){
 	fudge_factor=0.01;
@@ -908,6 +917,12 @@ module wagon_base(){
 					}
 				}
 			}
+			//glue holes for hot glue
+			mirror_x(){
+				for(hole = base_top_glue_holes_y){
+					translate([0,hole[0],-fudge_factor])centred_cube(hole[1], glue_hole_length, glue_hole_thick/2);
+				}
+			}
 		}
 	}
 }
@@ -925,6 +940,12 @@ module wagon_top(){
 					translate([screw[0], screw[1], wagon_height - base_thick + min_thick*4]){
 						cylinder(r=m2_thread_size/2,h=20);
 					}
+				}
+			}
+			//glue holes for hot glue
+			mirror_x(){
+				for(hole = base_top_glue_holes_y){
+					translate([0,hole[0],wagon_height-wagon_base_thick-glue_hole_thick/2])centred_cube(hole[1], glue_hole_length, glue_hole_thick);
 				}
 			}
 		}

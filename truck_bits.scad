@@ -323,7 +323,8 @@ module coupling_mount(height, base_thick = 0){
 
 //0,0 is bottom of mount (as printed, top as finished) at the front. So 0,0 should be top centre of the base of a wagon (assumes overlap with base, unless minusHeight is used)
 //facing +ve y
-module coupling_mount_dapol(minusHeight=0){
+//extraHeight makes the slot for the coupling more tall - useful if printed in PETG rather than PLA (which droops a bit more when bridging)
+module coupling_mount_dapol(minusHeight=0, extraHeight = 0){
 
     cylinder_from_edge = 7.5;
 
@@ -337,7 +338,7 @@ module coupling_mount_dapol(minusHeight=0){
     r=2.4/2;
 
     coupling_width = 7.5;
-    coupling_height = 1.65;
+    coupling_height = 1.65 + extraHeight;
     translate([0,-base_from_edge-base_length/2,0])centred_cube(coupling_width + wall_thick*2,base_length,base_height);
     translate([0,-cylinder_from_edge,base_height])cylinder(r=r,h=coupling_height);
     mirror_y()translate([coupling_width/2 + wall_thick/2,-base_from_edge-base_length/2,base_height])centred_cube(wall_thick,base_length,coupling_height+wall_thick);
@@ -346,9 +347,9 @@ module coupling_mount_dapol(minusHeight=0){
 }
 
 //just the coupling mount, for placement on anything other than a bog standard truck. (0,0,0) is top centre of coupling fixing,
-//drop in replacement for coupling_mount with default arguments (height of zero)
-module coupling_mount_dapol_alone(base_thick = 0){
-	translate([0,0,-base_thick])coupling_mount_dapol(minusHeight=top_of_buffer_from_top_of_rail - top_of_coupling_from_top_of_rail - base_thick);
+//drop in replacement for coupling_mount with default arguments (extraheight of zero) for PETG add some extra height
+module coupling_mount_dapol_alone(base_thick = 0, extra_height = 0){
+	translate([0,0,-base_thick])coupling_mount_dapol(minusHeight=top_of_buffer_from_top_of_rail - top_of_coupling_from_top_of_rail - base_thick, extra_height);
 }
 
 //facing +ve y direction
