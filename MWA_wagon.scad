@@ -54,13 +54,28 @@ Second print observations:
 If printing the top, ensure the bridging of the overhang is in the right orientation - lengthwise with the wagon
 
 therefore, TODO:
- - cosmetic coupling hook, or at least a space for one
- - thicken base to fit screws better
- - Ladder? complicated: holes for bent wire. Easy: ledges small enough to print
- - bolts that hold the nameplate on?
- - I think my wagon is a tiny bit too short - compared to my (potentially squished) printout and when looking at the photos. the 'little door' isn't in quite the right place and there's not enough space below the nameplate. Might be more obvious if I try the ladder
- - few more details: there're some levers on teh side that I think I could pritn successfully using the min_thick style embossing like the logo
+ - thicken base to fit screws better - done (now 7mm)
+ - Ladder? complicated: holes for bent wire. Easy: ledges small enough to print - done easy version
+ - I think my wagon is a tiny bit too short - compared to my (potentially squished) printout and when looking at the photos. the 'little door' isn't in quite the right place and there's not enough space below the nameplate. Might be more obvious if I try the ladder - done
+ - base bit (exactl where cut into two sections) is ever so slightly more narrow - done
 
+ - few more details: there're some levers on teh side that I think I could pritn successfully using the min_thick style embossing like the logo
+ - cosmetic coupling hook, or at least a space for one
+ - bolts that hold the nameplate on?
+
+
+
+ Third print observations:
+  - Warped in the corners a bit - not sure if this was because the bed wasn't as clean as it could be, or because I'd made the base thicker.
+  - line near top of base is more obvious, but not sure if this is the same as the corner warp problem or not
+
+might try and make the base more thin again - maybe go for glue rather than screws?
+
+TODO:
+ - reduce base thickness below 6mm and add glue holes (shallow rectangular trenches I think will do) so the base can be attached to teh top with 4 screws (in buffer raised area) and some hot glue
+ - clean base very thoroughly before printing top
+ - give more clearance around coupling holder, and see if bogies print with scaffolding
+ - make holder for brake wheel a bit more thick
 */
 include <truck_bits.scad>
 include <constants.scad>
@@ -73,14 +88,16 @@ GEN_IN_SITU = false;
 //depreacted, now wagon is split into base and top
 GEN_WAGON = false;
 GEN_BASE = false;
-GEN_TOP = true;
-GEN_BOGIE = false;
+GEN_TOP = false;
+GEN_BOGIE = true;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
 GEN_COSMETIC_COUPLING = false;
 //MWA, MWA-B
 STYLE = "MWA";
+//MWA-B has no ladder, square nameplate, no small cylinder and brake-wheels on one bogie only - not on the main wagon body
+//and differently shaped triangular bits on the underside
 
 //LADDER = STYLE == "MWA";
 
@@ -110,14 +127,20 @@ wagon_length = m2mm(13.97-0.62*2);//168.5;//170.1;
 wagon_end_flange_length = (170.1-wagon_length)/2;
 //complete guess if I'm honest, same as the container wagons
 wagon_width = 30;
+wagon_base_width = 29.75;
 //starting from 'base' which is the flat bit above the bogies
-//wagon_height = 28.5; - possibly correct if my photo really is squashed
-wagon_height = 30;//28.5;//30;
+//wagon_height = 28.5; - possibly correct if my photo really is squashed. my photo measures 30. going with 29.25 as a bit of a compromise - not sure it's perfect
+wagon_height = 29.25;//28.5;//30;
 
 
 coupling_from_bogie_centre = wagon_length/2-bogie_distance/2 - coupling_from_edge;
 bogie_coupling_height = axle_to_top_of_bogie + wheel_diameter/2 - top_of_coupling_from_top_of_rail;
 
+ladder_rungs = 8;
+ladder_start_from_top = 4.2;
+ladder_gap_height = 24.1/7;
+ladder_length = 7;
+ladder_centre_y = -(wagon_length/2 - 3 - ladder_length/2);
 
 
 side_ridge_length = 2.2;
@@ -187,7 +210,7 @@ ledge_thick = 0.4;
 
 
 wall_thick = 1;
-base_thick = 7;
+base_thick = 6;
 
 min_thick = 0.2;
 //y coord of tallest edge
@@ -214,8 +237,8 @@ wagon_cylinders=[
 	];
 
 
-//same as edge_thick in intermodal wagon, as it worked well there
-brake_wheel_holder_thick = 2;
+//intermodal wagon was 2 thick, but they seem a bit loose
+brake_wheel_holder_thick = 2.5;
 brake_wheel_holder_length = buffer_holder_d+2;
 brake_wheel_holder_height_above_wheel = buffer_holder_d/2+1;
 //[x,y,z] 
@@ -226,7 +249,7 @@ little_cylinder_brake_wheel_pos = [(wagon_width/2-1), wagon_length/2-66 , wagon_
 module side_ridge(length){
 	color("green")translate([wagon_width/2+side_ridge_thick/2,0,0])hull(){
 			centred_cube(side_ridge_thick,length,side_ridge_height);
-			translate([-side_ridge_thick/2-0.1/2,0,0])centred_cube(0.1,length,side_ridge_height2);
+			translate([-side_ridge_thick/2-0.1/2 -(wagon_width/2 - wagon_base_width/2),0,0])centred_cube(0.1,length,side_ridge_height2);
 		}
 }
 
@@ -260,18 +283,36 @@ module little_door(){
 		
 }
 
+//facing +ve x, centred at centre of the rung in y and edge of the wagon in z
+module ladder_rung(){
+	color("white")translate([min_thick*1.5/2,0,0])centred_cube(min_thick*1.5,ladder_length,min_thick*2);
+}
+
 // main body of the wagon
 //upside down, so 0,0,0 is centre of top of wagon (the open bit)
 //note - although it can be printed like this, it warped, so it's split into two (base and top). only the base is still printed upside down, but everything here assumes it's upside down
 module wagon_body(logo=false){
+	//up to side_ridge_height is full width, 'below' (when real way up) that is slightly narrower
 	difference(){
-		centred_cube(wagon_width, wagon_length, wagon_height);
+		union(){
+			centred_cube(wagon_width, wagon_length, side_ridge_height);
+			translate([0,0,side_ridge_height])centred_cube(wagon_base_width, wagon_length, wagon_height - side_ridge_height);
+		}
 		union(){
 			translate([0,0,-0.01])centred_cube(wagon_width-wall_thick*2, wagon_length-wall_thick*2, wagon_height-base_thick);
 			wagon_end_indents();
 		}
 	}
 	
+	//ladder
+	if(STYLE == "MWA"){
+		mirror_rotate180(){
+			for(rung = [0:ladder_rungs-1]){
+				translate([wagon_width/2,ladder_centre_y, ladder_start_from_top + rung*ladder_gap_height])ladder_rung();
+			}
+		}
+	}
+
 	//top side ridge
 	color("green")mirror_y()translate([wagon_width/2+top_ridge_thick/2,0,0])centred_cube(top_ridge_thick,wagon_length+wagon_end_flange_length*2,top_ridge_height);
 	//top end ridge
@@ -365,6 +406,7 @@ module wagon_body(logo=false){
 	
 	//extra ledge for the buffers
 	mirror_x() hull(){
+		//deliberately still wagon_width wide
 		translate([0,wagon_length/2-buffer_ledge_length/2,wagon_height])centred_cube(wagon_width,buffer_ledge_length,buffer_ledge_height);
 		translate([0,wagon_length/2-(buffer_ledge_length + buffer_ledge_taper_length)/2,wagon_height-0.1])centred_cube(wagon_width,buffer_ledge_length + buffer_ledge_taper_length,0.1);
 	}
@@ -766,7 +808,7 @@ module bogie(){
 			mirror_xy()translate([bogie_inner_width/2+bogie_padding_width,bogie_axle_distance/2,axle_to_top_of_bogie])bogie_axle_holder_cosmetics();
 
 			
-			//springs for suspension, done here to avoid mirroring
+			//cosmetic springs for suspension, done here to avoid mirroring
 			difference(){
 				union(){
 					for(i=[0:3]){
@@ -777,13 +819,15 @@ module bogie(){
 				}
 				centred_cube(bogie_inner_width+bogie_padding_width*2,bogie_axle_distance*1.5,axle_to_top_of_bogie*2);
 			}
-			coupling_arm_height = bogie_centre_arm_height*0.6;
+
+			coupling_arm_height = bogie_centre_arm_height*0.5;
+			coupling_arm_z = bogie_centre_arm_height - coupling_arm_height;
 			//coupling holder
-			translate([0,coupling_from_bogie_centre, coupling_arm_height]){
-				coupling_mount(bogie_coupling_height-coupling_arm_height,coupling_arm_height);
+			translate([0,coupling_from_bogie_centre, coupling_arm_height+coupling_arm_z]){
+				coupling_mount(bogie_coupling_height-coupling_arm_height-coupling_arm_z,coupling_arm_height);
 			}
 			coupling_arm_length = coupling_from_bogie_centre-m2_thread_size;
-			translate([0,coupling_arm_length/2,0])centred_cube(5,coupling_arm_length,coupling_arm_height);
+			translate([0,coupling_arm_length/2,coupling_arm_z])centred_cube(5,coupling_arm_length,coupling_arm_height);
 
 		}//end of additive bits
 		union(){
@@ -875,7 +919,7 @@ module wagon_top(){
 }
 
 if(GEN_WAGON){
-	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)wagon();
+	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)wagon(true);
 }
 
 if(GEN_BASE){

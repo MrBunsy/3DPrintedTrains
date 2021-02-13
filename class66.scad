@@ -21,6 +21,7 @@ include <truck_bits.scad>
 include <constants.scad>
 include <threads.scad>
 
+// TODO - the coupling is a tiny bit too low and will foul on pointwork (tried adjusting bogie_wheel_d to 14 rather than 14.3, not reprinted to test)
 
 //the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body, likewise with the roof of the shell
 //the DC socket and switch holders still need scaffolding, as does the motor holder screwholes in the shell
@@ -178,7 +179,7 @@ bogie_chain_mount_height = base_thick/2;
 //statement of intent
 top_of_bogie_from_rails = 15;
 //measurement of wheels
-bogie_wheel_d = 14.3;
+bogie_wheel_d = 14;//14.3;
 
 bogie_axle_d = 2;
 wheel_holder_width = 13.8;
