@@ -879,7 +879,7 @@ base_top_screws = [
 base_top_glue_holes_y = [[24, wagon_width - 17], [wagon_length/2 - buffer_ledge_length/2-1, 5]];
 //glue_hole_width = wagon_width - 10;
 glue_hole_length = 7;
-glue_hole_thick = 0.5;
+glue_hole_thick = 0.8;
 
 module wagon_base(){
 	fudge_factor=0.01;
