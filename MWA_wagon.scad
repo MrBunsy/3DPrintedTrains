@@ -84,12 +84,12 @@ include <intermodal_wagon_accessories.scad>
 
 wheel_diameter = 12.5;
 
-GEN_IN_SITU = false;
+GEN_IN_SITU = true;
 //depreacted, now wagon is split into base and top
-GEN_WAGON = false;
+GEN_WAGON = true;
 GEN_BASE = false;
-GEN_TOP = true;
-GEN_BOGIE = false;
+GEN_TOP = false;
+GEN_BOGIE = true;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
@@ -835,6 +835,7 @@ module bogie(){
 			//coupling holder
 			translate([0,coupling_from_bogie_centre, coupling_arm_height+coupling_arm_z]){
 				if(COUPLING_TYPE == "dapol"){
+					//plus 0.2 extra height because these only print well in PETG and with PETG the dapol coupling bridging droops more than PLA
 					coupling_mount_dapol_alone(coupling_arm_height, 0.2);
 				}else{
 					coupling_mount(bogie_coupling_height-coupling_arm_height-coupling_arm_z,coupling_arm_height);
