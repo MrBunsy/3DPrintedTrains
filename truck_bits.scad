@@ -345,6 +345,12 @@ module coupling_mount_dapol(minusHeight=0){
 
 }
 
+//just the coupling mount, for placement on anything other than a bog standard truck. (0,0,0) is top centre of coupling fixing,
+//drop in replacement for coupling_mount with default arguments (height of zero)
+module coupling_mount_dapol_alone(base_thick = 0){
+	translate([0,0,-base_thick])coupling_mount_dapol(minusHeight=top_of_buffer_from_top_of_rail - top_of_coupling_from_top_of_rail - base_thick);
+}
+
 //facing +ve y direction
 module buffer(buffer_end_width, buffer_end_height, buffer_distance, buffer_length){
     

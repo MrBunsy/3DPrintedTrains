@@ -94,6 +94,10 @@ GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
 GEN_COSMETIC_COUPLING = false;
+
+//"dapol" or "hornby"
+COUPLING_TYPE="dapol";
+
 //MWA, MWA-B
 STYLE = "MWA";
 //MWA-B has no ladder, square nameplate, no small cylinder and brake-wheels on one bogie only - not on the main wagon body
@@ -130,7 +134,7 @@ wagon_width = 30;
 wagon_base_width = 29.75;
 //starting from 'base' which is the flat bit above the bogies
 //wagon_height = 28.5; - possibly correct if my photo really is squashed. my photo measures 30. going with 29.25 as a bit of a compromise - not sure it's perfect
-wagon_height = 29.25;//28.5;//30;
+wagon_height = 30;//29.25;//28.5;//30;
 
 
 coupling_from_bogie_centre = wagon_length/2-bogie_distance/2 - coupling_from_edge;
@@ -824,9 +828,18 @@ module bogie(){
 			coupling_arm_z = bogie_centre_arm_height - coupling_arm_height;
 			//coupling holder
 			translate([0,coupling_from_bogie_centre, coupling_arm_height+coupling_arm_z]){
-				coupling_mount(bogie_coupling_height-coupling_arm_height-coupling_arm_z,coupling_arm_height);
+				if(COUPLING_TYPE == "dapol"){
+					coupling_mount_dapol_alone(coupling_arm_height);
+				}else{
+					coupling_mount(bogie_coupling_height-coupling_arm_height-coupling_arm_z,coupling_arm_height);
+				}
+				
 			}
-			coupling_arm_length = coupling_from_bogie_centre-m2_thread_size;
+
+			//how much shorter to make the arm, based on the type of coupling mount
+			coupling_mount_y_adjust = COUPLING_TYPE == "dapol" ? -5 : -m2_thread_size;
+
+			coupling_arm_length = coupling_from_bogie_centre + coupling_mount_y_adjust;
 			translate([0,coupling_arm_length/2,coupling_arm_z])centred_cube(5,coupling_arm_length,coupling_arm_height);
 
 		}//end of additive bits
