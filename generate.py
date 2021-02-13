@@ -148,21 +148,24 @@ def wagon_jobs():
 
 def mwa_wagon_jobs():
     jobs = []
-    MWAariables = ["bogie", "brake_cylinder", "base", "top", "brake_wheel", "wagon"]
-    fullMWAJob = JobDescription("MWA_wagon.scad", "MWA_wagon_model")
-    fullMWAJob.addVariable("GEN_IN_SITU", True)
-    fullMWAJob.addVariable("GEN_BASE", False)
-    fullMWAJob.addVariable("GEN_TOP", False)
-    for v in ["wagon", "bogie", "brake_cylinder", "brake_wheel"]:
-        fullMWAJob.addVariable("GEN_"+v.upper(), True)
+    for style in ["MWA", "MWA-B"]:
+        MWAariables = ["bogie", "brake_cylinder", "base", "top", "brake_wheel", "wagon"]
+        fullMWAJob = JobDescription("MWA_wagon.scad", "{}_wagon_model".format(style))
+        fullMWAJob.addVariable("GEN_IN_SITU", True)
+        fullMWAJob.addVariable("STYLE", style)
+        fullMWAJob.addVariable("GEN_BASE", False)
+        fullMWAJob.addVariable("GEN_TOP", False)
+        for v in ["wagon", "bogie", "brake_cylinder", "brake_wheel"]:
+            fullMWAJob.addVariable("GEN_"+v.upper(), True)
 
-    for v in MWAariables:
-        job = JobDescription("MWA_wagon.scad", "MWA_wagon_{}".format(v))
-        job.addVariable("GEN_IN_SITU", False)
-        for v2 in MWAariables:
-            job.addVariable("GEN_"+v2.upper(), v==v2)
-        jobs.append(job)
-    jobs.append(fullMWAJob)
+        for v in MWAariables:
+            job = JobDescription("MWA_wagon.scad", "{}_wagon_{}".format(style, v))
+            job.addVariable("GEN_IN_SITU", False)
+            job.addVariable("STYLE", style)
+            for v2 in MWAariables:
+                job.addVariable("GEN_"+v2.upper(), v==v2)
+            jobs.append(job)
+        jobs.append(fullMWAJob)
     return jobs
 
 if __name__ == '__main__':

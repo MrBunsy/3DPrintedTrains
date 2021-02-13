@@ -87,8 +87,8 @@ wheel_diameter = 12.5;
 GEN_IN_SITU = false;
 //depreacted, now wagon is split into base and top
 GEN_WAGON = false;
-GEN_BASE = true;
-GEN_TOP = false;
+GEN_BASE = false;
+GEN_TOP = true;
 GEN_BOGIE = false;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
@@ -99,7 +99,7 @@ GEN_COSMETIC_COUPLING = false;
 COUPLING_TYPE="dapol";
 
 //MWA, MWA-B
-STYLE = "MWA";
+STYLE = "MWA-B";
 //MWA-B has no ladder, square nameplate, no small cylinder and brake-wheels on one bogie only - not on the main wagon body
 //and differently shaped triangular bits on the underside
 
@@ -194,17 +194,18 @@ end_ridge_x = 1.5*wagon_width/7;
 //logo_file = "freightliner-logo.png";
 // logo_dimensions = [515,100, 5];
 // logo_file = "freightliner-logo-small.png";
-
-
-logo_dimensions = [39.73169, 8.64314];
-logo_file = "Freightliner-logo.svg";
-
-nameplate_length = 44.2;
-nameplate_height = 10.8;
-nameplate_z = 7;
-
 side_ridge_height = wagon_height-3;
 side_ridge_height2 = wagon_height-0.9;
+
+//can't auto detect size of svg
+logo_dimensions = STYLE == "MWA" ? [39.73169, 8.64314] : [135, 100];
+logo_file = STYLE == "MWA" ? "Freightliner_logo.svg" : "mwa-b-logo-chunky.svg";
+
+nameplate_length = STYLE == "MWA" ? 44.2 : 24.5;
+nameplate_height = STYLE == "MWA" ? 10.8 : side_ridge_height - top_ridge_height;
+nameplate_z = STYLE == "MWA" ? 7 : top_ridge_height;
+
+
 
 end_bottom_ledge_z = side_ridge_height-end_flange_taper_height;//wagon_height -3;//27;
 //guessing a bit here
@@ -232,13 +233,14 @@ wagon_little_cylinder_r2 = 2;
 
 brake_wheel_d = 7;
 brake_wheel_space_d = 7+0.9*2;
+
+//big cylinder, -ve x, +ve y
+big_cylinder = [[-(wagon_width/2-3),wagon_length/2-78.3],5.5/2,17.6, true];
+
+little_cylinder = [[(wagon_width/2-3),-(wagon_length/2-73.5)],5.5/2,7, false];
+
 //[ [x,y of centre], radius, length, bigstyle]
-wagon_cylinders=[
-	//big cylinder, -ve x, +ve y
-	[[-(wagon_width/2-3),wagon_length/2-78.3],5.5/2,17.6, true],
-	//little cylinder
-	[[(wagon_width/2-3),-(wagon_length/2-73.5)],5.5/2,7, false]
-	];
+wagon_cylinders= STYLE == "MWA-B" ? [ big_cylinder ] : [ big_cylinder, little_cylinder ];
 
 
 //intermodal wagon was 2 thick, but they seem a bit loose
@@ -351,7 +353,7 @@ module wagon_body(logo=false){
 	if(logo){
 		//mirror_y()translate([wagon_width/2-wall_thick+nameplate_thick-0.1,0,nameplate_z+nameplate_height/2])rotate([-90,0,0])rotate([0,90,0])scale([(nameplate_length-nameplate_margin*2)/logo_dimensions[0], (nameplate_height-nameplate_margin*2)/logo_dimensions[1] ,min_thick/logo_dimensions[2]])translate([-logo_dimensions[0]/2,-logo_dimensions[1]/2, logo_dimensions[2]])surface(logo_file, invert = true);
 		scaleby = (nameplate_length-nameplate_margin*2)/logo_dimensions[0];
-		mirror_rotate180()translate([wagon_width/2-wall_thick+nameplate_thick,0,nameplate_z+nameplate_height/2])rotate([-90,0,0])rotate([0,90,0])scale([scaleby,scaleby , 1])linear_extrude(height=min_thick)import("Freightliner_logo.svg", center=true);
+		mirror_rotate180()translate([wagon_width/2-wall_thick+nameplate_thick,0,nameplate_z+nameplate_height/2])rotate([-90,0,0])rotate([0,90,0])scale([scaleby,scaleby , 1])linear_extrude(height=min_thick)import(logo_file, center=true);
 	}
 	
 	//end flanges
@@ -434,11 +436,12 @@ module wagon_body(logo=false){
 	}
 
 	//mounts for the brake wheels
-	//for(hole = [big_cylinder_brake_wheel_pos, little_cylinder_brake_wheel_pos]){
-	big_height = big_cylinder_brake_wheel_pos[2]-wagon_height + brake_wheel_holder_height_above_wheel;
-	translate([big_cylinder_brake_wheel_pos[0]+brake_wheel_holder_thick/2, big_cylinder_brake_wheel_pos[1],wagon_height])centred_cube(brake_wheel_holder_thick,brake_wheel_holder_length, big_height);
-	little_height = little_cylinder_brake_wheel_pos[2]-wagon_height + brake_wheel_holder_height_above_wheel;
-	translate([little_cylinder_brake_wheel_pos[0]-brake_wheel_holder_thick/2, little_cylinder_brake_wheel_pos[1],wagon_height])centred_cube(brake_wheel_holder_thick,brake_wheel_holder_length, little_height);
+	if(STYLE=="MWA"){
+		big_height = big_cylinder_brake_wheel_pos[2]-wagon_height + brake_wheel_holder_height_above_wheel;
+		translate([big_cylinder_brake_wheel_pos[0]+brake_wheel_holder_thick/2, big_cylinder_brake_wheel_pos[1],wagon_height])centred_cube(brake_wheel_holder_thick,brake_wheel_holder_length, big_height);
+		little_height = little_cylinder_brake_wheel_pos[2]-wagon_height + brake_wheel_holder_height_above_wheel;
+		translate([little_cylinder_brake_wheel_pos[0]-brake_wheel_holder_thick/2, little_cylinder_brake_wheel_pos[1],wagon_height])centred_cube(brake_wheel_holder_thick,brake_wheel_holder_length, little_height);
+	}
 	
 }
 
@@ -506,12 +509,15 @@ module wagon(logo=false){
 				translate([pos[0],pos[1],wagon_height])brake_cylinder(cylinder_def,true);
 			}
 
-			//holes for the brake wheels to be inserted
-			for(hole = [big_cylinder_brake_wheel_pos, little_cylinder_brake_wheel_pos]){
-				translate(hole)rotate([0,90,0])cylinder(r=buffer_holder_d/2,h= 10, center=true);
+			if(STYLE=="MWA"){
+				//holes for the brake wheels to be inserted
+				for(hole = [big_cylinder_brake_wheel_pos, little_cylinder_brake_wheel_pos]){
+					translate(hole)rotate([0,90,0])cylinder(r=buffer_holder_d/2,h= 10, center=true);
+				}
+				//extra padding around the big cylinder brake wheel
+			
+				translate(big_cylinder_brake_wheel_pos)rotate([0,-90,0])cylinder(r=brake_wheel_space_d/2,h=10);
 			}
-			//extra padding around the big cylinder brake wheel
-			translate(big_cylinder_brake_wheel_pos)rotate([0,-90,0])cylinder(r=brake_wheel_space_d/2,h=10);
 		}
 	}
 }
