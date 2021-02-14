@@ -36,9 +36,9 @@ Notes:
  - The chunky hook works with most holders for the X8031, but doesn't fit on some hornby locos. (too wide with the 3d printed hook)
 
 */
-GEN_COUPLING = true;
-GEN_HOOK = true;
-GEN_IN_SITU = true;
+GEN_COUPLING = false;
+GEN_HOOK = false;
+GEN_IN_SITU = false;
 
 //only "wide" currently
 STYLE = "wide";
@@ -47,14 +47,14 @@ STYLE = "wide";
 'chunky' - my first stab at the x8031 hook, bit bigger than the real x8031
 'inline' - newer hornby/dapol style
 */
-HOOK = "chunky";
+HOOK = "inline";
 
 /*
 X8031 - Hornby/bachmann style, centralscrewhole with two dents on either side
 dovetail - Hornby dovetail fixing, I think intended to hold a NEM socket. I'll go for something that fits directly into the dovetail fixing
 dapol - Dapol's clip-in fixing. Possibly also Hornby X9660 and Airfix?
 */
-FIXING = "X8031";
+FIXING = "dapol";
 
 min_thickness = 1.5;
 x8031_main_arm_length = 5.9;
@@ -221,7 +221,7 @@ module dovetail_fixing(subtract = false){
 	
 }
 
-module coupling_body(){
+module coupling_body(STYLE){
 //	difference(){
 		if(STYLE=="wide"){
 			coupling_base(base_width = wide_coupling_base_arm_length, coupling_width = wide_coupling_width);
@@ -261,27 +261,32 @@ module fixing(subtract = false){
 		dapol_fixing(subtract);
 	}
 }
-if(GEN_COUPLING){
-	difference(){
-		union(){
-			difference(){
-				coupling_body();
-				hook_base(true);
+
+module gen_couplings(GEN_COUPLING, GEN_HOOK ,GEN_IN_SITU, STYLE, HOOK, FIXING){
+	if(GEN_COUPLING){
+		difference(){
+			union(){
+				difference(){
+					coupling_body(STYLE);
+					hook_base(true);
+				}
+				fixing(false);
+				hook_base(false);
 			}
-			fixing(false);
-			hook_base(false);
+			fixing(true);
 		}
-		fixing(true);
+
 	}
 
+	if(GEN_HOOK){
+		//todo calculate these rather than hardcode?
+		hook_pos = HOOK == "chunky" ? [3.4+0.5,-4.2,4] : HOOK == "inline" ? [coupling_hook_x+0.5,2.4/2,hook_holder_diameter/2] : [0,0];
+		
+		//[hook_pos[0]+0.5,hook_pos[1]+3.5,hook_pos[2]+6.7]
+		optional_translate(hook_pos,GEN_IN_SITU)optional_rotate([-90,0,90],GEN_IN_SITU)wide_coupling_hook([hook_pos[1],hook_pos[2]]);
+
+		
+	}
 }
 
-if(GEN_HOOK){
-	//todo calculate these rather than hardcode?
-	hook_pos = HOOK == "chunky" ? [3.4+0.5,-4.2,4] : HOOK == "inline" ? [coupling_hook_x+0.5,2.4/2,hook_holder_diameter/2] : [0,0];
-	
-	//[hook_pos[0]+0.5,hook_pos[1]+3.5,hook_pos[2]+6.7]
-	optional_translate(hook_pos,GEN_IN_SITU)optional_rotate([-90,0,90],GEN_IN_SITU)wide_coupling_hook([hook_pos[1],hook_pos[2]]);
-
-	
-}
+gen_couplings(GEN_COUPLING, GEN_HOOK ,GEN_IN_SITU, STYLE, HOOK, FIXING);

@@ -79,8 +79,11 @@ TODO:
 */
 include <truck_bits.scad>
 include <constants.scad>
+include <wheel.scad>
 include <threads.scad>
 include <intermodal_wagon_accessories.scad>
+include <buffer_modern.scad>
+include <couplings_parametric.scad>
 
 wheel_diameter = 12.5;
 
@@ -90,10 +93,11 @@ GEN_WAGON = true;
 GEN_BASE = false;
 GEN_TOP = false;
 GEN_BOGIE = true;
-GEN_BRAKE_WHEEL = false;
-GEN_BRAKE_CYLINDER = false;
-GEN_BUFFER = false;
+GEN_BRAKE_WHEEL = true;
+GEN_BRAKE_CYLINDER = true;
+GEN_BUFFER = true;
 GEN_COSMETIC_COUPLING = false;
+GEN_MODEL_BITS = true;
 
 //"dapol" or "hornby"
 COUPLING_TYPE="dapol";
@@ -808,6 +812,9 @@ module bogie_axle_holder_cosmetics(){
 }
 
 bogie_centre_arm_height = 3.4;
+coupling_arm_height = bogie_centre_arm_height*0.5;
+coupling_arm_z = bogie_centre_arm_height - coupling_arm_height;
+
 module bogie(){
 	difference(){
 		union(){
@@ -844,8 +851,7 @@ module bogie(){
 				centred_cube(bogie_inner_width+bogie_padding_width*2,bogie_axle_distance*1.5,axle_to_top_of_bogie*2);
 			}
 
-			coupling_arm_height = bogie_centre_arm_height*0.5;
-			coupling_arm_z = bogie_centre_arm_height - coupling_arm_height;
+			
 			//coupling holder
 			translate([0,coupling_from_bogie_centre, coupling_arm_height+coupling_arm_z]){
 				if(COUPLING_TYPE == "dapol"){
@@ -992,7 +998,20 @@ if(GEN_TOP){
 
 if(GEN_BOGIE){
 	//TODO, rotate rather than mirror!
-	rotate_mirror(GEN_IN_SITU)optional_translate([0,bogie_distance/2,axle_to_top_of_bogie+wheel_diameter/2],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)bogie();
+	rotate_mirror(GEN_IN_SITU)optional_translate([0,bogie_distance/2,axle_to_top_of_bogie+wheel_diameter/2],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU){
+		bogie();
+
+		if(GEN_MODEL_BITS){
+			//representation of the wheels. not for printing
+			mirror_x()translate([0,bogie_axle_distance/2, axle_to_top_of_bogie])wheelset_model(wheel_diameter);
+			//coupling
+			//works but doesn't end up in exported STL
+			//translate([0,coupling_from_bogie_centre-0.6, coupling_arm_height+coupling_arm_z+0.2])import("stl/coupling_dapol_model.stl");
+			translate([0,coupling_from_bogie_centre-0.6, coupling_arm_height+coupling_arm_z+0.2])gen_couplings(true, true, true, "wide", "inline", "dapol");
+		}
+	}
+
+	
 }
 
 if(GEN_BRAKE_CYLINDER){
@@ -1009,11 +1028,25 @@ if(GEN_BRAKE_CYLINDER){
 
 if(GEN_BRAKE_WHEEL){
 	if(GEN_IN_SITU){
-		//big_cylinder_brake_wheel_pos, little_cylinder_brake_wheel_pos
-		optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)translate(big_cylinder_brake_wheel_pos)translate([-0.5,0,0])rotate([0,90,0])gen_brake_wheel();
+		if(STYLE == "MWA"){
+			//big_cylinder_brake_wheel_pos, little_cylinder_brake_wheel_pos
+			optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)translate(big_cylinder_brake_wheel_pos)translate([-0.5,0,0])rotate([0,90,0])gen_brake_wheel();
 
-		optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)translate(little_cylinder_brake_wheel_pos)translate([0.5,0,0])rotate([0,-90,0])gen_brake_wheel();
+			optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)translate(little_cylinder_brake_wheel_pos)translate([0.5,0,0])rotate([0,-90,0])gen_brake_wheel();
+		}else{
+			//TODO
+		}
 	}else{
 		gen_brake_wheel();
 	}
+}
+
+if(GEN_BUFFER){
+	//wagon rotation copypasta
+	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU){
+
+		mirror_xy()translate([buffer_distance/2,wagon_length/2+buffer_holder_length+1,wagon_height+buffer_z_from_base])rotate([90,0,0])modern_buffer();
+
+	}
+	
 }

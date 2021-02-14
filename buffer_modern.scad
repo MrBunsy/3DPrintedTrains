@@ -28,6 +28,10 @@ include <constants.scad>
 //   _||_    pole
 //   ____    end
 
+
+
+module modern_buffer(){
+
 holder_length=4;
 
 
@@ -61,3 +65,7 @@ translate([0,0,pole_length+end_length]){
     cylinder(r=holder_diameter/2, h=total_length-(pole_length+end_length), $fn=200);
 }
 cylinder(r=truck_fixing_d/2,h=total_length+holder_length, $fn=200);
+
+}
+
+//modern_buffer();
