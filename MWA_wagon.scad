@@ -220,9 +220,12 @@ base_thick = 6;
 min_thick = 0.2;
 //y coord of tallest edge
 wagon_under_triangle_from_end = 56;//56.6;
-wagon_under_triangle_height = 4.6;
-wagon_under_triangle_flat_length = 1.3;
-wagon_under_triangle_total_length = 5.7;
+wagon_under_triangle_height = STYLE == "MWA" ? 4.6 : 4;
+wagon_under_triangle_flat_length = STYLE== "MWA" ? 1.3 : 3;
+//overhang bit, more of a rombus at this point
+wagon_under_triangle_flat_extra_length = STYLE== "MWA" ? 0 : 1;
+//not inculing the extra_length overhang
+wagon_under_triangle_total_length = STYLE== "MWA" ? 5.7 : 4.5;
 //guesses:
 wagon_under_triangle_from_side = 1;
 wagon_under_triangle_width = 3;
@@ -429,9 +432,20 @@ module wagon_body(logo=false){
 
 	//triangular bits underneath, part of the real bogie suspension I think
 	mirror_xy()hull(){
+		//main cube
 		translate([wagon_width/2 - wagon_under_triangle_from_side-wagon_under_triangle_width/2,wagon_length/2-wagon_under_triangle_from_end+wagon_under_triangle_flat_length/2,wagon_height-0.1])centred_cube(wagon_under_triangle_width,wagon_under_triangle_flat_length,wagon_under_triangle_height+0.1);
 
+		//bit off to the bogie side to make the triangle
 		translate([wagon_width/2 - wagon_under_triangle_from_side-wagon_under_triangle_width/2,wagon_length/2-wagon_under_triangle_from_end+wagon_under_triangle_flat_length+wagon_under_triangle_total_length,wagon_height-0.1])centred_cube(wagon_under_triangle_width,0.1,0.1);
+
+		//potential extra bit for overhang
+		if(wagon_under_triangle_flat_extra_length > 0){
+			translate([
+				wagon_width/2 - wagon_under_triangle_from_side-wagon_under_triangle_width/2,
+				wagon_length/2-wagon_under_triangle_from_end-wagon_under_triangle_flat_extra_length,
+				wagon_height + wagon_under_triangle_height-0.05
+				])centred_cube(wagon_under_triangle_width, 0.1, 0.1);
+		}
 
 	}
 
@@ -865,7 +879,11 @@ module bogie(){
 
 module gen_brake_wheel(){
 	//from intermodal wagon, with options now
-	brake_wheel(buffer_holder_length/3, brake_wheel_d, 4);
+	if(STYLE == "MWA"){
+		brake_wheel(buffer_holder_length/3, brake_wheel_d, 4);
+	}else{
+		brake_wheel(buffer_holder_length/3, brake_wheel_d, 3);
+	}
 	
 
 }
@@ -886,7 +904,8 @@ base_top_screws = [
 base_top_glue_holes_y = [[24, wagon_width - 17], [wagon_length/2 - buffer_ledge_length/2-1, 5]];
 //glue_hole_width = wagon_width - 10;
 glue_hole_length = 7;
-glue_hole_thick = 0.8;
+//0.8 was only two layers in each side and barely left a gap after the bridging
+glue_hole_thick = 1.2;//0.8;
 
 module wagon_base(){
 	fudge_factor=0.01;
