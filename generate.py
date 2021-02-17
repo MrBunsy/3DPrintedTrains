@@ -149,13 +149,15 @@ def wagon_jobs():
 def mwa_wagon_jobs():
     jobs = []
     for style in ["MWA", "MWA-B"]:
-        MWAariables = ["bogie", "brake_cylinder", "base", "top", "brake_wheel", "wagon"]
+        MWAariables = ["bogie", "brake_cylinder", "base", "top", "brake_wheel", "wagon", "buffer"]
         fullMWAJob = JobDescription("MWA_wagon.scad", "{}_wagon_model".format(style))
         fullMWAJob.addVariable("GEN_IN_SITU", True)
         fullMWAJob.addVariable("STYLE", style)
         fullMWAJob.addVariable("GEN_BASE", False)
         fullMWAJob.addVariable("GEN_TOP", False)
         fullMWAJob.addVariable("GEN_MODEL_BITS", True)
+        #want more realistic bogies for the model
+        fullMWAJob.addVariable("BOGIE_EASY_PRINT", False)
         for v in ["wagon", "bogie", "brake_cylinder", "brake_wheel", "buffer"]:
             fullMWAJob.addVariable("GEN_"+v.upper(), True)
 
@@ -163,6 +165,7 @@ def mwa_wagon_jobs():
             job = JobDescription("MWA_wagon.scad", "{}_wagon_{}".format(style, v))
             job.addVariable("GEN_IN_SITU", False)
             job.addVariable("GEN_MODEL_BITS", False)
+            job.addVariable("BOGIE_EASY_PRINT", True)
             job.addVariable("STYLE", style)
             for v2 in MWAariables:
                 job.addVariable("GEN_"+v2.upper(), v==v2)

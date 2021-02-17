@@ -87,20 +87,22 @@ include <couplings_parametric.scad>
 
 wheel_diameter = 12.5;
 
-GEN_IN_SITU = true;
+GEN_IN_SITU = false;
 //depreacted, now wagon is split into base and top
-GEN_WAGON = true;
+GEN_WAGON = false;
 GEN_BASE = false;
 GEN_TOP = false;
 GEN_BOGIE = true;
-GEN_BRAKE_WHEEL = true;
-GEN_BRAKE_CYLINDER = true;
-GEN_BUFFER = true;
+GEN_BRAKE_WHEEL = false;
+GEN_BRAKE_CYLINDER = false;
+GEN_BUFFER = false;
 GEN_COSMETIC_COUPLING = false;
-GEN_MODEL_BITS = true;
+GEN_MODEL_BITS = false;
 
 //"dapol" or "hornby"
 COUPLING_TYPE="dapol";
+//some optional tweaks to make the bogie less accurate, but hopefully printable in PLA
+BOGIE_EASY_PRINT = true;
 
 //MWA, MWA-B
 STYLE = "MWA-B";
@@ -251,7 +253,8 @@ wagon_cylinders= STYLE == "MWA-B" ? [ big_cylinder ] : [ big_cylinder, little_cy
 
 
 //intermodal wagon was 2 thick, but they seem a bit loose
-brake_wheel_holder_thick = 2.5;
+//2.5 really struggles to get the wheels in place
+brake_wheel_holder_thick = 2;//.5;
 brake_wheel_holder_length = buffer_holder_d+2;
 brake_wheel_holder_height_above_wheel = buffer_holder_d/2+1;
 //[x,y,z] 
@@ -545,7 +548,7 @@ module wagon(logo=false){
 //cosmetic bits:
 //base and top here refer when the bogie is the real way up, z is when being constructed (upside down)
 bogie_flange_width = 2.5;
-bogie_inner_flange_width = 2;
+bogie_inner_flange_width = 2+ (BOGIE_EASY_PRINT ? 0.2 : 0);;
 bogie_centre_bottom_length = 4;
 bogie_centre_top_length = 7;
 bogie_centre_gap_length = bogie_centre_top_length - bogie_centre_bottom_length;
@@ -561,7 +564,7 @@ bogie_bottom_cylinder_h=0.8;
 
 bogie_spring_d = bogie_top_cylinder_r*1.75;
 
-bogie_backing_plate_thick=1;
+bogie_backing_plate_thick=1 + (BOGIE_EASY_PRINT ? 0.5 : 0);
 
 
 //[y,z] for centre of flange thickness
@@ -592,7 +595,7 @@ bogie_end_hole_d = 1;
 bogie_end_hole_pos = [9.1, 1.6];
 
 bogie_bolt_d = 0.6;
-bogie_bolt_width = 1.25;
+bogie_bolt_width = bogie_backing_plate_thick+0.25;//1.25;
 bolt_offset1y = (bogie_top_centre[0] + bogie_bottom_centre[0])/2;
 bolt_offset1z_mid = (bogie_centre_bottom_z + bogie_centre_top_z)/2;
 bolt_offset1z = 1.3;
@@ -614,6 +617,7 @@ bogie_padding_width = 1;
 bogie_axle_pivot_pos = [5.2,4.9];
 bogie_axle_pivot_d = 2.2;
 bogie_axle_pivot_width = 1.5;
+bogie_axle_pivot_hinge_width = 1.5 + (BOGIE_EASY_PRINT ? 0.4 : 0);
 bogie_axle_holder_size = 4.5;
 
 //used for the backing of the bogie flanges and for intersections
@@ -722,7 +726,7 @@ module bogie_edge(){
 
 				pivot_bit_height = 2.2;
 				//axle hinge point
-				translate([0,bogie_axle_pivot_pos[0],bogie_axle_pivot_pos[1]])rotate([0,90,0])cylinder(r=bogie_axle_pivot_d/2,h=bogie_axle_pivot_width);
+				translate([0,bogie_axle_pivot_pos[0],bogie_axle_pivot_pos[1]])rotate([0,90,0])cylinder(r=bogie_axle_pivot_d/2,h=bogie_axle_pivot_hinge_width);
 				//link from hinge to axle
 				hinge_point_d = 1.3;
 				hull(){
@@ -815,7 +819,7 @@ bogie_centre_arm_height = 3.4;
 coupling_arm_height = bogie_centre_arm_height*0.5;
 coupling_arm_z = bogie_centre_arm_height - coupling_arm_height;
 
-module bogie(){
+module bogie(with_brake_wheel = false){
 	difference(){
 		union(){
 			//some cosmetics need rotating, so far I've not done any that need mirroring, but will have to split this if I do
@@ -824,14 +828,27 @@ module bogie(){
 			//centre arm
 			centred_cube(bogie_inner_width+bogie_padding_width*2,m3_thread_d*2,bogie_centre_arm_height);
 
+			right_hole_bottom_z = bogie_offset_hole_pos[1]-bogie_offset_hole_d/2;
+
 			//extra arm behind the cosmetics - hoping it's strong enough without changing the visual appearance much
 			mirror_y(){
 				translate([bogie_inner_width/2+bogie_padding_width/2,0,0])
 					intersection(){
-						centred_cube(bogie_padding_width,bogie_bottom_outer_wheel[0]*2,bogie_offset_hole_pos[1]-bogie_offset_hole_d/2);
+						centred_cube(bogie_padding_width,bogie_bottom_outer_wheel[0]*2,right_hole_bottom_z);
 						mirror_x()bogie_hull_shape(bogie_padding_width);
 				}
 			}
+
+			if(BOGIE_EASY_PRINT){
+				//fill in underneath the very low arch (at real top of bogie, bottom of print)
+				fill_in_width = bogie_flange_width+bogie_padding_width-0.4;
+				mirror_y()difference(){
+					//calculate length properly
+					translate([bogie_inner_width/2+fill_in_width/2,0,0])centred_cube(fill_in_width,bogie_axle_distance+6.35,right_hole_bottom_z);
+					translate([bogie_inner_width/2+bogie_padding_width,0,0])mirror_x()bogie_hull_shape(bogie_flange_width+1);
+				}
+			}
+
 			mirror_xy(){
 				translate([bogie_inner_width/2+bogie_padding_width/2,bogie_axle_distance/2+0.5,0])centred_cube(bogie_padding_width,4,axle_to_top_of_bogie+1.5);
 			}
