@@ -78,6 +78,7 @@ ANGLE = 0;
 
 //dummy model has no motor
 DUMMY = false;
+COUPLING_TYPE = "dapol";
 
 //wiki says 21.4metre long, but oes this include buffers?
 //n-gauge model with buffers => 21.2m
@@ -1107,16 +1108,24 @@ module bogies(box_end=true){
 	
 	bogie_cosmetics(axle_height, box_end);
 	
-	coupling_arm_length = coupling_arm_from_mount - bogie_end_axles_distance/2 + wheel_mount_length/2;
+	
+	
 	
 	
 	//adding centre_bogie_wheel_offset/2 to make up for when teh bogie bends under the weight of the loco and raises the height of the coupling
 	//note- not adding that, as it lowers the bogie too much
 	coupling_arm_z = axle_to_top_of_bogie+bogie_wheel_d/2 -coupling_arm_thick-top_of_coupling_from_top_of_rail;// +centre_bogie_wheel_offset/2;
 	
+	//dapol coupling mount 0,0 is edge of wagon, hornby is...something else
+	
+	arm_inner_y = (bogie_end_axles_distance/2 + wheel_mount_length/5);
+	arm_outer_y = coupling_arm_from_mount - ( COUPLING_TYPE == "dapol" ? dapol_coupling_end_from_edge : coupling_from_edge + m2_thread_size );
+
+	coupling_arm_length = arm_outer_y - arm_inner_y;
+
 	//arm to hold coupling
 	difference(){
-		translate([0,-(coupling_arm_from_mount-coupling_arm_length/2-coupling_mount_length/2),coupling_arm_z])centred_cube(coupling_arm_width,coupling_arm_length-coupling_mount_length,coupling_arm_thick);
+		translate([0,-(arm_inner_y + arm_outer_y)/2,coupling_arm_z])centred_cube(coupling_arm_width,coupling_arm_length,coupling_arm_thick);
 		union(){
 		//enough space near the axle
 			translate([0,-bogie_end_axles_distance/2,axle_height])rotate([0,90,0])cylinder(h=wheel_holder_width,r=bogie_axle_d*0.8, center=true );
@@ -1126,7 +1135,16 @@ module bogies(box_end=true){
 	//fill in gap under coupling arm
 	translate([0,-bogie_end_axles_distance/2,0])centred_cube(coupling_arm_width,wheel_mount_length,coupling_arm_z);
 	
-	translate([0,-(coupling_arm_from_mount-coupling_mount_length/2),coupling_arm_z+coupling_arm_thick])coupling_mount(0,coupling_arm_thick);
+	translate([0,-(coupling_arm_from_mount - (COUPLING_TYPE == "dapol" ? 0 : coupling_from_edge)),coupling_arm_z+coupling_arm_thick]){
+		// coupling_mount(0,coupling_arm_thick);
+		if(COUPLING_TYPE == "dapol"){
+			//plus 0.2 extra height because these only print well in PETG and with PETG the dapol coupling bridging droops more than PLA
+			mirror([0,1,0])coupling_mount_dapol_alone(coupling_arm_thick);
+		}else{
+			coupling_mount(0,coupling_arm_thick);
+		}
+
+	}
 }
 
 //hmm not right.

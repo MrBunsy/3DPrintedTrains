@@ -277,6 +277,7 @@ module axle_holder_decoration(axle_space, x, axle_height, axle_distance, subtrac
         axle_mount_decoration(width,length, axle_height, subtract);
     }
 }
+//I think this was meant to be how far from the edge.
 coupling_mount_length=0.85*6;
 
 //For hornby/bachmann. 0,0 is the central screwhole which should be coupling_from_edge from the edge
@@ -320,7 +321,7 @@ module coupling_mount(height, base_thick = 0){
     
     
 }
-
+//assumes this is part of a truck
 //0,0 is bottom of mount (as printed, top as finished) at the front. So 0,0 should be top centre of the base of a wagon (assumes overlap with base, unless minusHeight is used)
 //facing +ve y
 //extraHeight makes the slot for the coupling more tall - useful if printed in PETG rather than PLA (which droops a bit more when bridging)
@@ -345,10 +346,12 @@ module coupling_mount_dapol(minusHeight=0, extraHeight = 0){
     translate([0,-base_from_edge-base_length/2,base_height+coupling_height])centred_cube(coupling_width,base_length,wall_thick);
 
 }
-
+//probably. maybe
+dapol_coupling_end_from_edge = 6.4 + 2.7;
 //just the coupling mount, for placement on anything other than a bog standard truck. (0,0,0) is top centre of coupling fixing,
 //drop in replacement for coupling_mount with default arguments (extraheight of zero) for PETG add some extra height
-module coupling_mount_dapol_alone(base_thick = 0, extra_height = 0){
+//the extra height also works well in PLA, so keeping it as default!
+module coupling_mount_dapol_alone(base_thick = 0, extra_height = 0.2){
 	translate([0,0,-base_thick])coupling_mount_dapol(top_of_buffer_from_top_of_rail - top_of_coupling_from_top_of_rail - base_thick, extra_height);
 }
 

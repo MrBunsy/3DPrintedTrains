@@ -76,6 +76,7 @@ TODO:
  - clean base very thoroughly before printing top
  - give more clearance around coupling holder, and see if bogies print with scaffolding
  - make holder for brake wheel a bit more thick
+ - dapol coupling holder is actually further from the edge than intended, although appears to work okay.
 */
 include <truck_bits.scad>
 include <constants.scad>
