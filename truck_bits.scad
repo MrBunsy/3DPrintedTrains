@@ -335,8 +335,9 @@ module coupling_mount_dapol(minusHeight=0, extraHeight = 0){
 
     base_height = top_of_buffer_from_top_of_rail - top_of_coupling_from_top_of_rail - minusHeight;
     base_length = 6.4;
-
-    r=2.4/2;
+	//2.4 works but is a tiny bit too loose compared to a real fixing
+	//trying 2.5
+    r=2.5/2;
 
     coupling_width = 7.5;
     coupling_height = 1.65 + extraHeight;

@@ -59,7 +59,7 @@ def executeJob(job):
 def class66_jobs():
     jobs = []
     #"walls", "roof",
-    class66Variables = ["base", "shell", "bogies" ,"motor_clip", "pi_mount"]
+    class66Variables = ["base", "shell", "bogies" ,"motor_clip", "pi_mount", "headlights"]
     at_angle = ["base", "shell", "walls"]
     full66Job = JobDescription("class66.scad", "class66_model")
     full66Job.addVariable("GEN_IN_PLACE", True)

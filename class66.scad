@@ -59,8 +59,11 @@ GEN_SHELL = false;
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = true;
-GEN_MOTOR_CLIP = false;
+GEN_BOGIES = false;
+GEN_MOTOR_CLIP = true;
+
+//separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
+GEN_HEADLIGHTS = false;
 
 GEN_PI_MOUNT = false;
 
@@ -219,15 +222,21 @@ bogie_axle_mount_width = 23;
  
  This is because it's hard to unclip the motor.
 
+There is a nib on one side of the Y-fork on the top of the motor so a clip the exact size results in a motor that can only 'wobble' in one directino
+
 */
 motor_clip_above_rails = 37;
 motor_clip_hole_d = 4.4;//4 was too tight
 motor_clip_fudge_height = 0.2;//0.5 is perfect for holding it in place but giving plenty of wobble. trying 0.2 for a lot less wobble
 //making it the perfect size doesn't result in enough side to side wobble to deal with the join in the motor, so make the clip smaller by the fudge
-motor_clip_thick = 4 - motor_clip_fudge_height;//or 4.1?
+motor_clip_thick = 4.1 - motor_clip_fudge_height;//or 4.1?
+motor_clip_height_from_nib = 3.7;
+motor_clip_height = 4.2;
+motor_clip_nib_width = 1.5;
 //for old mechanism of screwing motor into the shell
 motor_clip_shell_z = motor_clip_above_rails-(bogie_wheel_d/2+axle_to_top_of_bogie+m3_washer_thick+bogie_mount_height + base_thick);
-//for new mechanism of motor clip screwing into the base
+//for new mechanism of motor clip screwing into the base TODO did this take into account the nib?
+//how far between 'top' (in position) of base should the clip holder bottom be?
 motor_clip_base_z = motor_clip_above_rails - base_height_above_track - base_thick;
 motor_width=17.3;
 
@@ -746,7 +755,7 @@ module base(){
 				translate([0,-(length/2-door_centre_from_fuel_end),0])ladder_base();
 				translate([0,(length/2-door_centre_from_box_end),0])ladder_base();
 				
-				mirror_xy()translate([headlight_x, length/2,0])mirror([1,0,0])rotate([0,180,0])headlight_box(false);
+				//mirror_xy()translate([headlight_x, length/2,0])mirror([1,0,0])rotate([0,180,0])headlight_box(false);
 				
 				
 				front_mountpoints();
@@ -1631,22 +1640,25 @@ module motor_holder(){
 			
 		}
 	}*/
+
+	arm_height = motor_clip_height- motor_clip_fudge_height;
 	//third attempt, this shape screws into the base and the motor clips into this
 	//this can be much smaller than 1.5 and still give plenty of play for gradient changes
-	lip_height = 1.3;//1 worked with the looser hole, trying thicker now;//1.5;
+	lip_height = motor_clip_height - motor_clip_height_from_nib + motor_clip_fudge_height;
 	difference(){
 		union(){
-			centred_cube(motor_holder_width,motor_holder_length,motor_clip_thick-lip_height);
-			cylinder(r=motor_clip_hole_d,h=motor_clip_thick);
+			centred_cube(motor_holder_width,motor_holder_length,arm_height);
+			//cylinder(r=motor_clip_hole_d,h=motor_clip_thick);
 		}
 		union(){
 			cylinder(r=motor_clip_hole_d/2,h=100,center=true);
 			motor_holder_battery_space();
+			translate([0,0,arm_height - lip_height])cylinder(r=motor_clip_hole_d/2 + motor_clip_nib_width,h=10);
 		}
 	}
 	screw_depth = 10;
 	difference(){
-		translate([0,0,motor_clip_thick-lip_height])mirror_x()centred_cube(motor_holder_width,motor_holder_length,motor_clip_base_z+lip_height);
+		translate([0,0,arm_height])mirror_x()centred_cube(motor_holder_width,motor_holder_length,motor_clip_base_z);
 		union(){	
 			//don't overlap with space for motor
 			cylinder(r=motor_length/2,h=100);
@@ -1655,12 +1667,40 @@ module motor_holder(){
 			
 			//chop bits off for the batteries
 			motor_holder_battery_space();
+
+			
 		}
 	}
 	
 	
 }
-//part of the shell with the screwholes for the motor_holder
+
+
+module class59motor_mod(){
+	//the class 59 motor can wobble quite a lot (which we want for gradient changes) but
+	//this can result in the cosmetics getting stuck outside the base
+	//so this little bit will be glued into the back to prevent the wobble (bit like the sticky up bits
+	//on the old hornby HST motor)
+
+	main_width = 23;
+	main_length=5.5;
+	arm_length = 2.5;
+	//bigger than needed to allow for droop
+	arm_height = 1.2;
+	mid_length = 3.2;
+	mid_width = 8;
+	base_thick = 2.6;
+	height_from_base = 8.2;
+
+	total_length = main_length + arm_length + mid_length;
+
+	centred_cube(main_width,main_length,base_thick);
+	translate([0,main_length/2+arm_length+mid_length/2,0])centred_cube(mid_width,mid_length,base_thick);
+	translate([0,total_length/2-main_length/2,arm_height])centred_cube(mid_width,total_length,base_thick - arm_height);
+	centred_cube(main_width,main_length,height_from_base);
+}
+
+//part of the shell with the screwholes for the motor_holder not used anymore
 module motor_holder_holder(){
 	translate([0,-(length/2 - motor_centre_from_end),-girder_thick*1.5])
 	intersection(){
@@ -2210,11 +2250,21 @@ optional_rotate([0,0,ANGLE],ANGLE != 0){
 	if(GEN_MOTOR_CLIP){
 		echo("gen motor clip");
 		optional_translate([0,-(length/2 - motor_centre_from_end),motor_clip_base_z+base_thick+base_height_above_track+motor_clip_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	
+		if(!GEN_IN_PLACE){
+			translate([50,50,0])class59motor_mod();
+		}
 	}
 	
 	if(GEN_PI_MOUNT){
 		echo("gen pi mount");
 		optional_translate([0,(length/2 - motor_centre_from_end),base_thick+base_height_above_track],GEN_IN_PLACE)pi_mount();	
+	}
+
+	if(GEN_HEADLIGHTS){
+		mirror_y()translate([headlight_x, 0,0])rotate([90,0,0])difference(){
+			headlight_box(false);
+			headlight_box(true);
+		}
 	}
 
 }
