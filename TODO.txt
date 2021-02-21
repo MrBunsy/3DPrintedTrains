@@ -1,0 +1,17 @@
+General Bits:
+
+ - Tidy up of coupling fixings - currently they were mostly designed around the truck base and are fiddly to re-use for anything else.
+
+MWA Wagon:
+
+ - Fixing for 3-pronged brake wheel on the bogie for MWA-B variant
+ 
+Wagon/Truck:
+
+ - plank wagon top
+ - Check dimensions, mineral wagons were well defined and my truck base was designed around holding a pi, not being accurate.
+ 
+Intermodal Wagon
+ 
+ - (long term) split into FSA/FYA (I think those were the right names) with the different height for buffers and wagons. Probably not worth the effort since the single wagon looks pretty good.
+ 

@@ -22,6 +22,7 @@ include <constants.scad>
 diameters_12_5mm = [14.6,14.6, 12.7, 12.6];//not much gradient on the wheel part with this
 diameters_14mm = [16.5,16.5, 14.45, 14.0];
 depths = [0.4, 0.3, 2.7];//total 3.4
+total_depth = 3.4;
 //might need to make first dpeth longer to reduce wobble?
 $fn=1000;
 
@@ -36,25 +37,27 @@ module wheel_segment(i, diameters, fn=2000){
         }
     }
 }
-module wheel(diameters=diameters_14mm, depths=depths, fn=2000){
+module wheel(diameters=diameters_14mm, depths=depths, fn=2000, extra_axle_length = 2.5){
 	//2mm rod
-	axle_r=1;
+	//1mm radius works well for the 2mm rod with a clamp, but very hard to get wheel perfectly straight. trying slightly more loose but with more length
+	axle_r=1.1;
+	extra_height = extra_axle_length;
+	fancy_internal_r=5.8/2;
 
 	difference(){
-		wheel_segment(0,diameters, fn);
-		//2.1 radius was perfect for m4
-		//2.1 diameter was too tight for m2 (try 2.2?)
-		//2.2 still a bit tight
-		//2.3 still too tight?!
+		union(){
+			wheel_segment(0,diameters, fn);
+			cylinder(h=total_depth + extra_height, r=fancy_internal_r, $fn=fn);
+		}
 		
 		//fancy styling
 		union(){
 			//2mm rod
-			cylinder(h=10, r=axle_r, center=true);
+			cylinder(h=15, r=axle_r, center=true);
 			
 			difference(){
-				translate([0,0,2.9])cylinder(h=10, r=diameters[len(diameters)-1]/2-1.5, $fn=fn);
-				cylinder(h=10, r=5.8/2, center=true, $fn=fn);
+				translate([0,0,2.9])cylinder(h=1, r=diameters[len(diameters)-1]/2-1.5, $fn=fn);
+				cylinder(h=10, r=fancy_internal_r, center=true, $fn=fn);
 			}
 		}
 	}
@@ -69,4 +72,5 @@ module wheelset_model(diameter=12.5){
 	scale([axle_width/axle_holder_width,1,1])axle_punch();
 }
 
-//wheel();
+//these wheels work for the class 66 when mounted on 2mm brass rods with clean ends (use the rail cutters for this!)
+wheel(diameters_14mm, depths, 2000, 2.5);

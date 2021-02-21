@@ -21,24 +21,34 @@ include <truck_bits.scad>
 include <constants.scad>
 include <threads.scad>
 
-// TODO - the coupling is a tiny bit too low and will foul on pointwork (tried adjusting bogie_wheel_d to 14 rather than 14.3, not reprinted to test)
+
 
 //the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body, likewise with the roof of the shell
 //the DC socket and switch holders still need scaffolding, as does the motor holder screwholes in the shell
 
-//TODO improve shape of rainguards?
+
+//done todos:
 //TODO shapes around buffers in the pipe space have gone wrong again - going to have to leave these "wrong" to have space for LEDs
 
-//TODO fix led space so it slices without big gaps
+//TODO fix led space so it slices without big gaps - done
 
-//TODO mountings for pi and camera - screholes in base and a new peice?
+//TODO mountings for pi and camera - screholes in base and a new peice? - camera done, not sure pi is worth bothering with, hot glue + tap will be fine
 
 //TODO motor hinge point isn't in the centre of its length, so need to re-arrange hole in the base an the motor holder arm to give it the best space - not sure worth the effort
+//-definitely don't bother now I've got hte motor with enough freedom of movemwent for tight curves
 
-//TODO - when printing the shell, after the bridge layer the walls are pulled inwards slightly (presumably by the contracting bridge plastic) and so the roof shape on the final printed version isn't quite right.
+
+
+//still TODOs:
+
+// TODO - the coupling is a tiny bit too low and will foul on pointwork (tried adjusting bogie_wheel_d to 14 rather than 14.3, not reprinted to test)
+// TODO improve shape of rainguards?
+// TODO - when printing the shell, after the bridge layer the walls are pulled inwards slightly (presumably by the contracting bridge plastic) and so the roof shape on the final printed version isn't quite right.
 //not sure how to fix this. A few internal walls? actually make the roof a separate peice? buttresses?
+//would like to address it, but I had to split the MWA wagon into two and that still wans't quite enoguh. might be better to twaek the design
+//so the warping is in a less noticable place or countered.
 
-
+//TODO - the bogies have several bits that don't print well (lots of drooping), these could easily be fixed up
 /*
 
 Known variations I've not taken intoaccount:
@@ -52,7 +62,7 @@ Known variations I've not taken intoaccount:
 */
 
 //non-dummy base needs scaffolding
-GEN_BASE = false;
+GEN_BASE = true;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
 GEN_SHELL = false;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
@@ -60,7 +70,7 @@ GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
-GEN_MOTOR_CLIP = true;
+GEN_MOTOR_CLIP = false;
 
 //separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
 GEN_HEADLIGHTS = false;
@@ -321,7 +331,8 @@ hoover_head_height = 2;
 module motor_space(){
 	intersection(){
 		cylinder(r=motor_length/2,h=100,center=true);
-		translate([0,0,-1])centred_cube(base_top_width-base_pipe_space*2-wall_thick*2,motor_length*2,100);
+		//only half wall thick at edges, trying to get this as wide as possible
+		translate([0,0,-1])centred_cube(base_top_width-base_pipe_space*2-wall_thick,motor_length*2,100);
 	}
 }
 
