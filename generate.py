@@ -22,6 +22,9 @@ from multiprocessing import Pool
 import multiprocessing
 from pathlib import Path
 import argparse
+import numpy
+import stl
+from stl import mesh
 
 Path("out").mkdir(parents=True, exist_ok=True)
 
@@ -52,6 +55,10 @@ class JobDescription():
         print(cmd)
         os.system(cmd)
         print("finished {}".format(self.filename))
+        model = mesh.Mesh.from_file("out/{filename}.stl".format(filename = self.filename))
+        model.save("out/{filename}-binary.stl".format(filename = self.filename), mode=stl.Mode.BINARY)
+        #TODO can even use matplotlib to render it!
+
 
 def executeJob(job):
     job.do()

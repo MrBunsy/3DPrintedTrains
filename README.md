@@ -2,6 +2,16 @@
 
 Various attempts to 3D print OO gauge trains and accessories. Licenced under GNU GPL-3.0-or-later.
 
+## MWA Wagons
+
+Models for two variants of the MWA box wagon: MWA and MWA-B. MWA is green and MWA-B is grey. Assembly requires up to eight 4mm M2 screws or hot glue. There are square pits in the bottom of the 'top' and top of the 'base' to allow space for hot glue without changing the shape of the finished wagon. The bogies require a 10mm M3 screw and two M3 washers (one above and one below the bogie, to help with rotation). The bogies provide fixings for a dapol-style coupling, my 3D printed design works well.
+
+The main body of the wagon is split into two files ("wagon_top" and "wagon_base") to avoid too much warping when printing. Alternatively the entire wagon is avaible as "wagon_wagon". Good base adhesion is required for printing the top of the wagon. Even with good adhesion there is a slight line of warping, but this is mostly not too visible.
+
+The bogie requires scafolding only on the underside of the coupling holder. If you want a more accurate, but harder to print, version of the bogie set BOGIE_EASY_PRINT to false.
+
+Run gen_mwa_wagon.bat to generate all the STL files required. 
+
 ## Couplings
 
 My first attempt at a coupling (hornby_bachman_style.scad) is an equivilant to Hornby's X8031. This is compatible with Bachman's trucks as well (at least the ones from the 90s). With the hook holder, it is slightly wider than the original, so may not fit all situations (I can't mount them on a hornby loco). The version without the hook should fit.

@@ -42,6 +42,8 @@ include <threads.scad>
 //still TODOs:
 
 // TODO - the coupling is a tiny bit too low and will foul on pointwork (tried adjusting bogie_wheel_d to 14 rather than 14.3, not reprinted to test)
+// - is this related to front and rear wheels on the bogie being lower to account for bending?
+
 // TODO improve shape of rainguards?
 // TODO - when printing the shell, after the bridge layer the walls are pulled inwards slightly (presumably by the contracting bridge plastic) and so the roof shape on the final printed version isn't quite right.
 //not sure how to fix this. A few internal walls? actually make the roof a separate peice? buttresses?
@@ -49,6 +51,10 @@ include <threads.scad>
 //so the warping is in a less noticable place or countered.
 
 //TODO - the bogies have several bits that don't print well (lots of drooping), these could easily be fixed up
+
+
+//big todo - I think the wheels need slightly larger flanges and slightly more tapering, they seems to derail more easily than I'd expect.
+//need anotehr mod for the class59 motor on the other end to finish teh job
 /*
 
 Known variations I've not taken intoaccount:

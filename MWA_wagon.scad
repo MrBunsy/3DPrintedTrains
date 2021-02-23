@@ -93,10 +93,10 @@ GEN_IN_SITU = false;
 GEN_WAGON = false;
 GEN_BASE = false;
 GEN_TOP = false;
-GEN_BOGIE = true;
+GEN_BOGIE = false;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
-GEN_BUFFER = false;
+GEN_BUFFER = true;
 GEN_COSMETIC_COUPLING = false;
 GEN_MODEL_BITS = false;
 
@@ -1034,7 +1034,7 @@ if(GEN_BOGIE){
 
 if(GEN_BRAKE_CYLINDER){
 
-	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU){
+	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)rotate([0,180,0]){
 		for(cylinder_def = wagon_cylinders){
 				pos = cylinder_def[0];
 				r = cylinder_def[1];
@@ -1063,7 +1063,7 @@ if(GEN_BUFFER){
 	//wagon rotation copypasta
 	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU){
 
-		mirror_xy()translate([buffer_distance/2,wagon_length/2+buffer_holder_length+1,wagon_height+buffer_z_from_base])rotate([90,0,0])modern_buffer();
+		mirror_xy(GEN_IN_SITU)optional_translate([buffer_distance/2,wagon_length/2+buffer_holder_length+1,wagon_height+buffer_z_from_base],GEN_IN_SITU)optional_rotate([90,0,0],GEN_IN_SITU)modern_buffer();
 
 	}
 	

@@ -67,10 +67,12 @@ module wheelset_model(diameter=12.5){
 	
 	diameters = diameter == 14 ? diameters_14mm : diameters_12_5mm;
 	
-	mirror_y()translate([16.5/2-(depths[0] + depths[1]),0,0])rotate([0,90,0])wheel(diameters, depths, 50);
+	mirror_y()translate([16.5/2-(depths[0] + depths[1]),0,0])rotate([0,90,0])wheel(diameters, depths, 50, 0);
 	
 	scale([axle_width/axle_holder_width,1,1])axle_punch();
 }
 
 //these wheels work for the class 66 when mounted on 2mm brass rods with clean ends (use the rail cutters for this!)
-wheel(diameters_14mm, depths, 2000, 2.5);
+//wheel(diameters_14mm, depths, 2000, 2.5);
+
+//wheelset_model();
