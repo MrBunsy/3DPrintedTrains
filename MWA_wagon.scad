@@ -90,13 +90,13 @@ wheel_diameter = 12.5;
 
 GEN_IN_SITU = false;
 //depreacted, now wagon is split into base and top
-GEN_WAGON = false;
+GEN_WAGON = true;
 GEN_BASE = false;
 GEN_TOP = false;
 GEN_BOGIE = false;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
-GEN_BUFFER = true;
+GEN_BUFFER = false;
 GEN_COSMETIC_COUPLING = false;
 GEN_MODEL_BITS = false;
 
@@ -105,12 +105,18 @@ COUPLING_TYPE="dapol";
 //some optional tweaks to make the bogie less accurate, but hopefully printable in PLA
 BOGIE_EASY_PRINT = true;
 
-//MWA, MWA-B
-STYLE = "MWA-B";
+//MWA, MWA-B, IOA
+STYLE = "IOA";
 //MWA-B has no ladder, square nameplate, no small cylinder and brake-wheels on one bogie only - not on the main wagon body
+//IOA has no nameplate and taller 'ridge bits' around the top, also the brake cylinders are same colour as the body
 //and differently shaped triangular bits on the underside
 
-//LADDER = STYLE == "MWA";
+//MWA and IOA
+HAS_LADDER = STYLE != "MWA-B";
+HAS_NAMEPLATE = STYLE !="IOA";
+HAS_LITTLE_DOOR = STYLE !="IOA";
+//on IOA they're part of the many wagon as tehy're the same colour
+HAS_SEPARATE_BRAKE_CYLINDERS = STYLE != "IOA";
 
 //copying intermodal wagon
 //buffer_area_thick = 3.5; - buffer_ledge_height is used instead
@@ -147,8 +153,8 @@ wagon_height = 30;//29.25;//28.5;//30;
 coupling_from_bogie_centre = wagon_length/2-bogie_distance/2 - coupling_from_edge;
 bogie_coupling_height = axle_to_top_of_bogie + wheel_diameter/2 - top_of_coupling_from_top_of_rail;
 
-ladder_rungs = 8;
-ladder_start_from_top = 4.2;
+ladder_rungs = STYLE == "MWA" ? 8 : 7;
+ladder_start_from_top = STYLE == "MWA" ? 4.2 : 6.6;
 ladder_gap_height = 24.1/7;
 ladder_length = 7;
 ladder_centre_y = -(wagon_length/2 - 3 - ladder_length/2);
@@ -157,10 +163,13 @@ ladder_centre_y = -(wagon_length/2 - 3 - ladder_length/2);
 side_ridge_length = 2.2;
 side_ridge_length2 = 3.1;
 side_ridge_thicker_length = 3;
-top_ridge_height = 2.8;
-top_ridge_thick = top_ridge_height*0.5;
-top_ridge_flange_height=5.5;
+top_ridge_height = STYLE == "IOA" ? 4 : 2.8;
+top_ridge_height2 = STYLE == "IOA" ? 1.5 : 0;
+top_ridge_thick = 1.4;
+//just height of flange beyond top_ridge_height
+top_ridge_flange_height=5.5-2.8;
 side_ridge_thick=side_ridge_length*0.5;
+top_ridge_thick2 = (top_ridge_thick+side_ridge_thick)/2;
 
 little_door_height = 13;
 little_door_length = 10.5;
@@ -216,7 +225,7 @@ nameplate_z = STYLE == "MWA" ? 7 : top_ridge_height;
 
 end_bottom_ledge_z = side_ridge_height-end_flange_taper_height;//wagon_height -3;//27;
 //guessing a bit here
-end_mid_ledge_z = end_bottom_ledge_z * 0.6;
+end_mid_ledge_z = STYLE != "IOA" ? (end_bottom_ledge_z * 0.6) : (end_bottom_ledge_z * 0.7);
 ledge_thick = 0.4;
 
 
@@ -227,12 +236,12 @@ base_thick = 6;
 min_thick = 0.2;
 //y coord of tallest edge
 wagon_under_triangle_from_end = 56;//56.6;
-wagon_under_triangle_height = STYLE == "MWA" ? 4.6 : 4;
-wagon_under_triangle_flat_length = STYLE== "MWA" ? 1.3 : 3;
+wagon_under_triangle_height = STYLE != "MWA-B" ? 4.6 : 4;
+wagon_under_triangle_flat_length = STYLE!= "MWA-B" ? 1.3 : 3;
 //overhang bit, more of a rombus at this point
-wagon_under_triangle_flat_extra_length = STYLE== "MWA" ? 0 : 1;
+wagon_under_triangle_flat_extra_length = STYLE != "MWA-B" ? 0 : 1;
 //not inculing the extra_length overhang
-wagon_under_triangle_total_length = STYLE== "MWA" ? 5.7 : 4.5;
+wagon_under_triangle_total_length = STYLE != "MWA-B" ? 5.7 : 4.5;
 //guesses:
 wagon_under_triangle_from_side = 1;
 wagon_under_triangle_width = 3;
@@ -322,7 +331,7 @@ module wagon_body(logo=false){
 	}
 	
 	//ladder
-	if(STYLE == "MWA"){
+	if(HAS_LADDER){
 		mirror_rotate180(){
 			for(rung = [0:ladder_rungs-1]){
 				translate([wagon_width/2,ladder_centre_y, ladder_start_from_top + rung*ladder_gap_height])ladder_rung();
@@ -332,8 +341,10 @@ module wagon_body(logo=false){
 
 	//top side ridge
 	color("green")mirror_y()translate([wagon_width/2+top_ridge_thick/2,0,0])centred_cube(top_ridge_thick,wagon_length+wagon_end_flange_length*2,top_ridge_height);
+	color("green")mirror_y()translate([wagon_width/2+top_ridge_thick2/2,0,0])centred_cube(top_ridge_thick2,wagon_length+wagon_end_flange_length*2,top_ridge_height+top_ridge_height2);
 	//top end ridge
 	mirror_x()translate([0,wagon_length/2+wagon_end_flange_length/2,0])centred_cube(wagon_width,wagon_end_flange_length,top_ridge_height);
+	mirror_x()translate([0,wagon_length/2+wagon_end_flange_length/2 - (top_ridge_thick - top_ridge_thick2),0])centred_cube(wagon_width,wagon_end_flange_length- (top_ridge_thick - top_ridge_thick2),top_ridge_height+top_ridge_height2);
 	
 	//side ridges
 	//9 central ones of same thickness and distance
@@ -358,21 +369,23 @@ module wagon_body(logo=false){
 		translate([0,wagon_length/2 - side_ridge_from_end,0])side_ridge(side_ridge_length);
 	}
 	nameplate_thick = side_ridge_thick+min_thick+wall_thick;
-	//name plate
-	color("yellow")mirror_y()translate([wagon_width/2-wall_thick+nameplate_thick/2,0,nameplate_z])centred_cube(nameplate_thick,nameplate_length,nameplate_height);
-	nameplate_margin = 0;
-	if(logo){
-		//mirror_y()translate([wagon_width/2-wall_thick+nameplate_thick-0.1,0,nameplate_z+nameplate_height/2])rotate([-90,0,0])rotate([0,90,0])scale([(nameplate_length-nameplate_margin*2)/logo_dimensions[0], (nameplate_height-nameplate_margin*2)/logo_dimensions[1] ,min_thick/logo_dimensions[2]])translate([-logo_dimensions[0]/2,-logo_dimensions[1]/2, logo_dimensions[2]])surface(logo_file, invert = true);
-		scaleby = (nameplate_length-nameplate_margin*2)/logo_dimensions[0];
-		mirror_rotate180()translate([wagon_width/2-wall_thick+nameplate_thick,0,nameplate_z+nameplate_height/2])rotate([-90,0,0])rotate([0,90,0])scale([scaleby,scaleby , 1])linear_extrude(height=min_thick)import(logo_file, center=true);
+	if(HAS_NAMEPLATE){
+		//name plate
+		color("yellow")mirror_y()translate([wagon_width/2-wall_thick+nameplate_thick/2,0,nameplate_z])centred_cube(nameplate_thick,nameplate_length,nameplate_height);
+		nameplate_margin = 0;
+		if(logo){
+			//mirror_y()translate([wagon_width/2-wall_thick+nameplate_thick-0.1,0,nameplate_z+nameplate_height/2])rotate([-90,0,0])rotate([0,90,0])scale([(nameplate_length-nameplate_margin*2)/logo_dimensions[0], (nameplate_height-nameplate_margin*2)/logo_dimensions[1] ,min_thick/logo_dimensions[2]])translate([-logo_dimensions[0]/2,-logo_dimensions[1]/2, logo_dimensions[2]])surface(logo_file, invert = true);
+			scaleby = (nameplate_length-nameplate_margin*2)/logo_dimensions[0];
+			mirror_rotate180()translate([wagon_width/2-wall_thick+nameplate_thick,0,nameplate_z+nameplate_height/2])rotate([-90,0,0])rotate([0,90,0])scale([scaleby,scaleby , 1])linear_extrude(height=min_thick)import(logo_file, center=true);
+		}
 	}
 	
-	//end flanges
-	mirror_xy()hull(){
+	//end flanges (top of wagon)
+	color("blue")mirror_xy()hull(){
 		
 		translate([wagon_width/2+top_ridge_thick/2,wagon_length/2-end_ridge_thick/2+wagon_end_flange_length,0]){
-			centred_cube(top_ridge_thick,end_ridge_thick,top_ridge_height);
-			translate([-top_ridge_thick/2-0.1/2,0,0])centred_cube(0.1,end_ridge_thick,top_ridge_flange_height);
+			centred_cube(top_ridge_thick,end_ridge_thick,top_ridge_height + top_ridge_height2);
+			translate([-top_ridge_thick/2-0.1/2,0,0])centred_cube(0.1,end_ridge_thick,top_ridge_flange_height + top_ridge_height + top_ridge_height2);
 			
 		}
 	}
@@ -427,9 +440,10 @@ module wagon_body(logo=false){
 		translate([0,wagon_length/2-buffer_ledge_length/2,wagon_height])centred_cube(wagon_width,buffer_ledge_length,buffer_ledge_height);
 		translate([0,wagon_length/2-(buffer_ledge_length + buffer_ledge_taper_length)/2,wagon_height-0.1])centred_cube(wagon_width,buffer_ledge_length + buffer_ledge_taper_length,0.1);
 	}
-	
-	//little door thing
-	mirror_rotate180()translate([wagon_width/2,wagon_length/2 - side_ridge_from_end+ side_ridge_length/2 + little_door_length/2, little_door_z])little_door();
+	if(HAS_LITTLE_DOOR){
+		//little door thing
+		mirror_rotate180()translate([wagon_width/2,wagon_length/2 - side_ridge_from_end+ side_ridge_length/2 + little_door_length/2, little_door_z])little_door();
+	}
 	
 	//little plaque
 	color("gray")mirror_rotate180()translate([wagon_width/2+min_thick/2,wagon_length/2-plaque_from_end,plaque_z])centred_cube(min_thick,plaque_length,plaque_height);
@@ -458,7 +472,7 @@ module wagon_body(logo=false){
 	}
 
 	//mounts for the brake wheels
-	if(STYLE=="MWA"){
+	if(STYLE!="MWA-B"){
 		big_height = big_cylinder_brake_wheel_pos[2]-wagon_height + brake_wheel_holder_height_above_wheel;
 		translate([big_cylinder_brake_wheel_pos[0]+brake_wheel_holder_thick/2, big_cylinder_brake_wheel_pos[1],wagon_height])centred_cube(brake_wheel_holder_thick,brake_wheel_holder_length, big_height);
 		little_height = little_cylinder_brake_wheel_pos[2]-wagon_height + brake_wheel_holder_height_above_wheel;
@@ -504,8 +518,22 @@ module brake_cylinder(cylinder_def, punchout = false){
 
 module wagon(logo=false){
 	difference(){
-		wagon_body(logo);
+		union(){
+			wagon_body(logo);
+			if(!HAS_SEPARATE_BRAKE_CYLINDERS){
+				for(cylinder_def = wagon_cylinders){
+					pos = cylinder_def[0];
+					r = cylinder_def[1];
+					length = cylinder_def[2];
+					translate([pos[0],pos[1],wagon_height]){
+						brake_cylinder(cylinder_def);
+						centred_cube(r*0.8,length-r*0.75,2);
+					}
+				}
+			}
+		}
 		
+		//things to remove
 		union(){
 			//holes for buffers
             mirror_xy(){
@@ -523,25 +551,31 @@ module wagon(logo=false){
 			//holes for bogie screws
 			mirror_x()translate([0,bogie_distance/2,wagon_height-base_thick+min_thick*4])cylinder(h=bogie_mount_height+100,r=m3_thread_d/2);
 
-			//holes for the cylinders to be inserted
-			for(cylinder_def = wagon_cylinders){
-				pos = cylinder_def[0];
-				r = cylinder_def[1];
-				length = cylinder_def[2];
-				translate([pos[0],pos[1],wagon_height])brake_cylinder(cylinder_def,true);
+			if(HAS_SEPARATE_BRAKE_CYLINDERS){
+				//holes for the cylinders to be inserted
+				for(cylinder_def = wagon_cylinders){
+					pos = cylinder_def[0];
+					r = cylinder_def[1];
+					length = cylinder_def[2];
+					translate([pos[0],pos[1],wagon_height])brake_cylinder(cylinder_def,true);
+				}
 			}
 
-			if(STYLE=="MWA"){
+			if(STYLE!="MWA-B"){
 				//holes for the brake wheels to be inserted
 				for(hole = [big_cylinder_brake_wheel_pos, little_cylinder_brake_wheel_pos]){
 					translate(hole)rotate([0,90,0])cylinder(r=buffer_holder_d/2,h= 10, center=true);
 				}
 				//extra padding around the big cylinder brake wheel
-			
-				translate(big_cylinder_brake_wheel_pos)rotate([0,-90,0])cylinder(r=brake_wheel_space_d/2,h=10);
+				intersection(){
+					translate(big_cylinder_brake_wheel_pos)rotate([0,-90,0])cylinder(r=brake_wheel_space_d/2,h=10);
+					//but not so wide as to clip the brake cylinder if !HAS_SEPARATE_BRAKE_CYLINDERS
+					translate(big_cylinder_brake_wheel_pos)translate([0,0,-5])centred_cube(10,5,20);
+				}
 			}
 		}
 	}
+	
 }
 
 //bogie design measurements.
@@ -903,7 +937,7 @@ module bogie(with_brake_wheel = false){
 
 module gen_brake_wheel(){
 	//from intermodal wagon, with options now
-	if(STYLE == "MWA"){
+	if(STYLE != "MWA-B"){
 		brake_wheel(buffer_holder_length/3, brake_wheel_d, 4);
 	}else{
 		brake_wheel(buffer_holder_length/3, brake_wheel_d, 3);
@@ -1033,20 +1067,21 @@ if(GEN_BOGIE){
 }
 
 if(GEN_BRAKE_CYLINDER){
-
-	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)rotate([0,180,0]){
-		for(cylinder_def = wagon_cylinders){
-				pos = cylinder_def[0];
-				r = cylinder_def[1];
-				length = cylinder_def[2];
-				translate([pos[0],pos[1],wagon_height])brake_cylinder(cylinder_def,false);
-			}
+	if(HAS_SEPARATE_BRAKE_CYLINDERS){
+		optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)rotate([0,180,0]){
+			for(cylinder_def = wagon_cylinders){
+					pos = cylinder_def[0];
+					r = cylinder_def[1];
+					length = cylinder_def[2];
+					translate([pos[0],pos[1],wagon_height])brake_cylinder(cylinder_def,false);
+				}
+		}
 	}
 }
 
 if(GEN_BRAKE_WHEEL){
 	if(GEN_IN_SITU){
-		if(STYLE == "MWA"){
+		if(STYLE != "MWA-B"){
 			//big_cylinder_brake_wheel_pos, little_cylinder_brake_wheel_pos
 			optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)translate(big_cylinder_brake_wheel_pos)translate([-0.5,0,0])rotate([0,90,0])gen_brake_wheel();
 

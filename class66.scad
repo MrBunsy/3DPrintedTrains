@@ -54,7 +54,11 @@ include <threads.scad>
 
 
 //big todo - I think the wheels need slightly larger flanges and slightly more tapering, they seems to derail more easily than I'd expect.
+//better idea - central axle given dummy wheels!
 //need anotehr mod for the class59 motor on the other end to finish teh job
+
+//the motor really needs to be able to wobble to cope over wonky track - might be enough to put back the original shape of the clip (with lots of space) and raise height of base
+//or might need to re-think how it's held in place entirely
 /*
 
 Known variations I've not taken intoaccount:
@@ -68,7 +72,7 @@ Known variations I've not taken intoaccount:
 */
 
 //non-dummy base needs scaffolding
-GEN_BASE = true;
+GEN_BASE = false;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
 GEN_SHELL = false;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
@@ -76,7 +80,7 @@ GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
-GEN_MOTOR_CLIP = false;
+GEN_MOTOR_CLIP = true;
 
 //separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
 GEN_HEADLIGHTS = false;
@@ -218,8 +222,9 @@ centre_bogie_wheel_offset = 1;
 centre_length = m2mm(5.9);
 
 //bottom of the main part of the base from the track
+//adding some extra in here to help with the motor clearnace
 //buffers are BELOW this.
-base_height_above_track = top_of_buffer_from_top_of_rail ;//20;
+base_height_above_track = top_of_buffer_from_top_of_rail +1;//20;
 
 echo("length, width,height", length, width,height);
 
@@ -241,6 +246,8 @@ bogie_axle_mount_width = 23;
 There is a nib on one side of the Y-fork on the top of the motor so a clip the exact size results in a motor that can only 'wobble' in one directino
 
 */
+
+
 motor_clip_above_rails = 37;
 motor_clip_hole_d = 4.4;//4 was too tight
 motor_clip_fudge_height = 0.2;//0.5 is perfect for holding it in place but giving plenty of wobble. trying 0.2 for a lot less wobble
@@ -1657,7 +1664,7 @@ module motor_holder(){
 			
 		}
 	}*/
-
+	//thickess of central arm
 	arm_height = motor_clip_height- motor_clip_fudge_height;
 	//third attempt, this shape screws into the base and the motor clips into this
 	//this can be much smaller than 1.5 and still give plenty of play for gradient changes
