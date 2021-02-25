@@ -90,13 +90,13 @@ wheel_diameter = 12.5;
 
 GEN_IN_SITU = false;
 //depreacted, now wagon is split into base and top
-GEN_WAGON = true;
+GEN_WAGON = false;
 GEN_BASE = false;
 GEN_TOP = false;
 GEN_BOGIE = false;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
-GEN_BUFFER = false;
+GEN_BUFFER = true;
 GEN_COSMETIC_COUPLING = false;
 GEN_MODEL_BITS = false;
 
@@ -1036,6 +1036,76 @@ module wagon_top(){
 	}
 }
 
+//variation on the modern_buffer to make it a bit more MWA specific
+//copy-paste and tweak job
+//(0,0,0) is centre of buffer plate, buffer is vertical with buffer plate on the xy plane
+module buffer(){
+		
+	fixing_length=4;
+
+
+	//end that would touch another buffer if it were real
+	end_width = 6;
+	//height from the point of view on the train, +ve y here
+	end_height=3.25;
+	//my made-up buffer terminology, pole is the bit between the flat plate and the holder, and holder is the bit attached to a real wagon
+	//
+	pole_diameter = 2.5;//1;
+	holder_diameter=2.5;//1.8;
+	total_length=5.5;
+	pole_length = 1;
+	end_length=0.8;
+	//1.8 bit too big for the 2.0 diameter holes
+	truck_fixing_d=1.7;//1.5;
+
+	end_flange_length = 0.6;
+
+	end_corner_r = 0.5;
+	//top is curved
+	end_top_r = 8;
+	flat_bit_width = end_width;//-end_corner_r*2;
+	//height from top of square bit to centre of the circle that makes the top curve - ish, not quite accurate
+	h = sqrt(end_top_r*end_top_r - flat_bit_width*flat_bit_width/4);
+
+	endplate_length=0.5;
+
+	trainplate_width = end_width*0.8;
+	trainplate_height = end_height*0.8;
+	trainplate_r = 12;
+	trainplate_length = 0.1;
+
+	trainplate_h =  sqrt(trainplate_r*trainplate_r - trainplate_width*trainplate_width/4);
+	trainplate_flange_length = 1;
+
+
+	//end plate of the buffer
+	hull(){
+		rounded_cube(end_width,end_height,end_length, end_corner_r);
+		intersection(){
+			translate([0,-10,0])centred_cube(flat_bit_width,20,end_length);
+			translate([0,-end_height/2 + h, 0])cylinder(r=end_top_r, h = end_length);
+		}
+		cylinder(r=holder_diameter/2,h=end_flange_length+end_length);
+	}
+
+	
+	cylinder(r=pole_diameter/2, h=total_length, $fn=200);
+	translate([0,0,pole_length+end_length]){
+		cylinder(r=holder_diameter/2, h=total_length-(pole_length+end_length), $fn=200);
+	}
+	cylinder(r=truck_fixing_d/2,h=total_length+fixing_length, $fn=200);
+
+	//trainplate end
+	hull(){
+		translate([0,0,total_length-trainplate_length])mirror_x()intersection(){
+			translate([0,-10,0])centred_cube(trainplate_width,20,trainplate_length);
+			translate([0,-trainplate_height/2 + trainplate_h, 0])cylinder(r=trainplate_r, h = trainplate_length);
+		}
+		translate([0,0,total_length-trainplate_length-trainplate_flange_length+0.1])cylinder(r=holder_diameter/2,h=0.1);
+	}
+
+}
+
 if(GEN_WAGON){
 	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)wagon(true);
 }
@@ -1096,9 +1166,9 @@ if(GEN_BRAKE_WHEEL){
 
 if(GEN_BUFFER){
 	//wagon rotation copypasta
-	optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU){
+	color("grey")optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU){
 
-		mirror_xy(GEN_IN_SITU)optional_translate([buffer_distance/2,wagon_length/2+buffer_holder_length+1,wagon_height+buffer_z_from_base],GEN_IN_SITU)optional_rotate([90,0,0],GEN_IN_SITU)modern_buffer();
+		mirror_xy(GEN_IN_SITU)optional_translate([buffer_distance/2,wagon_length/2+buffer_holder_length+1,wagon_height+buffer_z_from_base],GEN_IN_SITU)optional_rotate([90,0,0],GEN_IN_SITU)buffer();
 
 	}
 	

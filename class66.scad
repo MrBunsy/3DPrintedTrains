@@ -248,9 +248,9 @@ There is a nib on one side of the Y-fork on the top of the motor so a clip the e
 */
 
 
-motor_clip_above_rails = 37;
+motor_clip_above_rails = 37-1;
 motor_clip_hole_d = 4.4;//4 was too tight
-motor_clip_fudge_height = 0.2;//0.5 is perfect for holding it in place but giving plenty of wobble. trying 0.2 for a lot less wobble
+motor_clip_fudge_height = 0.5;//0.2;//0.5 is perfect for holding it in place but giving plenty of wobble. trying 0.2 for a lot less wobble
 //making it the perfect size doesn't result in enough side to side wobble to deal with the join in the motor, so make the clip smaller by the fudge
 motor_clip_thick = 4.1 - motor_clip_fudge_height;//or 4.1?
 motor_clip_height_from_nib = 3.7;
@@ -1665,14 +1665,14 @@ module motor_holder(){
 		}
 	}*/
 	//thickess of central arm
-	arm_height = motor_clip_height- motor_clip_fudge_height;
+	arm_height = 2.5;//motor_clip_height- motor_clip_fudge_height;
 	//third attempt, this shape screws into the base and the motor clips into this
 	//this can be much smaller than 1.5 and still give plenty of play for gradient changes
 	lip_height = motor_clip_height - motor_clip_height_from_nib + motor_clip_fudge_height;
 	difference(){
 		union(){
 			centred_cube(motor_holder_width,motor_holder_length,arm_height);
-			//cylinder(r=motor_clip_hole_d,h=motor_clip_thick);
+			cylinder(r=motor_clip_hole_d,h=motor_clip_thick);
 		}
 		union(){
 			cylinder(r=motor_clip_hole_d/2,h=100,center=true);
@@ -2275,7 +2275,7 @@ optional_rotate([0,0,ANGLE],ANGLE != 0){
 		echo("gen motor clip");
 		optional_translate([0,-(length/2 - motor_centre_from_end),motor_clip_base_z+base_thick+base_height_above_track+motor_clip_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	
 		if(!GEN_IN_PLACE){
-			translate([50,50,0])class59motor_mod();
+			//translate([50,50,0])class59motor_mod();
 		}
 	}
 	
