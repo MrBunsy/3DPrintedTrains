@@ -72,7 +72,7 @@ Known variations I've not taken intoaccount:
 */
 
 //non-dummy base needs scaffolding
-GEN_BASE = false;
+GEN_BASE = true;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
 GEN_SHELL = false;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
@@ -80,7 +80,7 @@ GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
-GEN_MOTOR_CLIP = true;
+GEN_MOTOR_CLIP = false;
 
 //separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
 GEN_HEADLIGHTS = false;
@@ -149,6 +149,13 @@ base_top_width = width;
 //needs to be smaller than top width but larger than bottom width
 buffer_width = width-3.5;
 
+//bottom of the main part of the base from the track
+//adding some extra in here to help with the motor clearnace
+//buffers are BELOW this.
+base_height_above_track = top_of_buffer_from_top_of_rail +1;//20;
+
+buffer_height = base_thick + base_height_above_track - centre_of_buffer_from_top_of_rail;
+
 headlight_x = 11.5;
 
 //the girder bits extend further downwards in the middle
@@ -174,8 +181,8 @@ buffer_box_length_bottom = 3;
 buffer_box_bottom_height = 1.5;
 buffer_box_height = 3;
 //under the buffers, there's a front panel of the loco
-buffer_front_height = 4;
-buffer_front_length = 1;
+buffer_front_height = 5;
+buffer_front_length = 2;
 
 //wall_thick = 2;
 motor_length = 60+5;
@@ -221,10 +228,7 @@ centre_bogie_wheel_offset = 1;
 //centre of the base of the bit the sticks out between the bogies
 centre_length = m2mm(5.9);
 
-//bottom of the main part of the base from the track
-//adding some extra in here to help with the motor clearnace
-//buffers are BELOW this.
-base_height_above_track = top_of_buffer_from_top_of_rail +1;//20;
+
 
 echo("length, width,height", length, width,height);
 
@@ -248,7 +252,7 @@ There is a nib on one side of the Y-fork on the top of the motor so a clip the e
 */
 
 
-motor_clip_above_rails = 37-1;
+motor_clip_above_rails = 37;
 motor_clip_hole_d = 4.4;//4 was too tight
 motor_clip_fudge_height = 0.5;//0.2;//0.5 is perfect for holding it in place but giving plenty of wobble. trying 0.2 for a lot less wobble
 //making it the perfect size doesn't result in enough side to side wobble to deal with the join in the motor, so make the clip smaller by the fudge
@@ -354,8 +358,8 @@ module buffers(){
 
 	difference(){
 		union(){
-			//front face
-			hull(){
+			//front face in pipe space area
+			color("blue")hull(){
 				translate([0,-front_end_thick/2,0])centred_cube(end_width+front_outer_ridge_width*2,front_end_thick,girder_thick);
 				translate([0,-front_end_thick/2,base_thick-girder_thick])centred_cube(buffer_width,front_end_thick,girder_thick);
 				
@@ -380,10 +384,10 @@ module buffers(){
 			}
 			
 			//front face
-			translate([0,-buffer_front_length/2,base_thick])centred_cube(buffer_width,buffer_front_length,buffer_front_height);
+			color("green")translate([0,-buffer_front_length/2,base_thick])centred_cube(buffer_width,buffer_front_length,buffer_front_height);
 		}
 		//buffer holders
-		mirror_y()translate([buffer_distance/2,0,base_thick+buffer_box_height/2])rotate([90,0,0])cylinder(r=buffer_holder_d/2,h=buffer_holder_length*2,center=true);
+		mirror_y()translate([buffer_distance/2,0,buffer_height])rotate([90,0,0])cylinder(r=buffer_holder_d/2,h=buffer_holder_length*2,center=true);
 		
 	}
 	

@@ -155,8 +155,14 @@ def wagon_jobs():
 
 def mwa_wagon_jobs():
     jobs = []
+    variables = {"MWA":["bogie", "brake_cylinder", "base", "top", "brake_wheel", "wagon", "buffer"],
+                 #bogies are currently same for all, but should be different eventually
+                 #buffers are same for all
+                 "MWA-B":["brake_cylinder", "base", "top", "brake_wheel", "wagon"],
+                 #IOA has no separate brake cylinders
+                 "IOA":["base", "top", "brake_wheel", "wagon"]}
     for style in ["MWA", "MWA-B", "IOA"]:
-        MWAariables = ["bogie", "brake_cylinder", "base", "top", "brake_wheel", "wagon", "buffer"]
+        MWAariables = variables[style]
         fullMWAJob = JobDescription("MWA_wagon.scad", "{}_wagon_model".format(style))
         fullMWAJob.addVariable("GEN_IN_SITU", True)
         fullMWAJob.addVariable("STYLE", style)
