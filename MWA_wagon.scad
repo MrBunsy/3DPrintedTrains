@@ -88,9 +88,9 @@ include <couplings_parametric.scad>
 
 wheel_diameter = 12.5;
 
-GEN_IN_SITU = false;
+GEN_IN_SITU = true;
 //depreacted, now wagon is split into base and top
-GEN_WAGON = false;
+GEN_WAGON = true;
 GEN_BASE = false;
 GEN_TOP = false;
 GEN_BOGIE = false;
@@ -1069,13 +1069,13 @@ module buffer(){
 
 	endplate_length=0.5;
 
-	trainplate_width = end_width*0.8;
-	trainplate_height = end_height*0.8;
-	trainplate_r = 12;
+	trainplate_width = end_width*0.7;
+	trainplate_height = end_height*0.7;
+	trainplate_r = 10;
 	trainplate_length = 0.1;
 
 	trainplate_h =  sqrt(trainplate_r*trainplate_r - trainplate_width*trainplate_width/4);
-	trainplate_flange_length = 1;
+	trainplate_flange_length = 1.2;
 
 
 	//end plate of the buffer
