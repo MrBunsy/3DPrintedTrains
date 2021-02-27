@@ -155,7 +155,9 @@ def wagon_jobs():
 
 def mwa_wagon_jobs():
     jobs = []
-    variables = {"MWA":["bogie", "brake_cylinder", "base", "top", "brake_wheel", "wagon", "buffer"],
+    allOptions = ["bogie", "brake_cylinder", "base", "top", "brake_wheel", "wagon", "buffer"]
+    variables = {
+                "MWA":allOptions,
                  #bogies are currently same for all, but should be different eventually
                  #buffers are same for all
                  "MWA-B":["brake_cylinder", "base", "top", "brake_wheel", "wagon"],
@@ -179,6 +181,9 @@ def mwa_wagon_jobs():
             job.addVariable("GEN_IN_SITU", False)
             job.addVariable("GEN_MODEL_BITS", False)
             job.addVariable("BOGIE_EASY_PRINT", True)
+            #disable anything left set to True
+            for dont in allOptions:
+                job.addVariable("GEN_"+dont.upper(), False)
             job.addVariable("STYLE", style)
             for v2 in MWAariables:
                 job.addVariable("GEN_"+v2.upper(), v==v2)

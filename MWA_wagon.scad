@@ -88,15 +88,15 @@ include <couplings_parametric.scad>
 
 wheel_diameter = 12.5;
 
-GEN_IN_SITU = true;
+GEN_IN_SITU = false;
 //depreacted, now wagon is split into base and top
-GEN_WAGON = true;
-GEN_BASE = false;
+GEN_WAGON = false;
+GEN_BASE = true;
 GEN_TOP = false;
 GEN_BOGIE = false;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
-GEN_BUFFER = true;
+GEN_BUFFER = false;
 GEN_COSMETIC_COUPLING = false;
 GEN_MODEL_BITS = false;
 
@@ -110,6 +110,8 @@ STYLE = "IOA";
 //MWA-B has no ladder, square nameplate, no small cylinder and brake-wheels on one bogie only - not on the main wagon body
 //IOA has no nameplate and taller 'ridge bits' around the top, also the brake cylinders are same colour as the body
 //and differently shaped triangular bits on the underside
+
+blurbs = [str("github.com/MrBunsy/3DPrintedTrains"), str(STYLE, " Wagon")];
 
 //MWA and IOA
 HAS_LADDER = STYLE != "MWA-B";
@@ -531,6 +533,11 @@ module wagon(logo=false){
 					}
 				}
 			}
+			text_size = 4.5;
+			color("grey")translate([0,0,wagon_height]){
+				translate([-text_size*0.75,0,0])rotate([0,0,90])linear_extrude(height = 0.2) text(text=blurbs[0],size=text_size,valign="center",halign="center",font = "Liberation Sans:style=Bold");
+				translate([text_size*0.75,0,0])rotate([0,0,90])linear_extrude(height = 0.2) text(text=blurbs[1],size=text_size,valign="center",halign="center",font = "Liberation Sans:style=Bold");
+			};
 		}
 		
 		//things to remove
