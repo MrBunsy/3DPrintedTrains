@@ -85,13 +85,14 @@ include <threads.scad>
 include <intermodal_wagon_accessories.scad>
 include <buffer_modern.scad>
 include <couplings_parametric.scad>
+include <gravel_pile.scad>
 
 wheel_diameter = 12.5;
 
 GEN_IN_SITU = false;
 //depreacted, now wagon is split into base and top
 GEN_WAGON = false;
-GEN_BASE = true;
+GEN_BASE = false;
 GEN_TOP = false;
 GEN_BOGIE = false;
 GEN_BRAKE_WHEEL = false;
@@ -99,6 +100,7 @@ GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
 GEN_COSMETIC_COUPLING = false;
 GEN_MODEL_BITS = false;
+GEN_GRAVEL = true;
 
 //"dapol" or "hornby"
 COUPLING_TYPE="dapol";
@@ -1179,4 +1181,9 @@ if(GEN_BUFFER){
 
 	}
 	
+}
+
+if(GEN_GRAVEL){
+	padding = GEN_IN_SITU ? 0 : 0.2;
+	optional_translate([0,0,wagon_base_above_rails+wagon_base_thick], GEN_IN_SITU)gravel_pile(wagon_width-wall_thick*2-padding, wagon_length-wall_thick*2-padding, wagon_height-base_thick);
 }
