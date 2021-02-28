@@ -94,13 +94,13 @@ GEN_IN_SITU = false;
 GEN_WAGON = false;
 GEN_BASE = false;
 GEN_TOP = false;
-GEN_BOGIE = false;
+GEN_BOGIE = true;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
 GEN_COSMETIC_COUPLING = false;
 GEN_MODEL_BITS = false;
-GEN_GRAVEL = true;
+GEN_GRAVEL = false;
 
 //"dapol" or "hornby"
 COUPLING_TYPE="dapol";
@@ -108,7 +108,7 @@ COUPLING_TYPE="dapol";
 BOGIE_EASY_PRINT = true;
 
 //MWA, MWA-B, IOA
-STYLE = "IOA";
+STYLE = "MWA-B";
 //MWA-B has no ladder, square nameplate, no small cylinder and brake-wheels on one bogie only - not on the main wagon body
 //IOA has no nameplate and taller 'ridge bits' around the top, also the brake cylinders are same colour as the body
 //and differently shaped triangular bits on the underside
@@ -709,6 +709,9 @@ module bogie_hull_shape(width=bogie_backing_plate_thick){
 		}
 }
 
+//[y,z]
+bogie_brake_wheel_pos = [-4.2,3.1];
+
 //facing +ve x
 module bogie_edge(){
 	
@@ -809,7 +812,9 @@ module bogie_edge(){
 	//non-mirrored bits
 
 	//some other sticky out bits
+	//circle
 	color("blue")translate([0,4.4,3.1])rotate([0,90,0])cylinder(r=0.9/2,h=bogie_bolt_width,$fn=20);
+	//elongated circle
 	color("blue")hull(){
 		translate([0,-4.4,3.1])rotate([0,90,0])cylinder(r=0.9/2,h=bogie_bolt_width,$fn=20);
 		translate([0,-4.4-0.9,3.1])rotate([0,90,0])cylinder(r=0.9/2,h=bogie_bolt_width,$fn=20);
@@ -930,13 +935,21 @@ module bogie(with_brake_wheel = false){
 			coupling_arm_length = coupling_from_bogie_centre + coupling_mount_y_adjust;
 			translate([0,coupling_arm_length/2,coupling_arm_z])centred_cube(5,coupling_arm_length,coupling_arm_height);
 
+			//make bit with brake wheel thicker
+			extra_thickness =  2-min_thick;// - bogie_backing_plate_thick;
+			extra_thickness_length = buffer_holder_d*2;
+			mirror_y()translate([bogie_inner_width/2+bogie_padding_width++bogie_backing_plate_thick-extra_thickness/2-min_thick, bogie_brake_wheel_pos[0],0])centred_cube(extra_thickness,extra_thickness_length, bogie_brake_wheel_pos[1]+buffer_holder_d*0.75);
+
 		}//end of additive bits
 		union(){
 			//wheel holder
 			mirror_x()translate([0,bogie_axle_distance/2,axle_to_top_of_bogie])axle_punch();
 			//m3 bolt holder
 			translate([0,0,-1])cylinder(r=m3_thread_loose_size/2,h=20,$fn=100);
-
+			if(with_brake_wheel){
+				//MWA-B style brake wheel on bogie
+				mirror_y()translate([5,bogie_brake_wheel_pos[0],bogie_brake_wheel_pos[1]])rotate([0,90,0])cylinder(r=buffer_holder_d/2,h=20);
+			}
 		}
 
 		
@@ -1128,9 +1141,10 @@ if(GEN_TOP){
 }
 
 if(GEN_BOGIE){
+	// bogies_different = STYLE == "MWA-B";
 	//TODO, rotate rather than mirror!
 	rotate_mirror(GEN_IN_SITU)optional_translate([0,bogie_distance/2,axle_to_top_of_bogie+wheel_diameter/2],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU){
-		bogie();
+		bogie(STYLE == "MWA-B");
 
 		if(GEN_MODEL_BITS){
 			//representation of the wheels. not for printing

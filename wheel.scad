@@ -90,7 +90,7 @@ module wheel_with_point(diameters=diameters_14mm, depths=depths, fn=2000, extra_
 //wheel(diameters_14mm_dummy, depths, 2000, 2.5);
 
 //trying making my own wheelset
-wheel(diameters_12_5mm, depths, 2000, 3.7-total_depth);
+//wheel(diameters_12_5mm, depths, 2000, 3.7-total_depth);
 //wheel_with_point(diameters_12_5mm, depths, 2000, 3.7-total_depth);
 //needs 2mm rod of length 25.7 - 1.4*2; (1.4 is point height) = 22.9
 
