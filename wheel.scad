@@ -19,7 +19,7 @@ along with The 3DPrintedTrains project.  If not, see <https:www.gnu.org/licenses
 
 include <constants.scad>
 
-diameters_12_5mm = [14.6,14.6, 12.7, 12.6];//not much gradient on the wheel part with this
+diameters_12_5mm = [14.6,14.6, 12.7, 12.5];//not much gradient on the wheel part with this
 diameters_14mm = [16.5,16.5, 14.45, 14.0];
 diameters_14mm_dummy = [14.4,14.4, 14.4, 14.0];
 depths = [0.4, 0.3, 2.7];//total 3.4
@@ -27,6 +27,7 @@ total_depth = 3.4;
 //might need to make first dpeth longer to reduce wobble?
 $fn=1000;
 
+flange_to_point = 5.1;
 //intended for a 2mm brass rod of length 21.2mm (better slightly shorter, so it doesn't stick out the ends and therefore is easy to use in a clamp)
 
 
@@ -41,7 +42,8 @@ module wheel_segment(i, diameters, fn=2000){
 module wheel(diameters=diameters_14mm, depths=depths, fn=2000, extra_axle_length = 2.5){
 	//2mm rod
 	//1mm radius works well for the 2mm rod with a clamp, but very hard to get wheel perfectly straight. trying slightly more loose but with more length
-	axle_r=1.1;
+	//1.1 works very well indeed for wheels that slide onto the axle, but they are a tiny bit too loose for ones that I don't want to be able to move along the axle.
+	axle_r=1.075;
 	extra_height = extra_axle_length;
 	fancy_internal_r=5.8/2;
 
@@ -73,9 +75,23 @@ module wheelset_model(diameter=12.5){
 	scale([axle_width/axle_holder_width,1,1])axle_punch();
 }
 
+module wheel_with_point(diameters=diameters_14mm, depths=depths, fn=2000, extra_axle_length = 2.5){
+	
+	wheel(diameters, depths, fn, extra_axle_length);
+	translate([0,0,total_depth + extra_axle_length])cylinder(r1=1.5,r2=0,$fn=fn, h = flange_to_point - total_depth - extra_axle_length);
+	echo("point height",flange_to_point - total_depth - extra_axle_length);
+	
+}
+
 //these wheels work for the class 66 when mounted on 2mm brass rods with clean ends (use the rail cutters for this!)
 //wheel(diameters_14mm, depths, 2000, 2.5);
 
+//for the class 66
 //wheel(diameters_14mm_dummy, depths, 2000, 2.5);
+
+//trying making my own wheelset
+wheel(diameters_12_5mm, depths, 2000, 3.7-total_depth);
+//wheel_with_point(diameters_12_5mm, depths, 2000, 3.7-total_depth);
+//needs 2mm rod of length 25.7 - 1.4*2; (1.4 is point height) = 22.9
 
 //wheelset_model();
