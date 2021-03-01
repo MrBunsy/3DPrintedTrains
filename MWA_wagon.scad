@@ -90,15 +90,15 @@ include <gravel_pile.scad>
 wheel_diameter = 12.5;
 
 GEN_IN_SITU = false;
-//depreacted, now wagon is split into base and top
+//deprecated, now wagon is split into base and top (still used to generate the model)
 GEN_WAGON = false;
 GEN_BASE = false;
 GEN_TOP = false;
-GEN_BOGIE = true;
-GEN_BRAKE_WHEEL = false;
+GEN_BOGIE = false;
+GEN_BRAKE_WHEEL = true;
 GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
-GEN_COSMETIC_COUPLING = false;
+//bits that aren't printed, just part of the 3d model
 GEN_MODEL_BITS = false;
 GEN_GRAVEL = false;
 
@@ -962,7 +962,8 @@ module gen_brake_wheel(){
 	if(STYLE != "MWA-B"){
 		brake_wheel(buffer_holder_length/3, brake_wheel_d, 4);
 	}else{
-		brake_wheel(buffer_holder_length/3, brake_wheel_d, 3);
+		//default from intermodalwagon actually seems to be right for MWA-B
+		brake_wheel(buffer_holder_length/3);
 	}
 	
 
@@ -1180,7 +1181,8 @@ if(GEN_BRAKE_WHEEL){
 
 			optional_translate([0,0,wagon_base_above_rails + wagon_height],GEN_IN_SITU)optional_rotate([0,180,0],GEN_IN_SITU)translate(little_cylinder_brake_wheel_pos)translate([0.5,0,0])rotate([0,-90,0])gen_brake_wheel();
 		}else{
-			//TODO
+			//mirror_y()translate([bogie_inner_width/2+bogie_padding_width++bogie_backing_plate_thick-extra_thickness/2-min_thick, bogie_brake_wheel_pos[0],0])centred_cube(extra_thickness,extra_thickness_length, bogie_brake_wheel_pos[1]+buffer_holder_d*0.75);
+			color("white")mirror_y()translate([bogie_inner_width/2+bogie_padding_width+bogie_flange_width+0.4,-bogie_distance/2-bogie_brake_wheel_pos[0], axle_to_top_of_bogie+wheel_diameter/2-bogie_brake_wheel_pos[1]])rotate([0,-90,0])brake_wheel();
 		}
 	}else{
 		gen_brake_wheel();

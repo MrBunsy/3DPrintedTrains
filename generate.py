@@ -158,9 +158,9 @@ def mwa_wagon_jobs():
     allOptions = ["bogie", "brake_cylinder", "base", "top", "brake_wheel", "wagon", "buffer"]
     variables = {
                 "MWA":allOptions,
-                 #bogies are currently same for all, but should be different eventually
+                 #bogies are currently same for IOA and MWA, with one bogie different for MWA-B
                  #buffers are same for all
-                 "MWA-B":["brake_cylinder", "base", "top", "brake_wheel", "wagon"],
+                 "MWA-B":["brake_cylinder", "base", "top", "brake_wheel", "wagon", "bogie"],
                  #IOA has no separate brake cylinders
                  "IOA":["base", "top", "brake_wheel", "wagon"]}
     for style in ["MWA", "MWA-B", "IOA"]:
