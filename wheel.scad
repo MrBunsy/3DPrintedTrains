@@ -23,7 +23,17 @@ diameters_12_5mm = [14.6,14.6, 12.7, 12.5];//not much gradient on the wheel part
 diameters_14mm = [16.5,16.5, 14.45, 14.0];
 diameters_14mm_dummy = [14.4,14.4, 14.4, 14.0];
 depths = [0.4, 0.3, 2.7];//total 3.4
-total_depth = 3.4;
+//total_depth = 3.4;
+//sum depths provided
+function total_depth(depths, i=0) = depths[i] + (i < len(depths)-1 ? total_depth(depths, i+1) : 0);
+
+//sum depths up to the index provided
+function depth_up_to(depths, upto = 1) = total_depth(depths) - (upto < len(depths)-1 ?  total_depth(depths,upto+1) : 0);
+
+//given diameters and depths of a normal wheel, add an extra bit and return [diameters, depths]
+function extra_height(diameters, depths, height = 2.5, r = 2.9) = [concat(diameters, [r,r]), concat(depths, [0,height])];
+
+//echo(total_depth(depths));
 //might need to make first dpeth longer to reduce wobble?
 $fn=1000;
 
@@ -31,38 +41,54 @@ flange_to_point = 5.1;
 //intended for a 2mm brass rod of length 21.2mm (better slightly shorter, so it doesn't stick out the ends and therefore is easy to use in a clamp)
 
 
-module wheel_segment(i, diameters, fn=2000){
-    cylinder(r1=diameters[i]/2, r2=diameters[i+1]/2, h=depths[i], $fn=fn);
+module wheel_segment(diameters, depths, fn=2000, i=0){
+	if(depths[i] > 0){
+		cylinder(r1=diameters[i]/2, r2=diameters[i+1]/2, h=depths[i], $fn=fn);
+	}
     if(i< len(depths)-1){
         translate([0,0, depths[i]]){
-            wheel_segment(i+1,diameters, fn);
+            wheel_segment(diameters, depths, fn, i+1);
         }
     }
 }
-module wheel(diameters=diameters_14mm, depths=depths, fn=2000, extra_axle_length = 2.5){
+module wheel(diameters=diameters_14mm, depths=depths, fn=2000){
 	//2mm rod
 	//1mm radius works well for the 2mm rod with a clamp, but very hard to get wheel perfectly straight. trying slightly more loose but with more length
 	//1.1 works very well indeed for wheels that slide onto the axle, but they are a tiny bit too loose for ones that I don't want to be able to move along the axle.
-	axle_r=1.075;
-	extra_height = extra_axle_length;
-	fancy_internal_r=5.8/2;
+	//works well for PLA:
+	//axle_r=1.075;
+	//trying for PETG:
+	//1.2 is about as loose in PETG as 1.1 was in PLA
+	//1.175 works in PETG, but still a bit too loose to worth without glue
 
+	axle_r=1.15;
+	//extra_height = extra_axle_length;
+	fancy_internal_r=5.8/2;
+	fancy_edge_thick = 1.5;
+	//assuming diameters[flange outer, flange inner, mainwheel outer, mainwheel inner]
+	fancy_height = depth_up_to(depths,2)-0.5;
+	
 	difference(){
 		union(){
-			wheel_segment(0,diameters, fn);
-			cylinder(h=total_depth + extra_height, r=fancy_internal_r, $fn=fn);
+			wheel_segment(diameters, depths, fn);
+			//cylinder(h=total_depth(depths) + extra_height, r=fancy_internal_r, $fn=fn);
 		}
 		
 		//fancy styling
 		union(){
 			//2mm rod
-			cylinder(h=15, r=axle_r, center=true);
-			
+			cylinder(h=total_depth(depths)*2+1, r=axle_r, center=true);
+			echo ("depth up to 2", depth_up_to(depths,2));
 			difference(){
-				translate([0,0,2.9])cylinder(h=1, r=diameters[len(diameters)-1]/2-1.5, $fn=fn);
-				cylinder(h=10, r=fancy_internal_r, center=true, $fn=fn);
+				
+				translate([0,0,fancy_height])cylinder(h=50, r=diameters[3]/2-fancy_edge_thick, $fn=fn);
+				cylinder(h=150, r=fancy_internal_r, center=true, $fn=fn);
 			}
 		}
+		
+	}
+	difference(){
+	
 	}
 }
 
@@ -70,7 +96,7 @@ module wheelset_model(diameter=12.5){
 	
 	diameters = diameter == 14 ? diameters_14mm : diameters_12_5mm;
 	
-	mirror_y()translate([16.5/2-(depths[0] + depths[1]),0,0])rotate([0,90,0])wheel(diameters, depths, 50, 0);
+	mirror_y()translate([16.5/2-(depths[0] + depths[1]),0,0])rotate([0,90,0])wheel(diameters, depths, 50);
 	
 	scale([axle_width/axle_holder_width,1,1])axle_punch();
 }
@@ -78,20 +104,36 @@ module wheelset_model(diameter=12.5){
 module wheel_with_point(diameters=diameters_14mm, depths=depths, fn=2000, extra_axle_length = 2.5){
 	
 	wheel(diameters, depths, fn, extra_axle_length);
-	translate([0,0,total_depth + extra_axle_length])cylinder(r1=1.5,r2=0,$fn=fn, h = flange_to_point - total_depth - extra_axle_length);
-	echo("point height",flange_to_point - total_depth - extra_axle_length);
+	translate([0,0,total_depth(depths) + extra_axle_length])cylinder(r1=1.5,r2=0,$fn=fn, h = flange_to_point - total_depth(depths) - extra_axle_length);
+	echo("point height",flange_to_point - total_depth(depths) - extra_axle_length);
 	
 }
 
 //these wheels work for the class 66 when mounted on 2mm brass rods with clean ends (use the rail cutters for this!)
 //wheel(diameters_14mm, depths, 2000, 2.5);
+diameters_14mm_with_extra = extra_height(diameters_14mm, depths, 2.5, 14/2);
+//wheel(diameters_14mm_with_extra[0], diameters_14mm_with_extra[1], 2000);
 
 //for the class 66
-//wheel(diameters_14mm_dummy, depths, 2000, 2.5);
+diameters_14mm_dummy_with_extra = extra_height(diameters_14mm_dummy, depths, 2.5, 14/2);
+//wheel(diameters_14mm_dummy_with_extra[0], diameters_14mm_dummy_with_extra[1], 2000);
 
-//trying making my own wheelset
-//wheel(diameters_12_5mm, depths, 2000, 3.7-total_depth);
+//trying making my own wheelset (dremel with 2mm brass rod can be sharpened to spike, or reclaimed dapol axles)
+wheelset_sizes_12_5mm = extra_height(diameters_12_5mm, depths, 3.7-total_depth(depths), 12.5/2);
+//wheel(wheelset_sizes_12_5mm[0], wheelset_sizes_12_5mm[1]);
+
+//bits to slot along the axle to keep the wheels square and at the right distance
+
+between_wheels = axle_width - 2*(flange_to_point + depths[0]);
+mini_wheel_h = 2;
+
+//wheel([10,10,4,4], [mini_wheel_h,0,between_wheels/2-mini_wheel_h]);
+
+
+//not particularily successful: - slotting onto the rod popped the spike off on one wheel. spikes might be strong enough though
 //wheel_with_point(diameters_12_5mm, depths, 2000, 3.7-total_depth);
 //needs 2mm rod of length 25.7 - 1.4*2; (1.4 is point height) = 22.9
+
+//wheel(diameters_12_5mm, depths);
 
 //wheelset_model();
