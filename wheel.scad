@@ -19,11 +19,34 @@ along with The 3DPrintedTrains project.  If not, see <https:www.gnu.org/licenses
 
 include <constants.scad>
 
+//spacers to hold said wheels square
+GEN_WHEELSET_SPACER = true;
+//generate the actual wheel
+GEN_WHEEL = false;
+
+
+//"spike" uses pointed ends of the axle for bearings. "axle" uses the centre of the axle slotting into a holder as a bearing. Wheels are longer for axle bearings and spike bearings require spacers to keep the shorter wheels at right angles
+BEARING_TYPE = "spike";
+
+//no flange - only used for centre wheel on class66 currently
+DUMMY = false;
+
+//12.5 or 14
+DIAMETER = 12.5;
+
+//if false axle is axle_width (25.65mm) long ended in points, if true axle is flat ended and the points are part of the wheels. if BEARING_TYPE is "axle" this is largely irrelevant
+WHEEL_POINTED = true;
+
+//TODO
+STYLE = "modern";
+
+
 diameters_12_5mm = [14.6,14.6, 12.7, 12.5];//not much gradient on the wheel part with this
 diameters_14mm = [16.5,16.5, 14.45, 14.0];
 diameters_14mm_dummy = [14.4,14.4, 14.4, 14.0];
-depths = [0.4, 0.3, 2.7];//total 3.4
-//total_depth = 3.4;
+depths_thicker = [0.4, 0.3, 2.7];//total 3.4
+depths_thinner = [0.4, 0.3, 2];
+
 //sum depths provided
 function total_depth(depths, i=0) = depths[i] + (i < len(depths)-1 ? total_depth(depths, i+1) : 0);
 
@@ -40,7 +63,7 @@ $fn=1000;
 flange_to_point = 5.1;
 //intended for a 2mm brass rod of length 21.2mm (better slightly shorter, so it doesn't stick out the ends and therefore is easy to use in a clamp)
 
-
+//recurive module used by wheel() to generate each segment just from an array of depths and diameters
 module wheel_segment(diameters, depths, fn=2000, i=0){
 	if(depths[i] > 0){
 		cylinder(r1=diameters[i]/2, r2=diameters[i+1]/2, h=depths[i], $fn=fn);
@@ -101,37 +124,62 @@ module wheelset_model(diameter=12.5){
 	scale([axle_width/axle_holder_width,1,1])axle_punch();
 }
 
-module wheel_with_point(diameters=diameters_14mm, depths=depths, fn=2000, extra_axle_length = 2.5){
+//axle_length reduction reduces length of axle - will introduce a bit more wobble (potentially) but increase strength of the point
+module wheel_with_point(diameters=diameters_14mm, depths=depths, axle_length_reduction = 0.5, fn=2000){
 	
-	wheel(diameters, depths, fn, extra_axle_length);
-	translate([0,0,total_depth(depths) + extra_axle_length])cylinder(r1=1.5,r2=0,$fn=fn, h = flange_to_point - total_depth(depths) - extra_axle_length);
-	echo("point height",flange_to_point - total_depth(depths) - extra_axle_length);
+	wheel(diameters, depths, fn);
+	translate([0,0,total_depth(depths)])cylinder(r1=1.5,r2=0,$fn=fn, h = flange_to_point - total_depth(depths));
+	translate([0,0,total_depth(depths)-axle_length_reduction])cylinder(r=1.5,h=axle_length_reduction);
+	echo("point height",flange_to_point - (total_depth(depths)-depths[0]));
 	
 }
 
+diameters = DIAMETER == 12.5 ? diameters_12_5mm : 
+				DIAMETER == 14 && DUMMY == false ? diameters_14mm : diameters_14mm_dummy;
+				//DIAMETER == 14 && DUMMY == true ? 
+
+depths = BEARING_TYPE == "axle" ? depths_thicker : depths_thinner;
+
+extra_height = BEARING_TYPE == "axle" ? 2.5 : 3-total_depth(depths);
+
+diameters_with_extra = extra_height(diameters, depths, extra_height, DIAMETER/2);
+
 //these wheels work for the class 66 when mounted on 2mm brass rods with clean ends (use the rail cutters for this!)
 //wheel(diameters_14mm, depths, 2000, 2.5);
-diameters_14mm_with_extra = extra_height(diameters_14mm, depths, 2.5, 14/2);
+//diameters_14mm_with_extra = extra_height(diameters_14mm, depths, 2.5, 14/2);
 //wheel(diameters_14mm_with_extra[0], diameters_14mm_with_extra[1], 2000);
 
 //for the class 66
-diameters_14mm_dummy_with_extra = extra_height(diameters_14mm_dummy, depths, 2.5, 14/2);
+//diameters_14mm_dummy_with_extra = extra_height(diameters_14mm_dummy, depths, 2.5, 14/2);
 //wheel(diameters_14mm_dummy_with_extra[0], diameters_14mm_dummy_with_extra[1], 2000);
 
 //trying making my own wheelset (dremel with 2mm brass rod can be sharpened to spike, or reclaimed dapol axles)
-wheelset_sizes_12_5mm = extra_height(diameters_12_5mm, depths, 3.7-total_depth(depths), 12.5/2);
+//wheelset_sizes_12_5mm = extra_height(diameters_12_5mm, depths, 3-total_depth(depths), 12.5/2);
 //wheel(wheelset_sizes_12_5mm[0], wheelset_sizes_12_5mm[1]);
 
-//bits to slot along the axle to keep the wheels square and at the right distance
 
-between_wheels = axle_width - 2*(flange_to_point + depths[0]);
-mini_wheel_h = 2;
+if(GEN_WHEEL){
+	if(WHEEL_POINTED && BEARING_TYPE=="spike"){
+		wheel_with_point(diameters_with_extra[0], diameters_with_extra[1]);
+	}else{
+		wheel(diameters_with_extra[0], diameters_with_extra[1]);
+	}
+}
+
+if(GEN_WHEELSET_SPACER){
+	//bits to slot along the axle to keep the wheels square and at the right distance
+	between_wheels = axle_width - 2*(flange_to_point + depths[0]);
+	mini_wheel_h = 2;
+	wheel([10,10,4,4], [mini_wheel_h,0,between_wheels/2-mini_wheel_h]);
+}
+
 
 //wheel([10,10,4,4], [mini_wheel_h,0,between_wheels/2-mini_wheel_h]);
 
-
 //not particularily successful: - slotting onto the rod popped the spike off on one wheel. spikes might be strong enough though
 //wheel_with_point(diameters_12_5mm, depths, 2000, 3.7-total_depth);
+//trying again with the between wheels bits
+//wheel_with_point(wheelset_sizes_12_5mm[0], wheelset_sizes_12_5mm[1]);
 //needs 2mm rod of length 25.7 - 1.4*2; (1.4 is point height) = 22.9
 
 //wheel(diameters_12_5mm, depths);
