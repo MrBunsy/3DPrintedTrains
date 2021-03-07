@@ -80,7 +80,7 @@ GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
-GEN_MOTOR_CLIP = false;
+GEN_MOTOR_CLIP = true;
 
 //separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
 GEN_HEADLIGHTS = false;
@@ -89,7 +89,7 @@ GEN_PI_MOUNT = false;
 
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
-GEN_IN_PLACE = false;
+GEN_IN_PLACE = true;
 
 //generate tiny things that won't print well
 GEN_TINY_BITS = false;
@@ -152,7 +152,7 @@ buffer_width = width-3.5;
 //bottom of the main part of the base from the track
 //adding some extra in here to help with the motor clearnace
 //buffers are BELOW this.
-base_height_above_track = top_of_buffer_from_top_of_rail +1;//20;
+base_height_above_track = top_of_buffer_from_top_of_rail;// +1;//20;
 
 buffer_height = base_thick + base_height_above_track - centre_of_buffer_from_top_of_rail;
 
@@ -187,8 +187,7 @@ buffer_front_length = 2;
 //wall_thick = 2;
 motor_length = 60+5;
 //the bulk of the motor is not central to the wheels or rotation clip
-//however this makes the screwholes and whatnot more complicated, and I'm lazy. so I've just made the length longer
-//motor_length_offset_y = 2.5;
+motor_offset_y = 5;
 motor_centre_from_end = 45;
 //doors are different at each end
 //these should line up perfectly with the furthest bogie springs, but nothign enforces that
@@ -807,7 +806,7 @@ module base(){
 			pi_screwholes();
 			if(!DUMMY){
 				//space for motor
-				translate([0,-(length/2 - motor_centre_from_end),0])motor_space();
+				translate([0,-(length/2 - motor_centre_from_end) + motor_offset_y,0])motor_space();
 			}else{
 				//second bogie
 				translate([0,-(length/2 - motor_centre_from_end),0])cylinder(h=100,r=m3_thread_d/2,center=true);
@@ -859,8 +858,8 @@ module base(){
 			
 			if(!DUMMY){
 				//screwholes for motor clip
-				translate([0,-length/2+motor_centre_from_end,-1])mirror_xy()translate(motor_hold_screws)cylinder(r=m2_thread_size_loose/2,h=100,$fn=50);
-				translate([0,-length/2+motor_centre_from_end,base_thick-m2_head_length])mirror_xy()translate(motor_hold_screws)cylinder(r=m2_head_size/2,h=100,$fn=50);
+				translate([0,-length/2+motor_centre_from_end + motor_offset_y,-1])mirror_xy()translate(motor_hold_screws)cylinder(r=m2_thread_size_loose/2,h=100,$fn=50);
+				translate([0,-length/2+motor_centre_from_end + motor_offset_y,base_thick-m2_head_length])mirror_xy()translate(motor_hold_screws)cylinder(r=m2_head_size/2,h=100,$fn=50);
 			}
 			
 			
@@ -1676,12 +1675,12 @@ module motor_holder(){
 	difference(){
 		union(){
 			centred_cube(motor_holder_width,motor_holder_length,arm_height);
-			cylinder(r=motor_clip_hole_d,h=motor_clip_thick);
+			translate([0,-motor_offset_y,0])cylinder(r=motor_clip_hole_d,h=motor_clip_thick);
 		}
 		union(){
-			cylinder(r=motor_clip_hole_d/2,h=100,center=true);
+			translate([0,-motor_offset_y,0])cylinder(r=motor_clip_hole_d/2,h=100,center=true);
 			motor_holder_battery_space();
-			translate([0,0,arm_height - lip_height])cylinder(r=motor_clip_hole_d/2 + motor_clip_nib_width,h=10);
+			translate([0,-motor_offset_y,0])translate([0,0,arm_height - lip_height])cylinder(r=motor_clip_hole_d/2 + motor_clip_nib_width,h=10);
 		}
 	}
 	screw_depth = 10;
@@ -2277,7 +2276,7 @@ optional_rotate([0,0,ANGLE],ANGLE != 0){
 	
 	if(GEN_MOTOR_CLIP){
 		echo("gen motor clip");
-		optional_translate([0,-(length/2 - motor_centre_from_end),motor_clip_base_z+base_thick+base_height_above_track+motor_clip_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	
+		optional_translate([0,-(length/2 - motor_centre_from_end) + motor_offset_y,motor_clip_base_z+base_thick+base_height_above_track+motor_clip_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	
 		if(!GEN_IN_PLACE){
 			//translate([50,50,0])class59motor_mod();
 		}

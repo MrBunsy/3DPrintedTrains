@@ -4,13 +4,48 @@ Various attempts to 3D print OO gauge trains and accessories. Licenced under GNU
 
 ## MWA Wagons
 
-Models for two variants of the MWA box wagon: MWA and MWA-B. MWA is green and MWA-B is grey. Assembly requires up to eight 4mm M2 screws or hot glue. There are square pits in the bottom of the 'top' and top of the 'base' to allow space for hot glue without changing the shape of the finished wagon. The bogies require a 10mm M3 screw and two M3 washers (one above and one below the bogie, to help with rotation). The bogies provide fixings for a dapol-style coupling, my 3D printed design works well.
+There are three variants: MWA (green), MWA-B (grey) and IOA (yellow). See below for more details.
+
+Assembly requires up to eight 4mm M2 screws or hot glue. There are square pits in the bottom of the 'top' and top of the 'base' to allow space for hot glue without changing the shape of the finished wagon, alternatively you can use small (4/5mm) m2 screws - but the glue is more reliable. The bogies require a 10mm M3 screw and two M3 washers (one above and one below the bogie, to help with rotation). The bogies provide fixings for a dapol-style coupling, my 3D printed design works well. The brake wheels, cylinders and buffers should slot in with only a little encouragement - if needed you can clear out the hole by first screwing in an m2 screw, but don't clean the hole too much as they rely on friction to stay in. Since the small slot-in components are easy to snap I recommend printing them in something slightly more flexible than PLA, like PETG.
 
 The main body of the wagon is split into two files ("wagon_top" and "wagon_base") to avoid too much warping when printing. Alternatively the entire wagon is avaible as "wagon_wagon". Good base adhesion is required for printing the top of the wagon. Even with good adhesion there is a slight line of warping, but this is mostly not too visible.
 
 The bogie requires scafolding only on the underside of the coupling holder. If you want a more accurate, but harder to print, version of the bogie set BOGIE_EASY_PRINT to false.
 
 Run gen_mwa_wagon.bat to generate all the STL files required. 
+
+### MWA
+
+Uses the MWA_wagon_\*.stl files. The four-pronged brake wheel (white PETG) slots into the sides of the wagon base. The two brake cylinders (black PETG) slot into the bottom of the wagon base. Print the following:
+
+ - MWA_wagon_base: Green PLA
+ - MWA_wagon_top: Green PLA
+ - MWA_wagon_bogie (x2): Black PLA
+ - MWA_wagon_brake_cylinder (STL contains two objects): Black PETG
+ - MWA_wagon_buffer (x4): Black PETG
+ - MWA_wagon_brake_wheel (x2): White PETG
+ 
+### MWA-B
+
+Uses the MWA-B_wagon_\*.stl files and some MWA_wagon_\*.stl files. The three-pronged brake wheels slot into the sides of one of the bogies. This bogie should be attached at the end furthest from the brake cylinder - there is only one brake cylinder on the MWA-B. Otherwise the same as the MWA wagon.
+
+ - MWA-B_wagon_base: Grey PLA
+ - MWA-B_wagon_top: Grey PLA
+ - MWA-B_wagon_bogie (x1): Black PLA
+ - MWA_wagon_bogie (x1): Black PLA
+ - MWA-B_wagon_brake_cylinder : Black PETG
+ - MWA_wagon_buffer (x4): Black PETG
+ - MWA-B_wagon_brake_wheel (x2): White PETG
+
+### IOA
+
+Uses the IOA_wagon_\*.stl files and some MWA_wagon_\*.stl files. The brake cylinders are part of the base as they're also yellow. Brake wheels slot into the sides of the wagon base, like MWA. The IOA wagon uses the MWA bogies.
+
+ - IOA_wagon_base: Yellow PLA
+ - IOA_wagon_top: Yellow PLA
+ - MWA_wagon_bogie (x2): Black PLA
+ - MWA_wagon_buffer (x4): Black PETG
+ - MWA_wagon_brake_wheel (x2): White PETG
 
 ## Couplings
 

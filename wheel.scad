@@ -30,7 +30,7 @@ include <constants.scad>
 //spacers to hold said wheels square
 GEN_WHEELSET_SPACER = false;
 //generate the actual wheel
-GEN_WHEEL = true;
+GEN_WHEEL = false;
 
 
 //"spike" uses pointed ends of the axle for bearings. "axle" uses the centre of the axle slotting into a holder as a bearing. Wheels are longer for axle bearings and spike bearings require spacers to keep the shorter wheels at right angles
