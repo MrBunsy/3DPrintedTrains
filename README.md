@@ -16,7 +16,7 @@ Run gen_mwa_wagon.bat to generate all the STL files required.
 
 ### MWA
 
-Uses the MWA_wagon_\*.stl files. The four-pronged brake wheel (white PETG) slots into the sides of the wagon base. The two brake cylinders (black PETG) slot into the bottom of the wagon base. Print the following:
+Uses the MWA\_wagon\_\*.stl files. The four-pronged brake wheel (white PETG) slots into the sides of the wagon base. The two brake cylinders (black PETG) slot into the bottom of the wagon base. Print the following:
 
  - MWA_wagon_base: Green PLA
  - MWA_wagon_top: Green PLA
@@ -27,7 +27,7 @@ Uses the MWA_wagon_\*.stl files. The four-pronged brake wheel (white PETG) slots
  
 ### MWA-B
 
-Uses the MWA-B_wagon_\*.stl files and some MWA_wagon_\*.stl files. The three-pronged brake wheels slot into the sides of one of the bogies. This bogie should be attached at the end furthest from the brake cylinder - there is only one brake cylinder on the MWA-B. Otherwise the same as the MWA wagon.
+Uses the MWA-B\_wagon\_\*.stl files and some MWA\_wagon\_\*.stl files. The three-pronged brake wheels slot into the sides of one of the bogies. This bogie should be attached at the end furthest from the brake cylinder - there is only one brake cylinder on the MWA-B. Otherwise the same as the MWA wagon.
 
  - MWA-B_wagon_base: Grey PLA
  - MWA-B_wagon_top: Grey PLA
@@ -39,7 +39,7 @@ Uses the MWA-B_wagon_\*.stl files and some MWA_wagon_\*.stl files. The three-pro
 
 ### IOA
 
-Uses the IOA_wagon_\*.stl files and some MWA_wagon_\*.stl files. The brake cylinders are part of the base as they're also yellow. Brake wheels slot into the sides of the wagon base, like MWA. The IOA wagon uses the MWA bogies.
+Uses the IOA\_wagon\_\*.stl files and some MWA\_wagon\_\*.stl files. The brake cylinders are part of the base as they're also yellow. Brake wheels slot into the sides of the wagon base, like MWA. The IOA wagon uses the MWA bogies.
 
  - IOA_wagon_base: Yellow PLA
  - IOA_wagon_top: Yellow PLA

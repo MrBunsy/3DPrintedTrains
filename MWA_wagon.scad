@@ -94,8 +94,8 @@ GEN_IN_SITU = false;
 GEN_WAGON = false;
 GEN_BASE = false;
 GEN_TOP = false;
-GEN_BOGIE = false;
-GEN_BRAKE_WHEEL = true;
+GEN_BOGIE = true;
+GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
 //bits that aren't printed, just part of the 3d model
@@ -108,7 +108,7 @@ COUPLING_TYPE="dapol";
 BOGIE_EASY_PRINT = true;
 
 //MWA, MWA-B, IOA
-STYLE = "MWA-B";
+STYLE = "MWA";
 //MWA-B has no ladder, square nameplate, no small cylinder and brake-wheels on one bogie only - not on the main wagon body
 //IOA has no nameplate and taller 'ridge bits' around the top, also the brake cylinders are same colour as the body
 //and differently shaped triangular bits on the underside
@@ -934,11 +934,12 @@ module bogie(with_brake_wheel = false){
 
 			coupling_arm_length = coupling_from_bogie_centre + coupling_mount_y_adjust;
 			translate([0,coupling_arm_length/2,coupling_arm_z])centred_cube(5,coupling_arm_length,coupling_arm_height);
-
-			//make bit with brake wheel thicker
-			extra_thickness =  2-min_thick;// - bogie_backing_plate_thick;
-			extra_thickness_length = buffer_holder_d*2;
-			mirror_y()translate([bogie_inner_width/2+bogie_padding_width++bogie_backing_plate_thick-extra_thickness/2-min_thick, bogie_brake_wheel_pos[0],0])centred_cube(extra_thickness,extra_thickness_length, bogie_brake_wheel_pos[1]+buffer_holder_d*0.75);
+			if(with_brake_wheel){
+				//make bit with brake wheel thicker
+				extra_thickness =  2-min_thick;// - bogie_backing_plate_thick;
+				extra_thickness_length = buffer_holder_d*2;
+				mirror_y()translate([bogie_inner_width/2+bogie_padding_width++bogie_backing_plate_thick-extra_thickness/2-min_thick, bogie_brake_wheel_pos[0],0])centred_cube(extra_thickness,extra_thickness_length, bogie_brake_wheel_pos[1]+buffer_holder_d*0.75);
+			}
 
 		}//end of additive bits
 		union(){
