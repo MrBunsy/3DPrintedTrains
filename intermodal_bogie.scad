@@ -22,11 +22,15 @@ include <truck_bits.scad>
 include<constants.scad>
 
 include <threads.scad>
+
+
 /*
 
 Bogie designed to look like FSA/FTA wagon bogie, which I think is a varient of the y25 bogie
 
 */
+//"dapol", "hornby"
+COUPLING_TYPE = "dapol";
 
 dapol_wheels = true;
 spoked = false;
@@ -225,10 +229,12 @@ difference(){
         mirror_y()translate([width/2-side_arm_thick/2,0,0])centredCube(0,0,side_arm_thick,axle_space,thick);
 
         
-        long_arm_length = coupling_from_axle+axle_distance/2 + coupling_arm_wide/2;
+        long_arm_length = coupling_from_axle+axle_distance/2 + (COUPLING_TYPE == "dapol" ? -4 : coupling_arm_wide/2);
         //long arm to coupling
-        centredCube(0,long_arm_length/2,coupling_arm_wide,long_arm_length,thick + coupling_height);
-        centredCube(0,coupling_from_axle+axle_distance/2,coupling_width,coupling_arm_wide,thick + coupling_height);
+        color("blue")centredCube(0,long_arm_length/2,coupling_arm_wide,long_arm_length,thick + coupling_height);
+        if(COUPLING_TYPE != "dapol"){
+            color("green")centredCube(0,coupling_from_axle+axle_distance/2,coupling_width,coupling_arm_wide,thick + coupling_height);
+        }
         
         //lengthening of hole for m3 screw
         cylinder(h=m3_hole_depth, r=(m3_thread_loose_size/2)+m3_hole_thick);
@@ -256,8 +262,13 @@ difference(){
 //just to be confusing, axle_holder adds thickness itself
 //axle_holder(axle_space, 20, axle_height);
 
-translate([0,axle_distance/2 + coupling_from_axle,thick +  coupling_height]){
-    coupling_mount(0);
+translate([0,axle_distance/2 + coupling_from_axle, (thick +  coupling_height)]){
+    if(COUPLING_TYPE == "dapol"){
+        coupling_mount_dapol_alone(thick +  coupling_height);
+    }else{
+        coupling_mount(0);
+    }
+    
 }
 
 

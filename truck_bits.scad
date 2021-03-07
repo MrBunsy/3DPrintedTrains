@@ -388,6 +388,8 @@ module axle_hole(wheel_max_d,axle_space,wheel_centre_space){
         cylinder(r=wheel_max_d/2,h=axle_space-0.5,$fn=200,center=true);
         cylinder(r=wheel_max_d/2+1,h=wheel_centre_space,$fn=200,center=true);
         }
+        //chunky axle
+        color("pink")cylinder(r=6/2,h=wheel_centre_space,$fn=200, center = true);
     }
     
 }
