@@ -74,12 +74,12 @@ Known variations I've not taken intoaccount:
 //non-dummy base needs scaffolding
 GEN_BASE = false;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
-GEN_SHELL = false;
+GEN_SHELL = true;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = true;
+GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
 
 //separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
@@ -1414,15 +1414,27 @@ module door(subtract=false){
 			z=-dz/dist;
 			
 			rain_thick = 0.5;
-			//in plane of first roof angle
-			rain_corners = [[-door_and_handrails_length/2,rain_thick],[-door_length/2,rain_thick], [0,dist-rain_thick/2],[door_length/2,dist-rain_thick/2], [door_length/2,rain_thick], [door_and_handrails_length/2,rain_thick]];
+			//in plane of first roof angle [y,z]ish
+			rain_corners = [
+				[-door_and_handrails_length/2,	rain_thick],
+				[-door_length/2,				rain_thick+0.3],
+				//bit of a curve.
+				[0-0.5,								dist-rain_thick/2-0.3],
+				[0-0.2,								dist-rain_thick/2-0.1],
+				[0+0.2,								dist-rain_thick/2],
+				//and slightly less tight curve
+				[door_length/2-1,					dist-rain_thick/2], 
+				[door_length/2-0.5,					dist-rain_thick/2-0.25], 
+				[door_length/2-0.25,					dist-rain_thick/2-0.75], 
+				[door_length/2,					rain_thick+0.3],
+				[door_and_handrails_length/2,	rain_thick]];
 			
 			bottom_x = width/2;
 			bottom_z = wall_height;
 			
 			
 			
-			for(i=[0:len(rain_corners)-2]){
+			color("grey")for(i=[0:len(rain_corners)-2]){
 				corner0 = rain_corners[i];
 				corner1 = rain_corners[i+1];
 				
