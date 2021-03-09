@@ -72,24 +72,25 @@ Known variations I've not taken intoaccount:
 */
 
 //non-dummy base needs scaffolding
-GEN_BASE = true;
+GEN_BASE = false;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
 GEN_SHELL = false;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = false;
-GEN_MOTOR_CLIP = true;
+GEN_BOGIES = true;
+GEN_MOTOR_CLIP = false;
 
 //separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
 GEN_HEADLIGHTS = false;
 
+//never finished and not sure I'll use it - glu/+tape works fine.
 GEN_PI_MOUNT = false;
 
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
-GEN_IN_PLACE = true;
+GEN_IN_PLACE = false;
 
 //generate tiny things that won't print well
 GEN_TINY_BITS = false;
@@ -102,6 +103,9 @@ ANGLE = 0;
 //dummy model has no motor
 DUMMY = false;
 COUPLING_TYPE = "dapol";
+
+//mostly the entire thing is designed to be easy to print rather than real... so this doesn't change much
+BOGIE_EASY_PRINT = true;
 
 //wiki says 21.4metre long, but oes this include buffers?
 //n-gauge model with buffers => 21.2m
@@ -187,7 +191,8 @@ buffer_front_length = 2;
 //wall_thick = 2;
 motor_length = 60+5;
 //the bulk of the motor is not central to the wheels or rotation clip
-motor_offset_y = 5;
+//5 works (runs round the garden track!), but is slightly offset too much the wrong way. trying 4.
+motor_offset_y = 4;
 motor_centre_from_end = 45;
 //doors are different at each end
 //these should line up perfectly with the furthest bogie springs, but nothign enforces that
@@ -919,7 +924,7 @@ module bogie_h_suspension(axle_height){
 	angle = atan(dz/dy);
 	
 	//extra shape on the bottom of the "inner bits"
-	difference(){
+	color("green")difference(){
 		mirror_y()translate([bogie_inner_width/2-bogie_cosmetics_width/2,0,bogie_top_gap + bogie_top_thick])centred_cube(bogie_cosmetics_width,bogie_chunks_length,h_suspension_holder_height);
 		translate([0,bogie_chunks_length/2+notch_r/2,bogie_top_gap + bogie_top_thick+notch_r*0.85])rotate([0,90,0])cylinder(r=notch_r,h=width,center=true);
 		
@@ -928,12 +933,13 @@ module bogie_h_suspension(axle_height){
 	}
 	//representation of the suspension
 	mirror_y(){
-		mirror_y()translate([bogie_inner_width/2-bogie_cosmetics_width/2+girder_thick/2, h_suspension_y_offset,axle_height-h_suspension_height/2]){
-			centred_cube(bogie_cosmetics_width+girder_thick,h_suspension_length,h_suspension_height);
+		mirror_y()translate([bogie_inner_width/2-bogie_cosmetics_width/2-girder_thick/2, h_suspension_y_offset,axle_height-h_suspension_height/2]){
+			translate([+girder_thick/2,0,-h_suspension_height])centred_cube(bogie_cosmetics_width,h_suspension_length,h_suspension_height*2);
 			translate([(bogie_cosmetics_width+girder_thick)/2,0,h_suspension_height/2]){
-				rotate([90,0,0])cylinder(r=h_suspension_height/3,h=h_suspension_length*0.75,center=true);
-				mirror_x(){
-					translate([0,h_suspension_length*(0.5-0.25/4),-h_suspension_height/2])centred_cube(h_suspension_height,h_suspension_length*0.25/2,h_suspension_height);
+				//squish slightly so it doesn't stick out as much
+				scale([1,1,1])rotate([90,0,0])cylinder(r=h_suspension_height/3,h=h_suspension_length*0.75,center=true);
+				color("pink")mirror_x(){
+					translate([0,h_suspension_length*(0.5-0.25/4),-h_suspension_height/2])centred_cube(h_suspension_height*0.5,h_suspension_length*0.25/2,h_suspension_height);
 				}
 			}
 		}
@@ -1017,9 +1023,9 @@ module bogie_cosmetics(axle_height, box_end=true){
 	
 	//big spring bases
 	//won't print well if it sticks out from a bridge, so make it longer
-	spring_base_length = bogie_chunks_length+1.5;//7.5;
+	spring_base_length = bogie_chunks_length + (BOGIE_EASY_PRINT ? 7 : 0);//1.5;//7.5;
 	spring_base_offset = -1;
-	mirror_xy(){
+	color("blue")mirror_xy(){
 		translate([bogie_inner_width/2-bogie_cosmetics_width/2+girder_thick/2,bogie_wheel_d+spring_base_offset,bogie_top_gap])centred_cube(bogie_cosmetics_width+girder_thick,spring_base_length,girder_thick);
 	}
 	
@@ -1086,10 +1092,11 @@ module bogie_cosmetics(axle_height, box_end=true){
 	}// ============ end axle holders ===============
 	
 	//horizontal bars between axle holders
+	suspension_bar_width = axle_holder_box_width*0.75;
 	//between rear two axles
-	mirror_y()translate([bogie_width/2-bogie_thick_width+axle_holder_box_width/2,bogie_end_axles_distance/4,axle_height-girder_thick/2])centred_cube(axle_holder_box_width,bogie_end_axles_distance/2,girder_thick);
+	color("orange")mirror_y()translate([bogie_width/2-bogie_thick_width+suspension_bar_width/2,bogie_end_axles_distance/4,axle_height-girder_thick/2])centred_cube(suspension_bar_width,bogie_end_axles_distance/2,girder_thick);
 	//front axle only
-	mirror_y()translate([bogie_width/2-bogie_thick_width+axle_holder_box_width/2,-bogie_end_axles_distance/4-bogie_end_axles_distance/8,axle_height-girder_thick/2])centred_cube(axle_holder_box_width,bogie_end_axles_distance/4,girder_thick);
+	mirror_y()translate([bogie_width/2-bogie_thick_width+suspension_bar_width/2,-bogie_end_axles_distance/4-bogie_end_axles_distance/8,axle_height-girder_thick/2])centred_cube(suspension_bar_width,bogie_end_axles_distance/4,girder_thick);
 	
 	
 	//ladder!
