@@ -866,7 +866,10 @@ module bogie_axle_holder_cosmetics(){
 
 bogie_centre_arm_height = 3.4;
 coupling_arm_height = bogie_centre_arm_height*0.5;
-coupling_arm_z = bogie_centre_arm_height - coupling_arm_height;
+//not the same as the height the coupling must be at!
+coupling_arm_z =bogie_centre_arm_height - coupling_arm_height;
+
+bogie_centre_arm_length = m3_thread_d*2;
 
 module bogie(with_brake_wheel = false){
 	difference(){
@@ -875,7 +878,7 @@ module bogie(with_brake_wheel = false){
 			rotate_mirror()translate([bogie_inner_width/2+bogie_padding_width,0,0])bogie_edge();
 			
 			//centre arm
-			centred_cube(bogie_inner_width+bogie_padding_width*2,m3_thread_d*2,bogie_centre_arm_height);
+			centred_cube(bogie_inner_width+bogie_padding_width*2,bogie_centre_arm_length,bogie_centre_arm_height);
 
 			right_hole_bottom_z = bogie_offset_hole_pos[1]-bogie_offset_hole_d/2;
 
@@ -921,8 +924,7 @@ module bogie(with_brake_wheel = false){
 			//coupling holder
 			translate([0,coupling_from_bogie_centre, coupling_arm_height+coupling_arm_z]){
 				if(COUPLING_TYPE == "dapol"){
-					//plus 0.2 extra height because these only print well in PETG and with PETG the dapol coupling bridging droops more than PLA
-					coupling_mount_dapol_alone(coupling_arm_height, 0.2);
+					translate([0,0,bogie_coupling_height-coupling_arm_z-coupling_arm_height])coupling_mount_dapol_alone(bogie_coupling_height-coupling_arm_height);
 				}else{
 					coupling_mount(bogie_coupling_height-coupling_arm_height-coupling_arm_z,coupling_arm_height);
 				}
