@@ -74,7 +74,7 @@ Known variations I've not taken intoaccount:
 //non-dummy base needs scaffolding
 GEN_BASE = false;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
-GEN_SHELL = true;
+GEN_SHELL = false;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
 GEN_WALLS = false;
 GEN_ROOF = false;
@@ -85,8 +85,8 @@ GEN_MOTOR_CLIP = false;
 //separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
 GEN_HEADLIGHTS = false;
 
-//never finished and not sure I'll use it - glu/+tape works fine.
-GEN_PI_MOUNT = false;
+//includes mount for the camera, which is useful, and unfinished mount for a pi
+GEN_PI_MOUNT = true;
 
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
@@ -282,8 +282,21 @@ motor_hold_screws = [motor_clip_hole_d,motor_length/2 + motor_clip_hole_d*0.75, 
 
 //5.5 isn't far enough away from the enlarged pipespace, althouhg 5.75 is plenty.
 screwhole_from_edge = 5.75;
-//to be mirrored in x and y
-base_wall_screwholes = [[width/2-screwhole_from_edge,base_arch_top_length/2+screwhole_from_edge/2,0],[width/2-screwhole_from_edge,length/2-screwhole_from_edge*1.5,0]];
+//to be mirrored along the y axis - not symetric on the non-dummy loco (space for the pi)
+base_wall_screwholes = DUMMY ?  [
+	[width/2-screwhole_from_edge, base_arch_top_length/2+screwhole_from_edge/2, 0],
+	[width/2-screwhole_from_edge, -(base_arch_top_length/2+screwhole_from_edge/2), 0],
+	[width/2-screwhole_from_edge, length/2-screwhole_from_edge*1.5, 0],
+	[width/2-screwhole_from_edge, -(length/2-screwhole_from_edge*1.5), 0],
+
+	] : [
+	// [width/2-screwhole_from_edge, base_arch_top_length/2+screwhole_from_edge/2, 0],
+	[width/2-screwhole_from_edge, -(base_arch_top_length/2+screwhole_from_edge/2), 0],
+	[width/2-screwhole_from_edge, length/2-screwhole_from_edge*1.5, 0],
+	[width/2-screwhole_from_edge, -(length/2-screwhole_from_edge*1.5), 0],
+
+	];
+
 shell_screwhole_thick = 2;
 
 //pi screwholes at end_width_start and mirror around the bogie mountpoint
@@ -854,10 +867,10 @@ module base(){
 			
 			
 			//screwholes to hold walls to base
-			translate([0,0,-1])mirror_xy()for(pos = base_wall_screwholes){
+			translate([0,0,-1])mirror_y()for(pos = base_wall_screwholes){
 				translate(pos)cylinder(r=m2_thread_size_loose/2,h=100,$fn=50);
 			}
-			translate([0,0,base_thick-m2_head_length])mirror_xy()for(pos = base_wall_screwholes){
+			translate([0,0,base_thick-m2_head_length])mirror_y()for(pos = base_wall_screwholes){
 				translate(pos)cylinder(r=m2_head_size/2,h=100,$fn=50);
 			}
 			
@@ -1954,7 +1967,7 @@ module shell(){
 	
 	front_height = front_top_r+front_top_r_z;
 	
-	mirror_xy(){
+	mirror_y(){
 		intersection(){
 			for(screw=base_wall_screwholes){
 				translate(screw)shell_screwhole();
@@ -2222,12 +2235,17 @@ module pi_mount(){
 			//punch out camera hole
 			translate([0,0,front_window_z])rotate([90,0,0])cylinder(r=pi_cam_d/2+0.1,h=mount_thick*2,center=true);
 			//chop off top of roof
-		translate([0,0,max_height])centred_cube(width,mount_thick*2,10);
+			translate([0,0,max_height])centred_cube(width,mount_thick*2,10);
+			//extra holes for LED cables
+			mirror_y()translate([width/4,0,max_height/3])rotate([90,0,0])cylinder(r=3,h=mount_thick*2,center=true);
 		}
 	}
-		
+
+	//the bit to hold a pi isn't finished and I'm not sure it's worth the effort.
+	gen_pi_holder = false;
+
 	//base with screw fixings for both camera and pi holder
-	mirror_x()translate([0,motor_centre_from_end - end_width_start,0])difference(){
+	mirror_x(gen_pi_holder)translate([0,motor_centre_from_end - end_width_start,0])difference(){
 		centred_cube((width)*shell_scale,base_length,base_thick);
 		mirror_y(){
 			translate([pi_screwholes_from_centre,0,0]){
@@ -2236,22 +2254,23 @@ module pi_mount(){
 			}
 		}
 	}
-	
-	//pi holder on a pole
-	translate([0,-(motor_centre_from_end - end_width_start),0]){
-		centred_cube(pi_holder_thick,pi_holder_thick,electronics_height);
-		translate([0,0,electronics_height]){
-			centred_cube(pi_holder_wide,pi_holder_wide,base_thick);
-			translate(pi_offset){
-				//lengthwise arm
-				centred_cube(pi_holder_thick,pi_mount_length,base_thick);
-				mirror_x()translate([0,pi_mount_length/2,0])centred_cube(pi_mount_width,pi_holder_thick,base_thick);
-				mirror_xy()translate([pi_mount_width/2,pi_mount_length/2,0]){
-					cylinder(r=pi_mount_d/2,h=base_thick+pi_mount_height);
-					cylinder(r=pi_mount_d,h=base_thick);
+	if(gen_pi_holder){
+		//pi holder on a pole
+		translate([0,-(motor_centre_from_end - end_width_start),0]){
+			centred_cube(pi_holder_thick,pi_holder_thick,electronics_height);
+			translate([0,0,electronics_height]){
+				centred_cube(pi_holder_wide,pi_holder_wide,base_thick);
+				translate(pi_offset){
+					//lengthwise arm
+					centred_cube(pi_holder_thick,pi_mount_length,base_thick);
+					mirror_x()translate([0,pi_mount_length/2,0])centred_cube(pi_mount_width,pi_holder_thick,base_thick);
+					mirror_xy()translate([pi_mount_width/2,pi_mount_length/2,0]){
+						cylinder(r=pi_mount_d/2,h=base_thick+pi_mount_height);
+						cylinder(r=pi_mount_d,h=base_thick);
+					}
 				}
+				
 			}
-			
 		}
 	}
 	
