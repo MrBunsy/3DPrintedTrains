@@ -1082,7 +1082,7 @@ module buffer(){
 	pole_length = 1;
 	end_length=0.8;
 	//1.8 bit too big for the 2.0 diameter holes
-	truck_fixing_d=1.7;//1.5;
+	truck_fixing_d=buffer_d;//1.7;//1.5;
 
 	end_flange_length = 0.6;
 

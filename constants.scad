@@ -66,7 +66,8 @@ $fn=200;
 //how far apart the centres of the buffers are
 buffer_distance = 22.2;
 buffer_holder_d = 2;
-buffer_d = 1.7;
+//I had been using 1.7 for ages, but a few are just a bit too loose, especially if cleaned up, so trying 1.725
+buffer_d = 1.725;
 //how deep the buffer holder hole needs to be
 buffer_holder_length = 4.5;
 
