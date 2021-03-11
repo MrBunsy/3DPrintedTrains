@@ -36,8 +36,38 @@ coins = ["penny", "tuppence", "none"]
 
 
 
+def intermodal_wagon_jobs():
+    '''
+    These aren't nicely in one parametric file, they're mostly spread across multiple files
+    :return:
+    '''
+    jobs = []
+    wagon_variables = ["front", "back", "no", "all"]
 
+    for v in wagon_variables:
+        job = JobDescription("intermodal_wagon.scad", "intermodal_wagon_with_{}_holes".format(v))
+        for w in wagon_variables:
+            job.addVariable("screwholes_for_containers_at_{}".format(w), w == v or v == "all")
 
+        jobs.append(job)
+
+    bufferJob = JobDescription("buffer_modern.scad", "intermodal_wagon_buffer")
+    bufferJob.addVariable("GEN_BUFFER", True)
+
+    jobs.append(bufferJob)
+
+    bogieJob = JobDescription("intermodal_bogie.scad", "intermodal_wagon_bogie")
+    jobs.append(bogieJob)
+
+    accessory_variables = ["brake_wheel", "brake_cylinder"]
+
+    for a in accessory_variables:
+        job = JobDescription("intermodal_wagon_accessories.scad", "intermodal_wagon_{}".format(a))
+        for v in accessory_variables:
+            job.addVariable("gen_{}".format(v), v == a)
+
+        jobs.append(job)
+    return jobs
 
 
 def class66_jobs():
@@ -219,25 +249,49 @@ def wheel_jobs():
 
 
 if __name__ == '__main__':
+
+    options = {"class66":lambda:class66_jobs(),
+               "couplings":lambda:couplings_jobs(),
+              "wagons":lambda:wagon_jobs(),
+              "mwa":lambda:mwa_wagon_jobs(),
+              "wheels":lambda:wheel_jobs(),
+              "intermodal":lambda:intermodal_wagon_jobs()
+               }
+
     parser = argparse.ArgumentParser(description="Generate all variants of a parametric object")
-    parser.add_argument("--class66", action='store_true')
-    parser.add_argument("--couplings", action='store_true')
-    parser.add_argument("--wagons", action='store_true')
-    parser.add_argument("--mwa", action='store_true')
-    parser.add_argument("--wheels", action='store_true')
+    # parser.add_argument("--class66", action='store_true')
+    # parser.add_argument("--couplings", action='store_true')
+    # parser.add_argument("--wagons", action='store_true')
+    # parser.add_argument("--mwa", action='store_true')
+    # parser.add_argument("--wheels", action='store_true')
+    # parser.add_argument("--intermodal", action='store_true')
+    for opt in options.keys():
+        parser.add_argument("--{}".format(opt), action='store_true')
 
     args = parser.parse_args()
     jobs = []
 
-    if args.class66:
-        jobs.extend(class66_jobs())
-    if args.couplings:
-        jobs.extend(couplings_jobs())
-    if args.wagons:
-        jobs.extend(wagon_jobs())
-    if args.mwa:
-        jobs.extend(mwa_wagon_jobs())
-    if args.wheels:
-        jobs.extend(wheel_jobs())
+    all = True
+    for opt in options.keys():
+        #https://stackoverflow.com/questions/43624460/python-how-to-get-value-from-argparse-from-variable-but-not-the-name-of-the-var
+        if vars(args).get(opt):
+            all = False
+
+    for opt in options.keys():
+        if vars(args).get(opt) or all:
+            jobs.extend(options[opt]())
+
+    # if args.class66 or all:
+    #     jobs.extend(class66_jobs())
+    # if args.couplings or all:
+    #     jobs.extend(couplings_jobs())
+    # if args.wagons or all:
+    #     jobs.extend(wagon_jobs())
+    # if args.mwa or all:
+    #     jobs.extend(mwa_wagon_jobs())
+    # if args.wheels or all:
+    #     jobs.extend(wheel_jobs())
+    # if args.intermodal or all:
+    #     jobs.extend(intermodal_wagon_jobs())
 
     multiprocessJobs(jobs)

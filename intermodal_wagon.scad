@@ -43,7 +43,7 @@ spoked = false;
 //make screwholes that aren't easy to see
 screwholes_for_containers = true;
 //make screwholes at either end that are visible
-screwholes_for_containers_at_front = false;
+screwholes_for_containers_at_front = true;
 screwholes_for_containers_at_back = false;
 screwhole_from_edge = 5;
 

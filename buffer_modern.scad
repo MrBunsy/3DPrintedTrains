@@ -28,7 +28,7 @@ include <constants.scad>
 //   _||_    pole
 //   ____    end
 
-
+GEN_BUFFER = false;
 
 module modern_buffer(){
 
@@ -67,5 +67,6 @@ translate([0,0,pole_length+end_length]){
 cylinder(r=truck_fixing_d/2,h=total_length+holder_length, $fn=200);
 
 }
-
-modern_buffer();
+if(GEN_BUFFER){
+	modern_buffer();
+}

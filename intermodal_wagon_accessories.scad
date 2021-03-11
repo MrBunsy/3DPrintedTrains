@@ -24,7 +24,7 @@ gen_brake_cylinder = false;
 //only for one prototype with the wrong sized buffer holes
 gen_buffer_fixing = false;
 
-truck_fixing_d=1.7;
+truck_fixing_d=buffer_d;//1.7;
 
 sticks_out = 1;
 wheel_thick = 0.5;
