@@ -79,6 +79,16 @@ pi_mount_length=58;
 pi_mount_width=23;
 pi_mount_d=2.25;
 
+NEM_pocket_width = 3.2;
+NEM_pocket_holder_height = 1.75;
+//top of the inside of the holder
+NEM_pocket_top_from_rail = 8.5;
+//given my buffers are generall 5.5 long, this aproximatly matches up with coupling_from_edge!
+//only binding when using close coupling, apparently, I might try lining up the edge with the edge of the wagon
+NEM_pocket_from_edge_of_buffer = 7.5;
+NEM_pocket_from_edge = 0;
+NEM_pocket_deep = 7.1;
+
 //for height of couplings and axle mounts - diameter of the thinner bit of
 //the wheel that rests on the rails
 //13.5 for the old coach wheels, truck wheels usually smaller (13.15)

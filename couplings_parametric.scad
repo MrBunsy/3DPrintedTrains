@@ -36,7 +36,7 @@ Notes:
  - The chunky hook works with most holders for the X8031, but doesn't fit on some hornby locos. (too wide with the 3d printed hook)
 
 */
-GEN_COUPLING = false;
+GEN_COUPLING = true;
 GEN_HOOK = false;
 GEN_IN_SITU = false;
 
@@ -52,9 +52,10 @@ HOOK = "inline";
 /*
 X8031 - Hornby/bachmann style, centralscrewhole with two dents on either side
 dovetail - Hornby dovetail fixing, I think intended to hold a NEM socket. I'll go for something that fits directly into the dovetail fixing
-dapol - Dapol's clip-in fixing. Possibly also Hornby X9660 and Airfix?
+dapol - Dapol's clip-in fixing. Possibly also known Hornby X9660 and Airfix?
+NEM - NEM 362
 */
-FIXING = "dapol";
+FIXING = "NEM";
 
 min_thickness = 1.5;
 x8031_main_arm_length = 5.9;
@@ -64,6 +65,38 @@ hook_holder_diameter = 1.8;
 hook_holder_length = 1.3;
 wide_coupling_width = 21;
 wide_coupling_base_arm_length = 2.4;
+
+module NEM_fixing(subtract = false){
+	if(!subtract){
+		width = NEM_pocket_width-0.2;
+		length = NEM_pocket_deep-0.1;
+		height = NEM_pocket_holder_height-0.2;
+		slot_y = length*0.4;
+		slot_width= width*0.6;
+		//exagerrated size because they don't slice well
+		wedge_stick_out = 1;//(slot_width-0.25)/2;
+		difference(){
+			union(){
+				//main arm
+				translate([0,-length/2,0])centred_cube(width, length, height);
+				//wedges on the end
+				mirror_y()hull(){
+					translate([width/2+wedge_stick_out, -length,0])centred_cube(0.001,0.001,height);
+					translate([0, -length,0])centred_cube(0.001,0.001,height);
+					translate([0, -length-(width/2+wedge_stick_out),0])centred_cube(0.001,0.001,height);
+				}
+			}
+			union(){
+				//slot down the length of the arm
+				hull(){
+					translate([0,-slot_y,0])cylinder(r=slot_width/2,h=height*3,center=true);
+					translate([0,-length*1.5,0])cylinder(r=slot_width/2,h=height*3,center=true);
+				}
+				//translate([0,-length/2-slot_y+r,height*0.4])centred_cube(width-0.4,length,height);
+			}
+		}
+	}
+}
 
 module x8031_fixing(subtract=false){
 	
@@ -259,6 +292,9 @@ module fixing(subtract = false){
 	}
 	if(FIXING == "dapol"){
 		dapol_fixing(subtract);
+	}
+	if(FIXING == "NEM"){
+		NEM_fixing(subtract);
 	}
 }
 
