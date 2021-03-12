@@ -67,12 +67,20 @@ wide_coupling_width = 21;
 wide_coupling_base_arm_length = 2.4;
 
 module NEM_fixing(subtract = false){
-	if(!subtract){
-		width = NEM_pocket_width-0.2;
-		length = NEM_pocket_deep-0.1;
-		height = NEM_pocket_holder_height-0.2;
-		slot_y = length*0.4;
-		slot_width= width*0.6;
+	width = NEM_pocket_width-0.2;
+	length = NEM_pocket_deep-0.1;
+	height = NEM_pocket_holder_height-0.2;
+	slot_y = length*0.4;
+	slot_width= width*0.6;
+	if(subtract){
+		//clear out part of the hook mechanism to clear more space
+
+		w = coupling_hook_x - width/2;
+		x = (coupling_hook_x + width/2)/2;
+		translate([x,-1,0])centred_cube(w,2,5);
+
+	}else{
+		
 		//exagerrated size because they don't slice well
 		wedge_stick_out = 1;//(slot_width-0.25)/2;
 		difference(){
