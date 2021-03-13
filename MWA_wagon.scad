@@ -89,9 +89,9 @@ include <gravel_pile.scad>
 
 wheel_diameter = 12.5;
 
-GEN_IN_SITU = true;
+GEN_IN_SITU = false;
 //deprecated, now wagon is split into base and top (still used to generate the model)
-GEN_WAGON = true;
+GEN_WAGON = false;
 GEN_BASE = false;
 GEN_TOP = false;
 GEN_BOGIE = true;
@@ -103,7 +103,7 @@ GEN_MODEL_BITS = false;
 GEN_GRAVEL = false;
 
 //"dapol", "hornby", "NEM"
-COUPLING_TYPE="dapol";
+COUPLING_TYPE="NEM";
 //some optional tweaks to make the bogie less accurate, but hopefully printable in PLA
 BOGIE_EASY_PRINT = true;
 

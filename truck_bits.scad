@@ -364,11 +364,16 @@ module coupling_mount_dapol_alone(base_thick = 0, extra_height = 0.2){
 module NEM_coupling_mount(base_thick=0){
     wall_thick = 0.8;
     roof_thick = 1;
+    
+    length_bodge = 0.1;
+    //same extra height as the dapol holder
+    height_bodge = 0.25;
+    width_bodge = 0.2;
     //ensuring 0,0,0 is NEM_pocket_from_edge
     translate([0,-NEM_pocket_deep/2 -NEM_pocket_from_edge, 0]){
         difference(){
-            centred_cube(NEM_pocket_width+wall_thick*2,NEM_pocket_deep, NEM_pocket_height+roof_thick);
-            centred_cube(NEM_pocket_width+wall_thick,NEM_pocket_deep+0.1, NEM_pocket_height);
+            translate([0,length_bodge/2,0])centred_cube(NEM_pocket_width+wall_thick*2,NEM_pocket_deep-length_bodge, NEM_pocket_height+roof_thick+height_bodge);
+            centred_cube(NEM_pocket_width+width_bodge ,NEM_pocket_deep+0.1, NEM_pocket_height+height_bodge);
         }
         translate([0,0,-base_thick])centred_cube(NEM_pocket_width+wall_thick*2,NEM_pocket_deep,base_thick);
     }

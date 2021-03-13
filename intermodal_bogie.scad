@@ -29,8 +29,8 @@ include <threads.scad>
 Bogie designed to look like FSA/FTA wagon bogie, which I think is a varient of the y25 bogie
 
 */
-//"dapol", "hornby"
-COUPLING_TYPE = "dapol";
+//"dapol", "hornby", "NEM"
+COUPLING_TYPE = "NEM";
 
 dapol_wheels = true;
 spoked = false;
@@ -61,7 +61,9 @@ axle_height = top_of_coupling_from_top_of_rail + coupling_height - wheel_diamete
 
 axle_distance = 23.6;//wheel_max_d*1.5;//23.6 is 1.8metres which is the "real" size
 
-coupling_from_axle = bogie_from_end - coupling_from_edge - axle_distance/2;
+
+coupling_from_axle = bogie_from_end - axle_distance/2 - coupling_from_edge;
+
 
 
 bar_thick = 2.5;
@@ -105,6 +107,10 @@ module hubcap(axle_mount_size){
     }
     
 }
+bar_height_above_axles = wheel_diameter*0.275*0.9;
+corner_r = wheel_diameter*0.275;
+//size of hole punched through
+central_hole_r2 = wheel_diameter*0.275*0.45;
 
 //easier to do one half and mirror the whole lot after
 module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
@@ -112,11 +118,10 @@ module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
     //the bit supported by springs is wider than the main A-frame bit
     axle_holder_wide = wide*1.2;
         
-    corner_r = wheel_diameter*0.275;
+    
     //size aroudn the hole, for the main bogie A-frame
     central_hole_r1 = wheel_diameter*0.275*0.75;
-    //size of hole punched through
-    central_hole_r2 = wheel_diameter*0.275*0.45;
+    
     //size of hole raised outwards around main hole
     hole_wider1=0.6;
     hole_wider2=0.4;
@@ -128,7 +133,7 @@ module intermodal_bogie_cosmetics_half(axle_distance, wheel_diameter,wide){
     axle_box_hole_r1 = wheel_diameter*0.275*0.2;
     axle_box_hole_r2 = wheel_diameter*0.275*0.15;
     
-    bar_height_above_axles = wheel_diameter*0.275*0.9;
+   
     spring_r = wide*0.6;
     axle_mount_ledge_thick=0.2;
     
@@ -226,15 +231,20 @@ difference(){
         centredCube(0,0,width,length,thick);
     
         //side arms to axle holders (don't trust the cosmetic bits to be strong enough by themselves)
-        mirror_y()translate([width/2-side_arm_thick/2,0,0])centredCube(0,0,side_arm_thick,axle_space,thick);
+        difference(){
+            mirror_y()translate([width/2-side_arm_thick/2,0,0])centredCube(0,0,side_arm_thick,axle_space+3,bar_height_above_axles);
+            //don't put a backing behind the main hole - keep at least that a real hole
+             translate([0,0,corner_r]) rotate([0,90,0]) cylinder(h=50,r=central_hole_r2, center=true);
+        }
 
         
-        long_arm_length = coupling_from_axle+axle_distance/2 + (COUPLING_TYPE == "dapol" ? -4 : coupling_arm_wide/2);
+        //long_arm_length = coupling_from_axle+axle_distance/2 + (COUPLING_TYPE == "dapol" ? -4 : coupling_arm_wide/2);
+        long_arm_length = bogie_from_end - generic_coupling_mount_from_edge(COUPLING_TYPE);
         //long arm to coupling
         color("blue")centredCube(0,long_arm_length/2,coupling_arm_wide,long_arm_length,thick + coupling_height);
-        if(COUPLING_TYPE != "dapol"){
-            color("green")centredCube(0,coupling_from_axle+axle_distance/2,coupling_width,coupling_arm_wide,thick + coupling_height);
-        }
+        // if(COUPLING_TYPE != "dapol"){
+        //     color("green")centredCube(0,coupling_from_axle+axle_distance/2,coupling_width,coupling_arm_wide,thick + coupling_height);
+        // }
         
         //lengthening of hole for m3 screw
         cylinder(h=m3_hole_depth, r=(m3_thread_loose_size/2)+m3_hole_thick);
@@ -262,15 +272,9 @@ difference(){
 //just to be confusing, axle_holder adds thickness itself
 //axle_holder(axle_space, 20, axle_height);
 
-translate([0,axle_distance/2 + coupling_from_axle, (thick +  coupling_height)]){
-    if(COUPLING_TYPE == "dapol"){
-        coupling_mount_dapol_alone(thick +  coupling_height);
-    }else{
-        coupling_mount(0);
-    }
-    
+translate([0,bogie_from_end, thick+coupling_height]){
+    generic_coupling_mount(COUPLING_TYPE, thick+coupling_height);
 }
-
 
 /*
 r=getWheelDiameter();
