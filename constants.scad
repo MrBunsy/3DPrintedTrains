@@ -80,7 +80,7 @@ pi_mount_width=23;
 pi_mount_d=2.25;
 
 NEM_pocket_width = 3.2;
-NEM_pocket_holder_height = 1.75;
+NEM_pocket_height = 1.75;
 //top of the inside of the holder
 NEM_pocket_top_from_rail = 8.5;
 //given my buffers are generall 5.5 long, this aproximatly matches up with coupling_from_edge!

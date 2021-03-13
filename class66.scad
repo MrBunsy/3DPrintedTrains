@@ -1194,7 +1194,6 @@ module bogies(box_end=true){
 	translate([0,-(coupling_arm_from_mount - (COUPLING_TYPE == "dapol" ? 0 : coupling_from_edge)),coupling_arm_z+coupling_arm_thick]){
 		// coupling_mount(0,coupling_arm_thick);
 		if(COUPLING_TYPE == "dapol"){
-			//plus 0.2 extra height because these only print well in PETG and with PETG the dapol coupling bridging droops more than PLA
 			mirror([0,1,0])coupling_mount_dapol_alone(coupling_arm_thick);
 		}else{
 			coupling_mount(0,coupling_arm_thick);

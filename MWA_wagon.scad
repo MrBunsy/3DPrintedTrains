@@ -102,7 +102,7 @@ GEN_BUFFER = false;
 GEN_MODEL_BITS = false;
 GEN_GRAVEL = false;
 
-//"dapol" or "hornby"
+//"dapol", "hornby", "NEM"
 COUPLING_TYPE="dapol";
 //some optional tweaks to make the bogie less accurate, but hopefully printable in PLA
 BOGIE_EASY_PRINT = true;
@@ -153,8 +153,8 @@ wagon_base_width = 29.75;
 //wagon_height = 28.5; - possibly correct if my photo really is squashed. my photo measures 30. going with 29.25 as a bit of a compromise - not sure it's perfect
 wagon_height = 30;//29.25;//28.5;//30;
 
-
-coupling_from_bogie_centre = wagon_length/2-bogie_distance/2 - coupling_from_edge;
+bogie_centre_from_edge =  wagon_length/2-bogie_distance/2;
+coupling_from_bogie_centre = bogie_centre_from_edge - coupling_from_edge;
 bogie_coupling_height = axle_to_top_of_bogie + wheel_diameter/2 - top_of_coupling_from_top_of_rail;
 
 ladder_rungs = STYLE == "MWA" ? 8 : 7;
@@ -922,19 +922,22 @@ module bogie(with_brake_wheel = false){
 
 			
 			//coupling holder
-			translate([0,coupling_from_bogie_centre, coupling_arm_height+coupling_arm_z]){
-				if(COUPLING_TYPE == "dapol"){
-					translate([0,0,bogie_coupling_height-coupling_arm_z-coupling_arm_height])coupling_mount_dapol_alone(bogie_coupling_height-coupling_arm_height);
-				}else{
-					coupling_mount(bogie_coupling_height-coupling_arm_height-coupling_arm_z,coupling_arm_height);
-				}
+			// translate([0,coupling_from_bogie_centre, coupling_arm_height+coupling_arm_z]){
+			// 	if(COUPLING_TYPE == "dapol"){
+			// 		translate([0,0,bogie_coupling_height-coupling_arm_z-coupling_arm_height])coupling_mount_dapol_alone(bogie_coupling_height-coupling_arm_height);
+			// 	}else{
+			// 		coupling_mount(bogie_coupling_height-coupling_arm_height-coupling_arm_z,coupling_arm_height);
+			// 	}
 				
-			}
+			// }
+			above_arm = bogie_coupling_height - coupling_arm_height - coupling_arm_z;
+			translate([0,bogie_centre_from_edge,bogie_coupling_height])generic_coupling_mount(COUPLING_TYPE,coupling_arm_height,above_arm);//COUPLING_TYPE
 
 			//how much shorter to make the arm, based on the type of coupling mount
-			coupling_mount_y_adjust = COUPLING_TYPE == "dapol" ? -5 : -m2_thread_size;
+			//coupling_mount_y_adjust = COUPLING_TYPE == "dapol" ? -5 : -m2_thread_size;
 
-			coupling_arm_length = coupling_from_bogie_centre + coupling_mount_y_adjust;
+			//coupling_arm_length = coupling_from_bogie_centre + coupling_mount_y_adjust;
+			coupling_arm_length = bogie_centre_from_edge - generic_coupling_mount_from_edge(COUPLING_TYPE);
 			translate([0,coupling_arm_length/2,coupling_arm_z])centred_cube(5,coupling_arm_length,coupling_arm_height);
 			if(with_brake_wheel){
 				//make bit with brake wheel thicker

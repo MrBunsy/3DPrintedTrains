@@ -348,14 +348,55 @@ module coupling_mount_dapol(minusHeight=0, extraHeight = 0){
     translate([0,-base_from_edge-base_length/2,base_height+coupling_height])centred_cube(coupling_width,base_length,wall_thick);
 
 }
-//probably. maybe
-dapol_coupling_end_from_edge = 6.4 + 2.7;
-//just the coupling mount, for placement on anything other than a bog standard truck. (0,0,0) is top centre of coupling fixing,
+
+//just the coupling mount, for placement on anything other than a bog standard truck. (0,0,0) is top centre of coupling fixing (xy lines up with edge of wagon),
 //drop in replacement for coupling_mount with default arguments (extraheight of zero) for PETG add some extra height
 //the extra height also works well in PLA, so keeping it as default!
 module coupling_mount_dapol_alone(base_thick = 0, extra_height = 0.2){
 	translate([0,0,-base_thick])coupling_mount_dapol(top_of_buffer_from_top_of_rail - top_of_coupling_from_top_of_rail - base_thick, extra_height);
 }
+
+//this is upside down from real - like all the bases and bogies. (0,0,0) should be placed inline with the middle edge of the wagon/loco in x,y, but at coupling_height_from_rails in z
+//facing +ve y
+module NEM_coupling_mount(base_thick=0){
+    wall_thick = 0.8;
+    roof_thick = 1;
+    //ensuring 0,0,0 is NEM_pocket_from_edge
+    translate([0,-NEM_pocket_deep/2 -NEM_pocket_from_edge, 0]){
+        difference(){
+            centred_cube(NEM_pocket_width+wall_thick*2,NEM_pocket_deep, NEM_pocket_height+roof_thick);
+            centred_cube(NEM_pocket_width+wall_thick,NEM_pocket_deep+0.1, NEM_pocket_height);
+        }
+        translate([0,0,-base_thick])centred_cube(NEM_pocket_width+wall_thick*2,NEM_pocket_deep,base_thick);
+    }
+    
+}
+
+//note - each coupling mount so far has been a little different with placement of (0,0,0) (I've learned as I've gone along...). This is an attempt to simplify new designs
+
+//this is upside down from real - like all the bases and bogies. (0,0,0) should be placed inline with the middle edge of the wagon/loco in x,y, but at coupling_height_from_rails in z
+//facing +ve y
+//type: "NEM", "dapol", "hornby"
+//base thick: this coupling assumes it's placed on something, but it will generate a base of base_thick if required
+//extra_height - how far above the 'base' this coupling is, generate something for it to attach to
+module generic_coupling_mount(type="NEM",base_thick=0, extra_height=0){
+
+    if(type == "NEM"){
+        NEM_coupling_mount(base_thick+extra_height);
+    }
+    if(type == "dapol"){
+        translate([0,0,0])coupling_mount_dapol_alone(base_thick+extra_height);
+    }
+    if(type == "hornby"){
+        translate([0,-coupling_from_edge,-extra_height])coupling_mount(extra_height,base_thick);
+    }
+
+}
+//given a type get the furthest distance of the mount from the edge - for calculating length of arm to hold a coupling on a bogie
+function generic_coupling_mount_from_edge(type) = type == "dapol" ? 6.4+2.7
+                                                : type == "NEM" ? NEM_pocket_from_edge+NEM_pocket_deep
+                                                : type == "hornby" ? 0.85*6/2 + coupling_from_edge
+                                                : 0;
 
 //facing +ve y direction
 module buffer(buffer_end_width, buffer_end_height, buffer_distance, buffer_length){

@@ -36,7 +36,7 @@ Notes:
  - The chunky hook works with most holders for the X8031, but doesn't fit on some hornby locos. (too wide with the 3d printed hook)
 
 */
-GEN_COUPLING = true;
+GEN_COUPLING = false;
 GEN_HOOK = false;
 GEN_IN_SITU = false;
 
@@ -69,11 +69,11 @@ wide_coupling_base_arm_length = 2.4;
 module NEM_fixing(subtract = false){
 	width = NEM_pocket_width-0.2;
 	length = NEM_pocket_deep+0.1;
-	height = NEM_pocket_holder_height-0.2;
-	slot_y = length*0.7;
+	height = NEM_pocket_height-0.2;
+	slot_y = length*0.6;
 	slot_width= width*0.5;
 	//exagerrated size because they don't slice well
-	wedge_stick_out = slot_width/2 + 0.5;//(slot_width-0.25)/2;
+	wedge_stick_out = slot_width/2 + 0.4;//(slot_width-0.25)/2;
 	if(subtract){
 		//clear out part of the hook mechanism to clear more space
 
