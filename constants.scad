@@ -84,9 +84,9 @@ NEM_pocket_height = 1.75;
 //top of the inside of the holder
 NEM_pocket_top_from_rail = 8.5;
 //given my buffers are generall 5.5 long, this aproximatly matches up with coupling_from_edge!
-//only binding when using close coupling, apparently, I might try lining up the edge with the edge of the wagon
 NEM_pocket_from_edge_of_buffer = 7.5;
-NEM_pocket_from_edge = 0;
+//should result in couplings in roughly the same place as hornby style
+NEM_pocket_from_edge = 2;
 NEM_pocket_deep = 7.1;
 
 //for height of couplings and axle mounts - diameter of the thinner bit of

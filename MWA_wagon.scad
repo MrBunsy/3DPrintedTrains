@@ -89,9 +89,9 @@ include <gravel_pile.scad>
 
 wheel_diameter = 12.5;
 
-GEN_IN_SITU = false;
+GEN_IN_SITU = true;
 //deprecated, now wagon is split into base and top (still used to generate the model)
-GEN_WAGON = false;
+GEN_WAGON = true;
 GEN_BASE = false;
 GEN_TOP = false;
 GEN_BOGIE = true;

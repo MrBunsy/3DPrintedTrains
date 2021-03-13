@@ -331,7 +331,10 @@ module coupling_mount_dapol(minusHeight=0, extraHeight = 0){
 
     wall_thick = 1;
 
-    base_from_edge = 2.7;
+    //note 2.7 is correct for an actual dapol wagon - but dapol's coupling stick out far further than any other makes (although they do have longer buffers)
+    //since my buffers are shorter, I'm putting it slightly further from the edge.
+    //TODO - future thought: actually adjust couplings based on buffer sizes
+    base_from_edge = 2.7 + 0.5;
 
     base_height = top_of_buffer_from_top_of_rail - top_of_coupling_from_top_of_rail - minusHeight;
     base_length = 6.4;
@@ -379,6 +382,7 @@ module NEM_coupling_mount(base_thick=0){
 //type: "NEM", "dapol", "hornby"
 //base thick: this coupling assumes it's placed on something, but it will generate a base of base_thick if required
 //extra_height - how far above the 'base' this coupling is, generate something for it to attach to
+//FUTURE TODO - take buffer length as input and calculate coupling_from_edge with it properly
 module generic_coupling_mount(type="NEM",base_thick=0, extra_height=0){
 
     if(type == "NEM"){
