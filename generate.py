@@ -97,25 +97,44 @@ def class66_jobs():
 
 def couplings_jobs():
     jobs = []
+    fixings = {
+            "hornby": {"FIXING": "X8031",
+                      "HOOK": "chunky",
+                      },
+            "hornby_nohook": {"FIXING": "X8031",
+                       "HOOK": "no",
+                       },
+            "dapol": {
+                    "FIXING": "dapol",
+                    "HOOK": "inline"
+                    },
+            "dovetail": {
+                "FIXING": "dovetail",
+                "HOOK": "inline"
+            },
+            "NEM": {
+                "FIXING": "NEM",
+                "HOOK": "inline"
+            }
+        }
 
-    for hook in ["inline", "chunky", "no"]:
-        for style in ["wide"]:
-            for fixing in ["X8031", "dovetail", "dapol"]:
-                job = JobDescription("couplings_parametric.scad", "coupling_{}_{}_{}_hook".format(style, fixing, hook))
-                job.addVariable("GEN_IN_SITU", False)
-                job.addVariable("GEN_COUPLING", True)
-                job.addVariable("GEN_HOOK", False)
-                job.addVariable("STYLE", style)
-                job.addVariable("HOOK", hook)
-                job.addVariable("FIXING", fixing)
-                jobs.append(job)
-        if hook != "no":
-            job2 = JobDescription("couplings_parametric.scad", "coupling_hook_{}".format(hook))
-            job2.addVariable("GEN_IN_SITU", False)
-            job2.addVariable("GEN_COUPLING", False)
-            job2.addVariable("GEN_HOOK", True)
-            job2.addVariable("HOOK", hook)
-            jobs.append(job2)
+    for hook in ["inline", "chunky"]:
+        job = JobDescription("couplings_parametric.scad", "coupling_hook_{}".format(hook))
+        job.addVariable("GEN_IN_SITU", False)
+        job.addVariable("GEN_COUPLING", False)
+        job.addVariable("GEN_HOOK", True)
+        job.addVariable("HOOK", hook)
+        jobs.append(job)
+
+    for style in ["wide"]:
+        for fixing in fixings.keys():
+            job = JobDescription("couplings_parametric.scad", "coupling_{}_{}".format(fixing,style))
+
+            job.addVariable("GEN_IN_SITU", False)
+            job.addVariable("GEN_COUPLING", True)
+            job.addVariable("GEN_HOOK", False)
+            job.addVariables(fixings[fixing])
+            jobs.append(job)
 
     return jobs
 
