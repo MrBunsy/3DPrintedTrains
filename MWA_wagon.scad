@@ -493,7 +493,7 @@ module wagon_body(logo=false){
 module brake_cylinder(cylinder_def, punchout = false){
 
 	leg_length = punchout ? 4.4 : 3.5;
-	leg_r = punchout ? buffer_holder_d/2 : buffer_d/2;
+	leg_r = punchout ? buffer_holder_d/2 : truck_fixing_deep_d/2;
 
 	pos = cylinder_def[0];
 	r = cylinder_def[1];

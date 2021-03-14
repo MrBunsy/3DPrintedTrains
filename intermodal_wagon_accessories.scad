@@ -70,7 +70,7 @@ module brake_wheel(height=buffer_holder_length, wheel_d = 6, arms=3, wheel_thick
 module brake_cylinder(){
 	translate([0,0,cylinder_d/2])rotate([0,90,0])cylinder(r=cylinder_d/2,h=cylinder_length, center=true);
 	
-	mirror_y()translate([-cylinder_hole_spacing/2,0,0])translate([0,0,cylinder_d/2])cylinder(h=buffer_holder_length+cylinder_d/2,r=truck_fixing_d/2);
+	mirror_y()translate([-cylinder_hole_spacing/2,0,0])translate([0,0,cylinder_d/2])cylinder(h=buffer_holder_length+cylinder_d/2,r=truck_fixing_deep_d/2);
 
 	
 }
