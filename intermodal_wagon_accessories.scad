@@ -37,7 +37,7 @@ cylinder_d = 6;
 cylinder_length = 3*4;
 cylinder_hole_spacing = 2*4;
 
-module brake_wheel(height=buffer_holder_length, wheel_d = 6, arms=3, wheel_thick = 0.5,little_hat = false){
+module brake_wheel(height=buffer_holder_length, wheel_d = 6, arms=3, wheel_thick = 0.5, little_hat = true){
 
 	
 	 //stick to slot into wagon

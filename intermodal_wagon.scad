@@ -128,6 +128,7 @@ a_frame_length= 2 + 0.5;
 mid_slot_width = width*0.1;
 
 edge_slot_width = width*0.2;
+echo("edge_slot_width", edge_slot_width);
 edge_slot_r = width*0.25/2;
 //holes near the buffer end. No idea what these are really for!
 hole_r = edge_slot_width*0.4;

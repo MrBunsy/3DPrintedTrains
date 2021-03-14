@@ -966,10 +966,12 @@ module bogie(with_brake_wheel = false){
 module gen_brake_wheel(){
 	//from intermodal wagon, with options now
 	if(STYLE != "MWA-B"){
-		brake_wheel(buffer_holder_length/3, brake_wheel_d, 4);
+		brake_wheel(brake_wheel_holder_thick, brake_wheel_d, 4);
 	}else{
 		//default from intermodalwagon actually seems to be right for MWA-B
-		brake_wheel(buffer_holder_length/3);
+		//diameter 6, 3 arms
+		//length of 3 worked (just default from intermodal wagon, TODO work this out properly from the bogie)
+		brake_wheel(3);
 	}
 	
 
