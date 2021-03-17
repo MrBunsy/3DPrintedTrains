@@ -74,7 +74,7 @@ Known variations I've not taken intoaccount:
 //non-dummy base needs scaffolding
 GEN_BASE = false;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
-GEN_SHELL = false;
+GEN_SHELL = true;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
 GEN_WALLS = false;
 GEN_ROOF = false;
@@ -86,7 +86,7 @@ GEN_MOTOR_CLIP = false;
 GEN_HEADLIGHTS = false;
 
 //includes mount for the camera, which is useful, and unfinished mount for a pi
-GEN_PI_MOUNT = true;
+GEN_PI_MOUNT = false;
 
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
@@ -1960,9 +1960,17 @@ side_window_bottom_corner_z=side_window_z+1.9;
 side_window_bottom_corner_y=2.8;
 side_window_top_corner_y=2.15;
 
+
 module shell(){
 	
-	
+	//I was contemplating a freightliner logo on teh side like the MWA wagon, but I've seen a photo of at least one in freighliner colours without a logo.
+	//I'll leave this for any future enhancements - the level of detail of this model isn't exactly high anyway
+	// nameplate_margin = 0;
+	// if(logo){
+	// 	//mirror_y()translate([wagon_width/2-wall_thick+nameplate_thick-0.1,0,nameplate_z+nameplate_height/2])rotate([-90,0,0])rotate([0,90,0])scale([(nameplate_length-nameplate_margin*2)/logo_dimensions[0], (nameplate_height-nameplate_margin*2)/logo_dimensions[1] ,min_thick/logo_dimensions[2]])translate([-logo_dimensions[0]/2,-logo_dimensions[1]/2, logo_dimensions[2]])surface(logo_file, invert = true);
+	// 	scaleby = (nameplate_length-nameplate_margin*2)/logo_dimensions[0];
+	// 	mirror_rotate180()translate([wagon_width/2-wall_thick+nameplate_thick,0,nameplate_z+nameplate_height/2])rotate([-90,0,0])rotate([0,90,0])scale([scaleby,scaleby , 1])linear_extrude(height=min_thick)import(logo_file, center=true);
+	// }
 	
 	front_height = front_top_r+front_top_r_z;
 	

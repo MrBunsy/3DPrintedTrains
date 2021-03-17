@@ -68,9 +68,11 @@ buffer_distance = 22.2;
 buffer_holder_d = 2;
 //I had been using 1.7 (in PETG) for ages, but a few are just a bit too loose, especially if cleaned up, so trying 1.725
 //trying 1.8 with PLA (prusament and fiberology seem to be much better than the PLAs I first experimented with)
+//buffers in prusament PLA work perfectly with 1.8 - much better than PETG in 1.7 was.
 buffer_d = 1.8;
 //need to confirm this still works in PLA.
 truck_fixing_deep_d = 1.8;
+//I've re-adjusted the brake wheels with 'little hats' and now they work fine
 truck_fixing_shallow_d = 1.8;
 //how deep the buffer holder hole needs to be
 buffer_holder_length = 4.5;

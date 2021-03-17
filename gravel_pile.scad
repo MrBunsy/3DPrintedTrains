@@ -69,7 +69,7 @@ module gravel_pile(width,length,height,avg_diameter = m2mm(0.2),seed = 1){
 }
 
 
-module gravel_pile_smooth(width,length,height,avg_diameter = m2mm(0.4),seed = 1){
+module gravel_pile_smooth(width,length,height,seed = 1,avg_diameter = m2mm(0.4)){
     tip_height = height*0.7;
     side_height = tip_height*0.8;
 
