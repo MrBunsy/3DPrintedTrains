@@ -74,13 +74,13 @@ Known variations I've not taken intoaccount:
 //non-dummy base needs scaffolding
 GEN_BASE = false;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
-GEN_SHELL = true;
+GEN_SHELL = false;
 //note - while separate roof and walls worked, the join between them seems to be more obvious than the problem with the shell.
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
-GEN_MOTOR_CLIP = false;
+GEN_MOTOR_CLIP = true;
 
 //separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
 GEN_HEADLIGHTS = false;
@@ -189,10 +189,10 @@ buffer_front_height = 5;
 buffer_front_length = 2;
 
 //wall_thick = 2;
-motor_length = 60+5;
+motor_length = 60+5 -1;
 //the bulk of the motor is not central to the wheels or rotation clip
 //5 works (runs round the garden track!), but is slightly offset too much the wrong way. trying 4.
-motor_offset_y = 4;
+motor_offset_y = 4-0.5;
 motor_centre_from_end = 45;
 //doors are different at each end
 //these should line up perfectly with the furthest bogie springs, but nothign enforces that
@@ -1660,52 +1660,25 @@ module side_cabinet(){
 	
 }
 
+battery_space_start_y = motor_hold_screws[1]-1;
 //some extra space for the batteries that rest up against the edge of the motor holder
 module motor_holder_battery_space(){
-	mirror_y()translate([-motor_holder_width/4,motor_hold_screws[1],0])
+	mirror_y()translate([-motor_holder_width/4,battery_space_start_y,0])
 	rotate([-45,0,-30])cube([20,20,20]);
 }
 
 //separate peice that clips onto motor and screws into the base
 module motor_holder(){
-	//first attempt, built into roof of shell
-	//would be impossible to ever remove the motor again
-	//translate([0,-(length/2 - motor_centre_from_end),0])
-	/*difference(){
-		intersection(){
-			translate([0,0,motor_clip_shell_z])
-			difference(){
-				centred_cube(width-wall_thick,motor_clip_hole_d*2,motor_clip_thick);
-				cylinder(r=motor_clip_hole_d/2,h=100,center=true);
-			}
-			//intersect with solid roof and walls to prevent poking out the sides of the roof
-			wall_and_roof_slice(motor_clip_hole_d*2,0,true);
-		}
-		wall_and_roof_slice(motor_clip_hole_d*3,0,false);
-	}*/
-	//second attempt, screws into roof of shell, works but super fiddly to assemble loco
-	/*
-	thick = motor_clip_thick;//-motor_clip_fudge_height;
-	difference(){
-		centred_cube(motor_holder_width,motor_clip_hole_d*2,thick);
-		union(){
-			cylinder(r=motor_clip_hole_d/2,h=100,center=true);
-			mirror_y(){
-				translate([motor_holder_screws_x,0,0])cylinder(r=m2_thread_size/2,h=100,center=true);
-				translate([motor_holder_screws_x,0,thick-m2_head_length])cylinder(r=m2_head_size/2,h=100);
-				centred_cube(motor_clip_hole_d*2,50,motor_clip_fudge_height);
-			}
-			
-		}
-	}*/
 	//thickess of central arm
 	arm_height = 2.5;//motor_clip_height- motor_clip_fudge_height;
 	//third attempt, this shape screws into the base and the motor clips into this
 	//this can be much smaller than 1.5 and still give plenty of play for gradient changes
 	lip_height = motor_clip_height - motor_clip_height_from_nib + motor_clip_fudge_height;
+	//main lengthwise arm
+	//motor_holder_battery_space();
 	difference(){
 		union(){
-			centred_cube(motor_holder_width,motor_holder_length,arm_height);
+			color("green")centred_cube(motor_holder_width,motor_holder_length,arm_height);
 			translate([0,-motor_offset_y,0])cylinder(r=motor_clip_hole_d,h=motor_clip_thick);
 		}
 		union(){
@@ -1715,11 +1688,16 @@ module motor_holder(){
 		}
 	}
 	screw_depth = 10;
+	//teh two arms that attach to the base
 	difference(){
-		translate([0,0,arm_height])mirror_x()centred_cube(motor_holder_width,motor_holder_length,motor_clip_base_z);
+		color("blue")translate([0,0,arm_height])mirror_x()centred_cube(motor_holder_width,motor_holder_length,motor_clip_base_z);
 		union(){	
 			//don't overlap with space for motor
-			cylinder(r=motor_length/2,h=100);
+			//offset (differently) to strengthen arm with battery space chopped out
+			battery_space_bodge = 2;
+
+			translate([0,-battery_space_bodge,0])cylinder(r=motor_length/2-battery_space_bodge,h=100);
+			translate([0,0,arm_height])cylinder(r1=motor_length/2-battery_space_bodge,r2=motor_length/2,h=motor_clip_base_z);
 			//screwholes
 			translate([0,0,motor_clip_base_z+motor_clip_thick-screw_depth])mirror_xy()translate(motor_hold_screws)cylinder(r=m2_thread_size_vertical/2,h=100);
 			
@@ -1729,7 +1707,12 @@ module motor_holder(){
 			
 		}
 	}
-	
+
+	// //thicken the corner with the battery space cut out
+	// hull(){
+	// 	translate([0,battery_space_start_y-0.1-6,0])centred_cube(motor_holder_width,0.2,arm_height);
+	// 	translate([0,motor_length/2+0.1,motor_clip_base_z])centred_cube(motor_holder_width,0.2,0.1);
+	// }
 	
 }
 
@@ -2321,7 +2304,7 @@ optional_rotate([0,0,ANGLE],ANGLE != 0){
 	
 	if(GEN_MOTOR_CLIP){
 		echo("gen motor clip");
-		optional_translate([0,-(length/2 - motor_centre_from_end) + motor_offset_y,motor_clip_base_z+base_thick+base_height_above_track+motor_clip_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	
+		optional_translate([0,-(length/2 - motor_centre_from_end) + motor_offset_y,motor_clip_base_z+base_thick+base_height_above_track+2.5],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)motor_holder();	
 		if(!GEN_IN_PLACE){
 			//translate([50,50,0])class59motor_mod();
 		}
