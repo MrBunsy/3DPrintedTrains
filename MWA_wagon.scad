@@ -94,16 +94,16 @@ GEN_IN_SITU = false;
 GEN_WAGON = false;
 GEN_BASE = false;
 GEN_TOP = false;
-GEN_BOGIE = false;
+GEN_BOGIE = true;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
 //bits that aren't printed, just part of the 3d model
 GEN_MODEL_BITS = false;
-GEN_GRAVEL = true;
+GEN_GRAVEL = false;
 
 //"dapol", "hornby", "NEM"
-COUPLING_TYPE="NEM";
+COUPLING_TYPE="dapol";
 //some optional tweaks to make the bogie less accurate, but hopefully printable in PLA
 BOGIE_EASY_PRINT = true;
 
@@ -130,6 +130,10 @@ bogie_distance = m2mm(8.52);
 bogie_axle_distance = m2mm(2);
 
 bogie_inner_width = 22.5;
+
+//same as intermodal bogie, should make them less wonky!
+bogie_m3_hole_depth = 5;
+bogie_m3_hole_thick = 1.5;
 
 //as measured from picture
 axle_to_top_of_bogie = 6.3;// 5.8;
@@ -879,6 +883,9 @@ module bogie(with_brake_wheel = false){
 			
 			//centre arm
 			centred_cube(bogie_inner_width+bogie_padding_width*2,bogie_centre_arm_length,bogie_centre_arm_height);
+
+			//extra height for screw to fix to wagon (should make wagon less wonky)
+			cylinder(r=(m3_thread_loose_size/2)+bogie_m3_hole_thick, h=bogie_m3_hole_depth);
 
 			right_hole_bottom_z = bogie_offset_hole_pos[1]-bogie_offset_hole_d/2;
 
