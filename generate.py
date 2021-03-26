@@ -181,9 +181,10 @@ def wagon_jobs():
 
 def mwa_wagon_jobs():
     jobs = []
-    allOptions = ["bogie", "brake_cylinder", "base", "top", "brake_wheel", "wagon", "buffer"]
+    allOptions = ["bogie", "brake_cylinder", "base", "top", "brake_wheel", "wagon", "buffer", "gravel"]
     variables = {
-        "MWA": allOptions,
+        #all except gravel, for now
+        "MWA": allOptions[:-1],
         # bogies are currently same for IOA and MWA, with one bogie different for MWA-B
         # buffers are same for all
         "MWA-B": ["brake_cylinder", "base", "top", "brake_wheel", "wagon", "bogie"],
@@ -203,17 +204,26 @@ def mwa_wagon_jobs():
             fullMWAJob.addVariable("GEN_" + v.upper(), True)
 
         for v in MWAariables:
-            job = JobDescription("MWA_wagon.scad", "{}_wagon_{}".format(style, v))
-            job.addVariable("GEN_IN_SITU", False)
-            job.addVariable("GEN_MODEL_BITS", False)
-            job.addVariable("BOGIE_EASY_PRINT", True)
-            # disable anything left set to True
-            for dont in allOptions:
-                job.addVariable("GEN_" + dont.upper(), False)
-            job.addVariable("STYLE", style)
-            for v2 in MWAariables:
-                job.addVariable("GEN_" + v2.upper(), v == v2)
-            jobs.append(job)
+
+            couplings = [""]
+            if v == "bogie":
+                couplings = ["dapol", "NEM"]
+            for coupling in couplings:
+                coupling_name = "" if len(coupling) == 0 else "_"+coupling
+                job = JobDescription("MWA_wagon.scad", "{}_wagon_{}{}".format(style, v, coupling_name))
+                job.addVariable("GEN_IN_SITU", False)
+                job.addVariable("GEN_MODEL_BITS", False)
+                job.addVariable("BOGIE_EASY_PRINT", True)
+                if len(coupling) > 0:
+                    job.addVariable("COUPLING_TYPE", coupling)
+
+                # disable anything left set to True
+                for dont in allOptions:
+                    job.addVariable("GEN_" + dont.upper(), False)
+                job.addVariable("STYLE", style)
+                for v2 in MWAariables:
+                    job.addVariable("GEN_" + v2.upper(), v == v2)
+                jobs.append(job)
         jobs.append(fullMWAJob)
     return jobs
 

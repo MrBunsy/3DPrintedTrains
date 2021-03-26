@@ -94,13 +94,13 @@ GEN_IN_SITU = false;
 GEN_WAGON = false;
 GEN_BASE = false;
 GEN_TOP = false;
-GEN_BOGIE = true;
+GEN_BOGIE = false;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
 //bits that aren't printed, just part of the 3d model
 GEN_MODEL_BITS = false;
-GEN_GRAVEL = false;
+GEN_GRAVEL = true;
 
 //"dapol", "hornby", "NEM"
 COUPLING_TYPE="dapol";
@@ -1215,6 +1215,6 @@ if(GEN_BUFFER){
 }
 
 if(GEN_GRAVEL){
-	padding = GEN_IN_SITU ? 0 : 0.2;
+	padding = GEN_IN_SITU ? 0 : 0.5;
 	optional_translate([0,0,wagon_base_above_rails+wagon_base_thick], GEN_IN_SITU)gravel_pile(wagon_width-wall_thick*2-padding, wagon_length-wall_thick*2-padding, wagon_height-base_thick);
 }
