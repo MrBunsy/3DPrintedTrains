@@ -79,7 +79,7 @@ GEN_SHELL = false;
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = false;
+GEN_BOGIES = true;
 GEN_MOTOR_CLIP = false;
 
 //separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
@@ -88,7 +88,7 @@ GEN_HEADLIGHTS = false;
 //includes mount for the camera, which is useful, and unfinished mount for a pi
 GEN_PI_MOUNT = false;
 
-GEN_BUFFER = true;
+GEN_BUFFER = false;
 
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
@@ -1172,16 +1172,18 @@ module bogies(box_end=true){
 	
 	//adding centre_bogie_wheel_offset/2 to make up for when teh bogie bends under the weight of the loco and raises the height of the coupling
 	//note- not adding that, as it lowers the bogie too much
-	coupling_arm_z = axle_to_top_of_bogie+bogie_wheel_d/2 -coupling_arm_thick-top_of_coupling_from_top_of_rail;// +centre_bogie_wheel_offset/2;
+	// coupling_arm_z = axle_to_top_of_bogie+bogie_wheel_d/2 -coupling_arm_thick-top_of_coupling_from_top_of_rail;// +centre_bogie_wheel_offset/2;
 	
-	//dapol coupling mount 0,0 is edge of wagon, hornby is...something else
-	
+	bogie_coupling_height = axle_to_top_of_bogie + bogie_wheel_d/2 - top_of_coupling_from_top_of_rail;
+
+	coupling_arm_z = bogie_coupling_height - coupling_arm_thick;
+
 	arm_inner_y = (bogie_end_axles_distance/2 + wheel_mount_length/5);
-	arm_outer_y = coupling_arm_from_mount - ( COUPLING_TYPE == "dapol" ? dapol_coupling_end_from_edge : coupling_from_edge + m2_thread_size );
+	arm_outer_y = motor_centre_from_end - generic_coupling_mount_from_edge(COUPLING_TYPE);//coupling_arm_from_mount - ( COUPLING_TYPE == "dapol" ? dapol_coupling_end_from_edge : coupling_from_edge + m2_thread_size );
 
 	coupling_arm_length = arm_outer_y - arm_inner_y;
-
-	//arm to hold coupling
+	echo("coupling arm length", coupling_arm_length);
+	// //arm to hold coupling
 	difference(){
 		translate([0,-(arm_inner_y + arm_outer_y)/2,coupling_arm_z])centred_cube(coupling_arm_width,coupling_arm_length,coupling_arm_thick);
 		union(){
@@ -1193,15 +1195,7 @@ module bogies(box_end=true){
 	//fill in gap under coupling arm
 	translate([0,-bogie_end_axles_distance/2,0])centred_cube(coupling_arm_width,wheel_mount_length,coupling_arm_z);
 	
-	translate([0,-(coupling_arm_from_mount - (COUPLING_TYPE == "dapol" ? 0 : coupling_from_edge)),coupling_arm_z+coupling_arm_thick]){
-		// coupling_mount(0,coupling_arm_thick);
-		if(COUPLING_TYPE == "dapol"){
-			mirror([0,1,0])coupling_mount_dapol_alone(coupling_arm_thick);
-		}else{
-			coupling_mount(0,coupling_arm_thick);
-		}
-
-	}
+	mirror([0,1,0])translate([0,motor_centre_from_end,bogie_coupling_height])generic_coupling_mount(COUPLING_TYPE,coupling_arm_thick);
 }
 
 //hmm not right.
@@ -2395,7 +2389,11 @@ optional_rotate([0,0,ANGLE],ANGLE != 0){
 
 	if(GEN_BUFFER){
 		//TODO in-situ
-		buffer();
+		if(GEN_IN_PLACE){
+			mirror_x()translate([0,length/2+5.5,centre_of_buffer_from_top_of_rail-bogie_wheel_d/2])mirror_y()translate([buffer_distance/2,0,buffer_height])rotate([90,0,0])buffer();
+		}else{
+			buffer();
+		}
 
 	}
 	
