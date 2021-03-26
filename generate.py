@@ -73,7 +73,7 @@ def intermodal_wagon_jobs():
 def class66_jobs():
     jobs = []
     # "walls", "roof",
-    class66Variables = ["base", "shell", "bogies", "motor_clip", "pi_mount", "headlights"]
+    class66Variables = ["base", "shell", "bogies", "motor_clip", "pi_mount", "headlights", "buffer"]
     at_angle = ["base", "shell", "walls"]
     full66Job = JobDescription("class66.scad", "class66_model")
     full66Job.addVariable("GEN_IN_PLACE", True)
@@ -179,7 +179,7 @@ def wagon_jobs():
     return jobs
 
 
-def mwa_wagon_jobs():
+def mwa_wagon_jobs(just_gravel = False):
     jobs = []
     allOptions = ["bogie", "brake_cylinder", "base", "top", "brake_wheel", "wagon", "buffer", "gravel"]
     variables = {
@@ -190,6 +190,22 @@ def mwa_wagon_jobs():
         "MWA-B": ["brake_cylinder", "base", "top", "brake_wheel", "wagon", "bogie"],
         # IOA has no separate brake cylinders
         "IOA": ["base", "top", "brake_wheel", "wagon"]}
+
+    if just_gravel:
+        for seed in range(1,10):
+            job = JobDescription("MWA_wagon.scad", "MWA_wagon_gravel_{}".format(seed))
+            job.addVariable("GEN_IN_SITU", False)
+            job.addVariable("GEN_MODEL_BITS", False)
+
+            # disable anything left set to True
+            for dont in allOptions:
+                job.addVariable("GEN_" + dont.upper(), False)
+
+            job.addVariable("GEN_GRAVEL", True)
+            job.addVariable("GRAVEL_SEED", seed)
+            jobs.append(job)
+        return jobs
+
     for style in ["MWA", "MWA-B", "IOA"]:
         MWAariables = variables[style]
         fullMWAJob = JobDescription("MWA_wagon.scad", "{}_wagon_model".format(style))
@@ -284,7 +300,8 @@ if __name__ == '__main__':
               "wagons":lambda:wagon_jobs(),
               "mwa":lambda:mwa_wagon_jobs(),
               "wheels":lambda:wheel_jobs(),
-              "intermodal":lambda:intermodal_wagon_jobs()
+              "intermodal":lambda:intermodal_wagon_jobs(),
+               "mwagravel": lambda:mwa_wagon_jobs(True)
                }
 
     parser = argparse.ArgumentParser(description="Generate all variants of a parametric object")

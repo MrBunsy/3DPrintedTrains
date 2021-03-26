@@ -18,19 +18,27 @@ function box_muller(u1,u2) = [sqrt(-2*ln(u1)) * cos(2*180*u2),  sqrt(-2*ln(u1)) 
 width, length and height of the container
 */
 module gravel_pile(width,length,height,avg_diameter = m2mm(0.2),seed = 1){
-    tip_height = height*0.7;
-    side_height = tip_height*0.8;
-
-    tip_length = length*0.7;
 
     widths = ceil(width/(avg_diameter*0.3));
     lengths = ceil(length/(avg_diameter*0.3));
 
     random = rands(0.00001,0.99999,widths*lengths*2,seed);
 
+
+    tip_height = height*(0.7 - 0.2*random[0]);
+    side_height = tip_height*(0.8 - 0.4*random[1]);
+    echo("side height", side_height, "tip height", tip_height);
+
+    tip_length = length*0.7;
+
+    
+
+    
+
     slope = tip_height - side_height;
+    offsets = [0.075 - 0.15*random[2]*width, 0.075 - 0.15*random[3]*length];
     //idea inspired by CoalGen: https://github.com/StephanRichter/CoalGen/blob/master/src/coalgen.cpp
-    function getHeight(x,y) = side_height + slope*sin((x/width)*180+90) + slope*sin((y/length)*180+90);
+    function getHeight(x,y) = side_height + slope*sin(((x-offsets[0])/width)*180+90) + slope*sin(((y - offsets[1])/length)*180+90);
 
     echo(sin(180))
 
@@ -53,14 +61,15 @@ module gravel_pile(width,length,height,avg_diameter = m2mm(0.2),seed = 1){
                     // r=avg_diameter/2;
                     x=(xi/widths)*width -width/2;
                     y=(yi/lengths)*length - length/2;
-                    h = getHeight(x,y);// + normal_rands[1]*avg_diameter*0.2;
+                    h = getHeight(x,y)-avg_diameter*0.2;// + normal_rands[1]*avg_diameter*0.2;
                     translate([x, y, h])rotate([randoms[0]*180,randoms[1]*180,(randoms[0]+randoms[1])*180])sphere(r=r,$fn=4);
                 }
             }
 
             // centred_cube(width,length,side_height);
             // translate([0,0,side_height])scale([width,length,slope])sphere(r=0.5);
-            gravel_pile_smooth(width,length,height);
+            translate([offsets[0], offsets[1],0])
+            gravel_pile_smooth(width,length,height,tip_height, side_height, offsets);
         }
 
         centred_cube(width,length,height*1.5);
@@ -69,9 +78,9 @@ module gravel_pile(width,length,height,avg_diameter = m2mm(0.2),seed = 1){
 }
 
 
-module gravel_pile_smooth(width,length,height,seed = 1,avg_diameter = m2mm(0.4)){
-    tip_height = height*0.7;
-    side_height = tip_height*0.8;
+module gravel_pile_smooth(width,length,height,tip_height, side_height, offsets){
+    // tip_height = height*0.7;
+    // side_height = tip_height*0.8;
 
     tip_length = length*0.7;
     slope = tip_height - side_height;
@@ -79,6 +88,7 @@ module gravel_pile_smooth(width,length,height,seed = 1,avg_diameter = m2mm(0.4))
     size = floor(width/2);
     step = 2;
     function f(x,y) = side_height + slope*sin((x/(size))*180+90) + slope*sin((y/size)*180+90);
+    // function f(x,y) = side_height + slope*sin(((x-offsets[0])/size)*180+90) + slope*sin(((y - offsets[1])/size)*180+90);
 
     function p(x, y) = [ x, y, f(x, y) ];
     function p0(x, y) = [ x, y, 0 ];
