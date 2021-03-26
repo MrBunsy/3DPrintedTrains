@@ -125,6 +125,30 @@ module rounded_cube(width,length,height,r, $fn=50){
     
 }
 
+//each edge of the cube (when viewed top-down) is an arc
+module arc_edged_cube(width, length, height, r_w, r_l){
+
+	top_offset = sqrt(r_w*r_w - width*width/4);
+	echo(top_offset);
+	//top&bottom arcs
+	mirror_x()
+	// translate([0,length/2-top_offset])cylinder(r=r_w,h=height);
+	difference(){
+		translate([0,length/2-top_offset])cylinder(r=r_w,h=height);
+		translate([0,(length/2-top_offset*2), -1])centred_cube(r_w*4,top_offset*4,height+2);
+	}
+
+	centred_cube(width,length,height);
+
+	side_offset = sqrt(r_l*r_l - length*length/4);
+	//left and right arcs
+	mirror_y()
+	difference(){
+		translate([width/2-side_offset,0,0])cylinder(r=r_l,h=height);
+		translate([width/2-side_offset*2,0,-1])centred_cube(side_offset*4,r_l*4,height+2);
+	}
+}
+
 
 module mirror_x(doMirror=true){
     children();

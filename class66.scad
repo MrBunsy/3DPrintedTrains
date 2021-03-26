@@ -44,13 +44,13 @@ include <threads.scad>
 // TODO - the coupling is a tiny bit too low and will foul on pointwork (tried adjusting bogie_wheel_d to 14 rather than 14.3, not reprinted to test)
 // - is this related to front and rear wheels on the bogie being lower to account for bending?
 
-// TODO improve shape of rainguards?
+// TODO improve shape of rainguards? - done
 // TODO - when printing the shell, after the bridge layer the walls are pulled inwards slightly (presumably by the contracting bridge plastic) and so the roof shape on the final printed version isn't quite right.
 //not sure how to fix this. A few internal walls? actually make the roof a separate peice? buttresses?
 //would like to address it, but I had to split the MWA wagon into two and that still wans't quite enoguh. might be better to twaek the design
 //so the warping is in a less noticable place or countered.
 
-//TODO - the bogies have several bits that don't print well (lots of drooping), these could easily be fixed up
+//TODO - the bogies have several bits that don't print well (lots of drooping), these could easily be fixed up - done
 
 
 //big todo - I think the wheels need slightly larger flanges and slightly more tapering, they seems to derail more easily than I'd expect.
@@ -80,13 +80,15 @@ GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
 GEN_BOGIES = false;
-GEN_MOTOR_CLIP = true;
+GEN_MOTOR_CLIP = false;
 
 //separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
 GEN_HEADLIGHTS = false;
 
 //includes mount for the camera, which is useful, and unfinished mount for a pi
 GEN_PI_MOUNT = false;
+
+GEN_BUFFER = true;
 
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
@@ -2270,6 +2272,75 @@ module pi_mount(){
 	
 }
 
+//copy-paste and tweak job from mwa_buffer
+//(0,0,0) is centre of buffer plate, buffer is vertical with buffer plate on the xy plane
+module buffer(){
+		
+	fixing_length=4;
+
+
+	//end that would touch another buffer if it were real
+	end_width = 6;
+	//height from the point of view on the train, +ve y here
+	end_height=3.25;
+	//my made-up buffer terminology, pole is the bit between the flat plate and the holder, and holder is the bit attached to a real wagon
+	//
+	pole_diameter = 2;//1;
+	holder_diameter=2.5;//1.8;
+	total_length=5.5;
+	pole_length = 1.5;
+	end_length=0.8;
+	truck_fixing_d=buffer_d;
+
+	end_flange_length = 0.6;
+
+	end_corner_r = 0.5;
+	//top is curved
+	end_top_r = 8;
+	flat_bit_width = end_width;//-end_corner_r*2;
+	//height from top of square bit to centre of the circle that makes the top curve - ish, not quite accurate
+	h = sqrt(end_top_r*end_top_r - flat_bit_width*flat_bit_width/4);
+
+	endplate_length=0.5;
+
+	trainplate_width = end_width*0.7;
+	trainplate_height = end_height*0.7;
+	trainplate_r = 10;
+	trainplate_length = 0.1;
+
+	trainplate_h =  sqrt(trainplate_r*trainplate_r - trainplate_width*trainplate_width/4);
+	trainplate_flange_length = 1.2;
+
+
+	//end plate of the buffer
+	
+		// rounded_cube(end_width,end_height,end_length, end_corner_r);
+		arc_edged_cube(end_width,end_height,end_length, end_width*1.5, end_height*1.5);
+		// intersection(){
+		// 	translate([0,-10,0])centred_cube(flat_bit_width,20,end_length);
+		// 	translate([0,-end_height/2 + h, 0])cylinder(r=end_top_r, h = end_length);
+		// }
+		// cylinder(r=holder_diameter/2,h=end_flange_length+end_length);
+	
+
+	
+	cylinder(r=pole_diameter/2, h=total_length, $fn=200);
+	translate([0,0,pole_length+end_length]){
+		cylinder(r=holder_diameter/2, h=total_length-(pole_length+end_length), $fn=200);
+	}
+	cylinder(r=truck_fixing_d/2,h=total_length+fixing_length, $fn=200);
+
+	//trainplate end
+	// hull(){
+	// 	translate([0,0,total_length-trainplate_length])mirror_x()intersection(){
+	// 		translate([0,-10,0])centred_cube(trainplate_width,20,trainplate_length);
+	// 		translate([0,-trainplate_height/2 + trainplate_h, 0])cylinder(r=trainplate_r, h = trainplate_length);
+	// 	}
+	// 	translate([0,0,total_length-trainplate_length-trainplate_flange_length+0.1])cylinder(r=holder_diameter/2,h=0.1);
+	// }
+
+}
+
 optional_rotate([0,0,ANGLE],ANGLE != 0){
 	if(GEN_BASE){
 		echo("gen base");
@@ -2321,5 +2392,12 @@ optional_rotate([0,0,ANGLE],ANGLE != 0){
 			headlight_box(true);
 		}
 	}
+
+	if(GEN_BUFFER){
+		//TODO in-situ
+		buffer();
+
+	}
+	
 
 }
