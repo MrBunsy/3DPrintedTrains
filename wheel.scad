@@ -129,7 +129,7 @@ module wheelset_model(diameter=12.5){
 	
 	mirror_y()translate([16.5/2-(depths[0] + depths[1]),0,0])rotate([0,90,0])wheel(diameters, depths, 50);
 	
-	scale([axle_width/axle_holder_width,1,1])axle_punch();
+	scale([axle_width/axle_holder_width,1,1])axle_punch(25);
 }
 
 //axle_length reduction reduces length of axle - will introduce a bit more wobble (potentially) but increase strength of the point

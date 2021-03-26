@@ -20,7 +20,8 @@ along with The 3DPrintedTrains project.  If not, see <https:www.gnu.org/licenses
 include <truck_bits.scad>
 include <constants.scad>
 include <threads.scad>
-
+//purely for the model
+include <wheel.scad>
 
 
 //the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body, likewise with the roof of the shell
@@ -92,7 +93,7 @@ GEN_BUFFER = false;
 
 //can't decide if to have a separate faceplate for the ends of the headlights to cover up any bits that break or not
 //GEN_LIGHTS_FACEPLATE = true;
-GEN_IN_PLACE = false;
+GEN_IN_PLACE = true;
 
 //generate tiny things that won't print well
 GEN_TINY_BITS = false;
@@ -2348,6 +2349,14 @@ optional_rotate([0,0,ANGLE],ANGLE != 0){
 		if(DUMMY){
 			//other bogie
 			optional_translate([0,-(length/2 - motor_centre_from_end),base_height_above_track-bogie_mount_height-m3_washer_thick],GEN_IN_PLACE)optional_rotate([0,180,0],GEN_IN_PLACE)bogies(false);
+		}
+		if(GEN_IN_PLACE){
+			mirror_x(DUMMY)mirror([0,1,0]){
+				translate([0,-(length/2 - motor_centre_from_end), bogie_wheel_d/2]){
+					triplicate_x([0,bogie_end_axles_distance/2,0])wheelset_model(14);
+
+				}
+			}
 		}
 		
 	}

@@ -265,12 +265,12 @@ module led_1_8mm(extra_base_length = led_base_extra, extra_front_length = 0){
 
 //representation of the axle, for punching out holes
 //0,0 is at centre of axle, axle is along the x axis
-module axle_punch(){
+module axle_punch(fn=200){
 	//same as in the more convoluted axle_holder()
 	cone_height = 2.325;
 	
-	mirror_y()translate([axle_holder_width/2-cone_height,0,0])rotate([0,90,0])cylinder(r1=cone_height/2,h=cone_height,r2=0,$fn=200);
+	mirror_y()translate([axle_holder_width/2-cone_height,0,0])rotate([0,90,0])cylinder(r1=cone_height/2,h=cone_height,r2=0,$fn=fn);
 	
-	rotate([0,90,0])cylinder(r=cone_height/2,h=axle_holder_width-cone_height*2,center=true);
+	rotate([0,90,0])cylinder(r=cone_height/2,h=axle_holder_width-cone_height*2,center=true, $fn=fn);
 }
 
