@@ -91,7 +91,7 @@ module wheel(diameters=diameters_14mm, depths=depths, fn=2000){
 	//trying for PETG:
 	//1.2 is about as loose in PETG as 1.1 was in PLA
 	//1.175 works in PETG, but still a bit too loose to worth without glue
-
+	//1.15 seems to be working for the pointed axleset and just about (almost loose) for the class 66 wheels
 	axle_r=1.15;
 	//extra_height = extra_axle_length;
 	fancy_internal_r=5.8/2;
