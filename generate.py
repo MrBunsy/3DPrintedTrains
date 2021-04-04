@@ -248,14 +248,14 @@ def wheel_jobs():
     jobs = []
     options = {
         # 12.5mm wheelset spacer
-        "spacer_12_5mm": {"GEN_WHEELSET_SPACER": True,
+        "wheel_spacer_12_5mm": {"GEN_WHEELSET_SPACER": True,
                           "GEN_WHEEL": False,
                           "BEARING_TYPE": "spike",
                           "DUMMY": False,
                           "DIAMETER": 12.5,
                           },
         # 12.5mm pointed axle wheel
-        "wheel_axle_spike_12_5mm": {"GEN_WHEELSET_SPACER": False,
+        "wheel_spiked_12_5mm": {"GEN_WHEELSET_SPACER": False,
                                     "GEN_WHEEL": True,
                                     "BEARING_TYPE": "spike",
                                     "DUMMY": False,
@@ -263,7 +263,7 @@ def wheel_jobs():
                                     "WHEEL_POINTED": False
                                     },
         # 12.5mm pointed wheel
-        "wheel_axle_flat_12_5mm": {"GEN_WHEELSET_SPACER": False,
+        "wheel_flat_12_5mm": {"GEN_WHEELSET_SPACER": False,
                                    "GEN_WHEEL": True,
                                    "BEARING_TYPE": "spike",
                                    "DUMMY": False,
@@ -282,7 +282,25 @@ def wheel_jobs():
                                 "BEARING_TYPE": "axle",
                                 "DUMMY": True,
                                 "DIAMETER": 14
-                                }
+                                },
+        "wheel_flat_14mm": {"GEN_WHEELSET_SPACER": False,
+                               "GEN_WHEEL": True,
+                               "BEARING_TYPE": "spike",
+                               "DUMMY": False,
+                               "DIAMETER": 14
+                               },
+        "wheel_flat_14mm_dummy": {"GEN_WHEELSET_SPACER": False,
+                                 "GEN_WHEEL": True,
+                                 "BEARING_TYPE": "spike",
+                                 "DUMMY": True,
+                                 "DIAMETER": 14
+                                 },
+        "wheel_spacer_14mm": {"GEN_WHEELSET_SPACER": True,
+                                "GEN_WHEEL": False,
+                                "BEARING_TYPE": "spike",
+                                "DUMMY": False,
+                                "DIAMETER": 14,
+                                },
     }
 
     for key in options:

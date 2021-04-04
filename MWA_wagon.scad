@@ -80,7 +80,7 @@ TODO:
 */
 include <truck_bits.scad>
 include <constants.scad>
-include <wheel.scad>
+use <wheel.scad>
 include <threads.scad>
 include <intermodal_wagon_accessories.scad>
 include <buffer_modern.scad>

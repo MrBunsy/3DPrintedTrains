@@ -37,6 +37,8 @@ centre_of_buffer_from_top_of_rail = 17 - 3.5/2;
 
 //pointy bit to pointy bit of spare hornby axles (also works for dapol axles)
 axle_width = 25.65;
+//min space needed around my 3d printed spike axles
+custom_axle_r = 3;
 //same as axle_holder in truck bits
 axle_holder_width = axle_width+1.5;
 
@@ -265,12 +267,12 @@ module led_1_8mm(extra_base_length = led_base_extra, extra_front_length = 0){
 
 //representation of the axle, for punching out holes
 //0,0 is at centre of axle, axle is along the x axis
-module axle_punch(fn=200){
+module axle_punch(fn=200, axle_r = 2.325/2){
 	//same as in the more convoluted axle_holder()
 	cone_height = 2.325;
 	
 	mirror_y()translate([axle_holder_width/2-cone_height,0,0])rotate([0,90,0])cylinder(r1=cone_height/2,h=cone_height,r2=0,$fn=fn);
 	
-	rotate([0,90,0])cylinder(r=cone_height/2,h=axle_holder_width-cone_height*2,center=true, $fn=fn);
+	rotate([0,90,0])cylinder(r=axle_r,h=axle_holder_width-cone_height*2,center=true, $fn=fn);
 }
 

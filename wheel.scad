@@ -30,7 +30,7 @@ include <constants.scad>
 //spacers to hold said wheels square
 GEN_WHEELSET_SPACER = false;
 //generate the actual wheel
-GEN_WHEEL = false;
+GEN_WHEEL = true;
 
 
 //"spike" uses pointed ends of the axle for bearings. "axle" uses the centre of the axle slotting into a holder as a bearing. Wheels are longer for axle bearings and spike bearings require spacers to keep the shorter wheels at right angles
@@ -40,10 +40,10 @@ BEARING_TYPE = "spike";
 DUMMY = false;
 
 //12.5 or 14
-DIAMETER = 12.5;
+DIAMETER = 14;//12.5;
 
 //if false axle is axle_width (25.65mm) long ended in points, if true axle is flat ended and the points are part of the wheels. if BEARING_TYPE is "axle" this is largely irrelevant
-WHEEL_POINTED = true;
+WHEEL_POINTED = false;
 
 //TODO
 STYLE = "modern";
@@ -51,7 +51,9 @@ STYLE = "modern";
 
 diameters_12_5mm = [14.6,14.6, 12.7, 12.5];//not much gradient on the wheel part with this
 diameters_14mm = [16.5,16.5, 14.45, 14.0];
-diameters_14mm_dummy = [14.4,14.4, 14.4, 14.0];
+//trying making these smaller than the real wheels (powered loco seems fine, but the dummies derail quite easily, even weighted), maybe I should have raised them up on teh class66 after all!
+diameters_14mm_dummy_smaller = [14.2,14.2, 14.2, 13.75];
+diameters_14mm_dummy = [14.2,14.2, 14.2, 13.75];
 depths_thicker = [0.4, 0.3, 2.7];//total 3.4
 depths_thinner = [0.4, 0.3, 2];
 
@@ -90,8 +92,9 @@ module wheel(diameters=diameters_14mm, depths=depths, fn=2000){
 	//axle_r=1.075;
 	//trying for PETG:
 	//1.2 is about as loose in PETG as 1.1 was in PLA
-	//1.175 works in PETG, but still a bit too loose to worth without glue
+	//1.175 works in PETG, but still a bit too loose to worth without glue - current best option for the class 66 axle-mounted wheels
 	//1.15 seems to be working for the pointed axleset and just about (almost loose) for the class 66 wheels
+	//note, 1.15 PETG does not produce as good wheels for the class66 (axle bearing) as 1.1 in PLA did.
 	axle_r=1.15;
 	//extra_height = extra_axle_length;
 	fancy_internal_r=5.8/2;
@@ -171,6 +174,6 @@ if(GEN_WHEELSET_SPACER){
 	//bits to slot along the axle to keep the wheels square and at the right distance
 	between_wheels = axle_width - 2*(flange_to_point + depths[0]);
 	mini_wheel_h = 2;
-	wheel([10,10,4,4], [mini_wheel_h,0,between_wheels/2-mini_wheel_h]);
+	wheel([DIAMETER-2.5,DIAMETER-2.5,4,4], [mini_wheel_h,0,between_wheels/2-mini_wheel_h]);
 }
 

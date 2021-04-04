@@ -21,7 +21,7 @@ include <truck_bits.scad>
 include <constants.scad>
 include <threads.scad>
 //purely for the model
-include <wheel.scad>
+use <wheel.scad>
 
 
 //the battery compartment in the base can print with bridging once the infil angle is perpendicular to the body, likewise with the roof of the shell
@@ -29,7 +29,7 @@ include <wheel.scad>
 
 
 //done todos:
-//TODO shapes around buffers in the pipe space have gone wrong again - going to have to leave these "wrong" to have space for LEDs
+//TODO shapes around buffers in the pipe space have gone wrong again - going to have to leave these "wrong" to have space for LEDs - done
 
 //TODO fix led space so it slices without big gaps - done
 
@@ -37,7 +37,7 @@ include <wheel.scad>
 
 //TODO motor hinge point isn't in the centre of its length, so need to re-arrange hole in the base an the motor holder arm to give it the best space - not sure worth the effort
 //-definitely don't bother now I've got hte motor with enough freedom of movemwent for tight curves
-
+//motor working reliably, main issue was width
 
 
 //still TODOs:
@@ -60,6 +60,7 @@ include <wheel.scad>
 
 //the motor really needs to be able to wobble to cope over wonky track - might be enough to put back the original shape of the clip (with lots of space) and raise height of base
 //or might need to re-think how it's held in place entirely
+//original clip with extra width in teh base was all that was needed
 /*
 
 Known variations I've not taken intoaccount:
@@ -83,7 +84,7 @@ GEN_ROOF = false;
 GEN_BOGIES = true;
 GEN_MOTOR_CLIP = false;
 
-GEN_WINDOWS = false;
+GEN_WINDOWS = true;
 //separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
 GEN_HEADLIGHTS = false;
 
@@ -109,8 +110,10 @@ LAYER_THICK = 0.2;
 ANGLE = 0;
 
 //dummy model has no motor
-DUMMY = true;
+DUMMY = false;
 COUPLING_TYPE = "dapol";
+//spike or axle
+BEARING_TYPE = "spike";
 
 //mostly the entire thing is designed to be easy to print rather than real... so this doesn't change much
 BOGIE_EASY_PRINT = true;
@@ -236,7 +239,8 @@ bogie_width = width-2;
 bogie_thick = 2.5;
 //how much higher the centre wheel should be compared with the end wheels (so when the bogie bends, all wheels take the weight)
 //decided not to use it - loco has run for hours when I was accidentally lowering /all/ the wheels by centre_bogie_wheel_offset
-centre_bogie_wheel_offset = 0;
+//changed my mind, one loco has run for hours, rest haven't.
+centre_bogie_wheel_offset = 0.5;
 
 
 //centre of the base of the bit the sticks out between the bogies
@@ -1160,51 +1164,76 @@ module bogies(box_end=true){
 	centre_axle_height = axle_to_top_of_bogie-centre_bogie_wheel_offset;
 	axle_height = axle_to_top_of_bogie;
 	
-	
-	
+	centre_arm_length = BEARING_TYPE == "axle" ? bogie_end_axles_distance+bogie_wheel_d/2 : bogie_end_axles_distance/2 + bogie_cosmetic_arm_length;
 	difference(){
 		//main arm to hold bogie together
-		centred_cube(wheel_holder_arm_width,bogie_end_axles_distance+bogie_wheel_d/2,bogie_thick);
+		centred_cube(wheel_holder_arm_width,centre_arm_length,bogie_thick);
 		cylinder(r=m3_thread_loose_size/2,h=100,center=true);
 	}
-	//center axle slightly lower (or higher from the final position), so as the bogie flexes it doesn't put all the weight on the centre wheels
-	bogie_axle_holder(centre_axle_height);
-	
-	mirror_x()translate([0,bogie_end_axles_distance/2,0])bogie_axle_holder(axle_height);
-	//centred_cube(wheel_holder_arm_width+10,bogie_arm_length,bogie_thick);
-	
-	bogie_cosmetics(axle_height, box_end);
-	
-	
-	
-	
-	
-	//adding centre_bogie_wheel_offset/2 to make up for when teh bogie bends under the weight of the loco and raises the height of the coupling
-	//note- not adding that, as it lowers the bogie too much
-	// coupling_arm_z = axle_to_top_of_bogie+bogie_wheel_d/2 -coupling_arm_thick-top_of_coupling_from_top_of_rail;// +centre_bogie_wheel_offset/2;
-	
-	bogie_coupling_height = top_of_bogie_from_rails - top_of_coupling_from_top_of_rail;
-
-	coupling_arm_z = bogie_coupling_height - coupling_arm_thick;
-
-	arm_inner_y = (bogie_end_axles_distance/2 + wheel_mount_length/5);
-	arm_outer_y = motor_centre_from_end - generic_coupling_mount_from_edge(COUPLING_TYPE);//coupling_arm_from_mount - ( COUPLING_TYPE == "dapol" ? dapol_coupling_end_from_edge : coupling_from_edge + m2_thread_size );
-
-	coupling_arm_length = arm_outer_y - arm_inner_y;
-	echo("coupling arm length", coupling_arm_length);
-	// //arm to hold coupling
-	difference(){
-		translate([0,-(arm_inner_y + arm_outer_y)/2,coupling_arm_z])centred_cube(coupling_arm_width,coupling_arm_length,coupling_arm_thick);
-		union(){
-		//enough space near the axle
-			translate([0,-bogie_end_axles_distance/2,axle_height])rotate([0,90,0])cylinder(h=wheel_holder_width,r=bogie_axle_d*0.8, center=true );
-			translate([0,-bogie_end_axles_distance/2+50,axle_height-bogie_axle_d*0.8])centred_cube(100,100,100);
-		}
+	if(BEARING_TYPE == "axle"){
+		//center axle slightly lower (or higher from the final position), so as the bogie flexes it doesn't put all the weight on the centre wheels
+		bogie_axle_holder(centre_axle_height);
+		
+		mirror_x()translate([0,bogie_end_axles_distance/2,0])bogie_axle_holder(axle_height);
+		//centred_cube(wheel_holder_arm_width+10,bogie_arm_length,bogie_thick);
 	}
-	//fill in gap under coupling arm
-	translate([0,-bogie_end_axles_distance/2,0])centred_cube(coupling_arm_width,wheel_mount_length,coupling_arm_z);
-	
-	mirror([0,1,0])translate([0,motor_centre_from_end,bogie_coupling_height])generic_coupling_mount(COUPLING_TYPE,coupling_arm_thick);
+	difference(){
+		union(){
+			bogie_cosmetics(axle_height, box_end);
+			if(BEARING_TYPE == "spike"){
+				holder_thick = 2.5;
+
+				//extra bits to hold the axle	
+				triplicate_x([0,bogie_end_axles_distance/2,0])mirror_y()translate([bogie_inner_width/2-holder_thick,0,0])centred_cube(holder_thick,4,axle_height+2);
+			}
+		
+			
+			
+			//adding centre_bogie_wheel_offset/2 to make up for when teh bogie bends under the weight of the loco and raises the height of the coupling
+			//note- not adding that, as it lowers the bogie too much
+			// coupling_arm_z = axle_to_top_of_bogie+bogie_wheel_d/2 -coupling_arm_thick-top_of_coupling_from_top_of_rail;// +centre_bogie_wheel_offset/2;
+			
+			bogie_coupling_height = top_of_bogie_from_rails - top_of_coupling_from_top_of_rail;
+
+			coupling_arm_z = bogie_coupling_height - coupling_arm_thick;
+
+			//keep away from the axle with the spike axle (quite chunky)
+			arm_inner_y = (bogie_end_axles_distance/2 + wheel_mount_length/5);// + (BEARING_TYPE == "spike" ? 1.5 : 0);
+			arm_outer_y = motor_centre_from_end - generic_coupling_mount_from_edge(COUPLING_TYPE);
+
+			coupling_arm_length = arm_outer_y - arm_inner_y;
+
+			// //arm to hold coupling
+			difference(){
+				translate([0,-(arm_inner_y + arm_outer_y)/2,coupling_arm_z])centred_cube(coupling_arm_width,coupling_arm_length,coupling_arm_thick);
+				union(){
+				//enough space near the axle
+					translate([0,-bogie_end_axles_distance/2,axle_height])rotate([0,90,0])cylinder(h=wheel_holder_width,r=bogie_axle_d*0.8, center=true );
+					translate([0,-bogie_end_axles_distance/2+50,axle_height-bogie_axle_d*0.8])centred_cube(100,100,100);
+				}
+			}
+			if(BEARING_TYPE == "axle"){
+				//fill in gap under coupling arm
+				translate([0,-bogie_end_axles_distance/2,0])centred_cube(coupling_arm_width,wheel_mount_length,coupling_arm_z);
+			}else 
+			if(BEARING_TYPE == "spike"){
+				y1 = -arm_inner_y-2;
+				y2 = -(bogie_end_axles_distance/2 + bogie_cosmetic_arm_length)/2;
+				//attach coupling mount to main bogie
+				translate([0,(y1+y2)/2,0])centred_cube(coupling_arm_width,y2-y1,coupling_arm_z);
+			}
+			mirror([0,1,0])translate([0,motor_centre_from_end,bogie_coupling_height])generic_coupling_mount(COUPLING_TYPE,coupling_arm_thick);
+
+
+			}
+		union(){
+			if(BEARING_TYPE == "spike"){
+				//subtract out space for the axle to slot in
+				mirror_x()translate([0,bogie_end_axles_distance/2,axle_height])axle_punch(200,custom_axle_r);
+				mirror_x()translate([0,0,axle_height])axle_punch(200,custom_axle_r);
+			}
+		}	
+	}
 }
 
 //hmm not right.
@@ -2368,10 +2397,12 @@ module buffer(){
 
 }
 
+//this thickness is also the width of the front bit of the side windows
+window_back_thick = 3;
 
 module front_windows(){
 
-// centred_cube(width-wall_thick*2-0.5);
+	// centred_cube(width-wall_thick*2-0.5);
 
 //from the shell
 // //front windows
