@@ -173,8 +173,10 @@ if(GEN_WHEEL){
 
 if(GEN_WHEELSET_SPACER){
 	//bits to slot along the axle to keep the wheels square and at the right distance
+	//make these slightly shorter to account for not being able to get the wheels perfectly against the spacer
+	fudge_factor = 0.2;
 	between_wheels = axle_width - 2*(flange_to_point + depths[0]);
 	mini_wheel_h = 2;
-	wheel([DIAMETER-2.5,DIAMETER-2.5,4,4], [mini_wheel_h,0,between_wheels/2-mini_wheel_h]);
+	wheel([DIAMETER-2.5,DIAMETER-2.5,3.75,3.75], [mini_wheel_h,0,between_wheels/2-mini_wheel_h - fudge_factor]);
 }
 

@@ -282,5 +282,5 @@ module axle_slot_punch(height = 10){
 	//diameter = axle_cone_height
 	sidelength = axle_cone_height/sqrt(2);
 	
-	mirror_y()translate([axle_holder_width/2 -axle_cone_height*1.2, 0, 0])rotate([0,0,45])centred_cube(sidelength, sidelength, height);
+	mirror_y()translate([axle_holder_width/2 -axle_cone_height*1.1, 0, 0])rotate([0,0,45])centred_cube(sidelength, sidelength, height);
 }

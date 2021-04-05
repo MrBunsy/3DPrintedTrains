@@ -110,7 +110,7 @@ LAYER_THICK = 0.2;
 ANGLE = 0;
 
 //dummy model has no motor
-DUMMY = false;
+DUMMY = true;
 COUPLING_TYPE = "dapol";
 //spike or axle
 BEARING_TYPE = "spike";
@@ -999,6 +999,8 @@ module bogie_cosmetics(axle_height, box_end=true){
 	if(BOGIE_EASY_PRINT && BEARING_TYPE == "spike"){
 		//backing plate
 		color("pink")mirror_y()translate([bogie_inner_width/2 - bogie_cosmetics_width - 0.5,0,0])centred_cube(2,bogie_end_axles_distance,4.5);
+		//extra plate as this bit warped off the base
+		color("pink")mirror_y()translate([bogie_inner_width/2 - bogie_cosmetics_width - 1, bogie_end_axles_distance/2 ,0])rounded_cube(2.5,10,1,1);
 	}
 	
 	//this arm looks like it might catch a bit if turning on a gradient
