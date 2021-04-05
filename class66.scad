@@ -84,7 +84,7 @@ GEN_ROOF = false;
 GEN_BOGIES = true;
 GEN_MOTOR_CLIP = false;
 
-GEN_WINDOWS = true;
+GEN_WINDOWS = false;
 //separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
 GEN_HEADLIGHTS = false;
 
@@ -230,7 +230,7 @@ bogie_wheel_d = 14;//14.3;
 
 bogie_axle_d = 2;
 wheel_holder_width = 13.8;
-wheel_holder_arm_width = 12;//10.4;
+wheel_holder_arm_width = 8;//12;//10.4;
 wheel_mount_length = bogie_wheel_d*0.5;
 	
 axle_to_top_of_bogie = top_of_bogie_from_rails - bogie_wheel_d/2;
@@ -240,7 +240,8 @@ bogie_thick = 2.5;
 //how much higher the centre wheel should be compared with the end wheels (so when the bogie bends, all wheels take the weight)
 //decided not to use it - loco has run for hours when I was accidentally lowering /all/ the wheels by centre_bogie_wheel_offset
 //changed my mind, one loco has run for hours, rest haven't.
-centre_bogie_wheel_offset = 0.5;
+//0.5 is waaay too much with the spike bearings, it doesn't even touch the rails
+centre_bogie_wheel_offset = 0.1;
 
 
 //centre of the base of the bit the sticks out between the bogies
@@ -1229,8 +1230,14 @@ module bogies(box_end=true){
 		union(){
 			if(BEARING_TYPE == "spike"){
 				//subtract out space for the axle to slot in
-				mirror_x()translate([0,bogie_end_axles_distance/2,axle_height])axle_punch(200,custom_axle_r);
-				mirror_x()translate([0,0,axle_height])axle_punch(200,custom_axle_r);
+				mirror_x()translate([0,bogie_end_axles_distance/2,axle_height]){
+					axle_punch(200,custom_axle_r);
+					axle_slot_punch();
+				}
+				translate([0,0,centre_axle_height]){
+					axle_punch(200,custom_axle_r);
+					axle_slot_punch();
+				}
 			}
 		}	
 	}
@@ -2399,10 +2406,17 @@ module buffer(){
 
 //this thickness is also the width of the front bit of the side windows
 window_back_thick = 3;
+window_front_thick = 1.5;
+window_lip_size = 1.5;
+window_gap = 0.5;
 
 module front_windows(){
 
-	// centred_cube(width-wall_thick*2-0.5);
+	//front two windows
+	centred_cube(end_width-wall_thick*2-window_gap,front_window_height + window_lip_size*2,window_back_thick);
+	color("blue")mirror_y()translate([front_window_x,0,window_back_thick])rounded_cube(front_window_width-window_gap*2,front_window_height-window_gap*2,window_front_thick,front_window_r,$fn);
+
+	//side of this must be the front slice of the side window - otherwise there's no easy way to fix that in place
 
 //from the shell
 // //front windows

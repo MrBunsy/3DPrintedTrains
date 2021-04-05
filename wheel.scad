@@ -95,7 +95,8 @@ module wheel(diameters=diameters_14mm, depths=depths, fn=2000){
 	//1.175 works in PETG, but still a bit too loose to worth without glue - current best option for the class 66 axle-mounted wheels
 	//1.15 seems to be working for the pointed axleset and just about (almost loose) for the class 66 wheels
 	//note, 1.15 PETG does not produce as good wheels for the class66 (axle bearing) as 1.1 in PLA did.
-	axle_r=1.15;
+	//for pointed axles: 1.15 works well in the dark grey PETG for the spacer, the wheels not so well - they tend to fall off.
+	axle_r=GEN_WHEELSET_SPACER ? 1.15 : 1.125;
 	//extra_height = extra_axle_length;
 	fancy_internal_r=5.8/2;
 	fancy_edge_thick = 1.5;

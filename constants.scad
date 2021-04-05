@@ -265,14 +265,22 @@ module led_1_8mm(extra_base_length = led_base_extra, extra_front_length = 0){
 	}
 }
 
+//same as in the more convoluted axle_holder()
+axle_cone_height = 2.325;
 //representation of the axle, for punching out holes
 //0,0 is at centre of axle, axle is along the x axis
 module axle_punch(fn=200, axle_r = 2.325/2){
-	//same as in the more convoluted axle_holder()
-	cone_height = 2.325;
 	
-	mirror_y()translate([axle_holder_width/2-cone_height,0,0])rotate([0,90,0])cylinder(r1=cone_height/2,h=cone_height,r2=0,$fn=fn);
 	
-	rotate([0,90,0])cylinder(r=axle_r,h=axle_holder_width-cone_height*2,center=true, $fn=fn);
+	mirror_y()translate([axle_holder_width/2-axle_cone_height,0,0])rotate([0,90,0])cylinder(r1=axle_cone_height/2,h=axle_cone_height,r2=0,$fn=fn);
+	
+	rotate([0,90,0])cylinder(r=axle_r,h=axle_holder_width-axle_cone_height*2,center=true, $fn=fn);
 }
 
+//two groves to help slot wheelsets into the axle holder
+module axle_slot_punch(height = 10){
+	//diameter = axle_cone_height
+	sidelength = axle_cone_height/sqrt(2);
+	
+	mirror_y()translate([axle_holder_width/2 -axle_cone_height*1.2, 0, 0])rotate([0,0,45])centred_cube(sidelength, sidelength, height);
+}
