@@ -1143,8 +1143,8 @@ module bogie_cosmetics(axle_height, box_end=true){
 			//springs on top
 			mirror_x()translate([axle_holder_box_width/2,axle_holder_length/2-spring_r,-axle_r])
 			mirror([0,0,1])//cylinder(r=spring_r,h=axle_height/2);
-			metric_thread(diameter=spring_r*2, thread_size=1.5, groove=false, pitch=0.5, length=axle_height/2);
-			//metric_thread(diameter=spring_r*2, pitch=0.7,thread_size=0.5, groove=true, length=5);
+			// metric_thread(diameter=spring_r*2, thread_size=1.5, groove=false, pitch=0.5, length=axle_height/2);
+			metric_thread(diameter=spring_r*2, pitch=0.7,thread_size=0.5, groove=true, length=axle_height/2);
 			//square bit on top
 			translate([top_square_size/2,0,-axle_r])mirror([0,0,1])centred_cube(top_square_size,top_square_size,3);
 			
