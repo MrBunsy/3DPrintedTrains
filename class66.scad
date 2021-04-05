@@ -377,6 +377,12 @@ hoover_head_length = hoover_arm_length*0.2;
 hoover_head_width = hoover_arm_space_width;
 hoover_head_height = 2;
 
+
+//positions of the big suspension springs between bogies and base
+spring_ys = [length/2 - motor_centre_from_end - bogie_wheel_d*1,
+//line up with the edge of the ladder exactly
+length/2 - door_centre_from_fuel_end - door_length/2-girder_thick];
+
 module motor_space(){
 	intersection(){
 		cylinder(r=motor_length/2,h=100,center=true);
@@ -800,9 +806,9 @@ module base(){
 				
 				//springs for bogies
 				mirror_x(){
-					translate([0,length/2 - motor_centre_from_end - bogie_wheel_d*1])springs();
+					translate([0,spring_ys[0], 0])springs();
 					//line up with the edge of the ladder exactly
-					translate([0,length/2 - door_centre_from_fuel_end - door_length/2-girder_thick])springs();
+					translate([0,spring_ys[1], 0])springs();
 				}
 				
 				//sticky out box thing (mounts for loco to be crane-lifted?)
@@ -989,12 +995,17 @@ module bogie_cosmetics(axle_height, box_end=true){
 	
 	//arms to hold cosmetics
 	mirror_x()translate([0,bogie_end_axles_distance/4,bogie_top_gap+LAYER_THICK])centred_cube(bogie_inner_width,bogie_cosmetic_arm_length,bogie_thick);
+
+	if(BOGIE_EASY_PRINT && BEARING_TYPE == "spike"){
+		//backing plate
+		color("pink")mirror_y()translate([bogie_inner_width/2 - bogie_cosmetics_width - 0.5,0,0])centred_cube(2,bogie_end_axles_distance,4.5);
+	}
 	
 	//this arm looks like it might catch a bit if turning on a gradient
 	//translate([0,(bogie_end_axles_distance/2 + end_y)/2 , 0])centred_cube(bogie_cosmetic_arm_length,end_y-bogie_end_axles_distance/2,bogie_top_gap_rear);
 	
 	//inner chunks between the wheels
-	mirror_xy()translate([bogie_inner_width/2-bogie_cosmetics_width/2,bogie_end_axles_distance/4,bogie_top_gap])centred_cube(bogie_cosmetics_width, bogie_chunks_length,bogie_top_thick);
+	color("blue")mirror_xy()translate([bogie_inner_width/2-bogie_cosmetics_width/2,bogie_end_axles_distance/4,bogie_top_gap])centred_cube(bogie_cosmetics_width, bogie_chunks_length,bogie_top_thick);
 	//chunks above the wheels
 	
 	//triplicate_x([0,bogie_end_axles_distance/2,0])
@@ -1049,13 +1060,35 @@ module bogie_cosmetics(axle_height, box_end=true){
 	translate([0,bogie_end_axles_distance/4,0])bogie_h_suspension(axle_height);
 	translate([0,-bogie_end_axles_distance/4,0])bogie_h_suspension(axle_height);
 	
-	//big spring bases
+	// =========== big spring bases =========== 
 	//won't print well if it sticks out from a bridge, so make it longer
 	spring_base_length = bogie_chunks_length + (BOGIE_EASY_PRINT ? 7 : 0);//1.5;//7.5;
 	spring_base_offset = -1;
 	color("blue")mirror_xy(){
 		translate([bogie_inner_width/2-bogie_cosmetics_width/2+girder_thick/2,bogie_wheel_d+spring_base_offset,bogie_top_gap])centred_cube(bogie_cosmetics_width+girder_thick,spring_base_length,girder_thick);
 	}
+	spring_holder_thick = 0.2;
+	suspension_spring_r = 4/2;
+	mirror_y(){
+		for(springy = spring_ys){
+			y = -(springy - length/2+motor_centre_from_end);
+			translate([bogie_inner_width/2,y,0]){
+				translate([0,0,spring_holder_thick])metric_thread(diameter=suspension_spring_r*2, thread_size=1.5, groove=false, pitch=0.5, length=bogie_top_gap-spring_holder_thick);
+				cylinder(r=suspension_spring_r,h=spring_holder_thick);
+				translate([0,0,bogie_top_gap])cylinder(r=suspension_spring_r,h=girder_thick);
+			}
+		}
+	}
+
+	// =========== chain holder ============
+
+	chain_holder_width = girder_thick;
+	chain_holder_height = bogie_top_thick/2;
+	chain_holder_length = 2;
+	chain_holder_offset = 0.5;
+
+	//slightly offset towards the back
+	color("purple")mirror_y()translate([bogie_width/2+chain_holder_width/2,chain_holder_offset,0])centred_cube(chain_holder_width,chain_holder_length,chain_holder_height);
 	
 	axle_r=3.5/2;
 	axle_box_size = axle_r*2.6;
@@ -1109,7 +1142,8 @@ module bogie_cosmetics(axle_height, box_end=true){
 			
 			//springs on top
 			mirror_x()translate([axle_holder_box_width/2,axle_holder_length/2-spring_r,-axle_r])
-			mirror([0,0,1])cylinder(r=spring_r,h=axle_height/2);
+			mirror([0,0,1])//cylinder(r=spring_r,h=axle_height/2);
+			metric_thread(diameter=spring_r*2, thread_size=1.5, groove=false, pitch=0.5, length=axle_height/2);
 			//metric_thread(diameter=spring_r*2, pitch=0.7,thread_size=0.5, groove=true, length=5);
 			//square bit on top
 			translate([top_square_size/2,0,-axle_r])mirror([0,0,1])centred_cube(top_square_size,top_square_size,3);
@@ -1140,18 +1174,19 @@ module bogie_cosmetics(axle_height, box_end=true){
 	ladder_y = box_end ? ladder_y_box : ladder_y_fuel;
 	
 	rung_space_height = (ladder_height - girder_thick*3)/2;
+	step_depth = girder_thick*1.5;
 	mirror_y()translate([bogie_width/2-ladder_width/2+girder_thick,ladder_y,0])
 	difference(){
 		centred_cube(ladder_width,ladder_length,ladder_height);
 		
 		union(){
 			//top rung space
-			translate([ladder_width/2-girder_thick/2,0,girder_thick])centred_cube(girder_thick+0.1,ladder_length-girder_thick*2,rung_space_height);
+			translate([ladder_width/2-step_depth/2,0,girder_thick])centred_cube(step_depth+0.1,ladder_length-girder_thick*2,rung_space_height);
 			if(box_end){
-				translate([ladder_width/2-girder_thick/2,0,girder_thick*2+rung_space_height])centred_cube(girder_thick+0.1,ladder_length-girder_thick*2,rung_space_height);
+				translate([ladder_width/2-step_depth/2,0,girder_thick*2+rung_space_height])centred_cube(step_depth+0.1,ladder_length-girder_thick*2,rung_space_height);
 			}else{
 				//only the left half of the bottom rung box
-				translate([ladder_width/2-girder_thick/2,-(ladder_length-girder_thick*2)/4,girder_thick*2+rung_space_height])centred_cube(girder_thick+0.1,(ladder_length-girder_thick*2)/2,rung_space_height);
+				translate([ladder_width/2-step_depth/2,-(ladder_length-step_depth*2)/4,girder_thick*2+rung_space_height])centred_cube(step_depth+0.1,(ladder_length-girder_thick*2)/2,rung_space_height);
 			}
 		}
 	}
@@ -1186,6 +1221,8 @@ module bogies(box_end=true){
 
 				//extra bits to hold the axle	
 				triplicate_x([0,bogie_end_axles_distance/2,0])mirror_y()translate([bogie_inner_width/2-holder_thick,0,0])centred_cube(holder_thick,4,axle_height+2);
+
+				//TODO extra bits to remove need for brim?
 			}
 		
 			
