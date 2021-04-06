@@ -81,10 +81,10 @@ GEN_SHELL = false;
 GEN_WALLS = false;
 GEN_ROOF = false;
 //bogie will need scaffolding unless I split it out into a separate coupling arm
-GEN_BOGIES = true;
+GEN_BOGIES = false;
 GEN_MOTOR_CLIP = false;
 
-GEN_WINDOWS = false;
+GEN_WINDOWS = true;
 //separate peice that will clip/glue over the LEDs at the front for the headlights that stick out and overlap base/shell
 GEN_HEADLIGHTS = false;
 
@@ -110,7 +110,7 @@ LAYER_THICK = 0.2;
 ANGLE = 0;
 
 //dummy model has no motor
-DUMMY = true;
+DUMMY = false;
 COUPLING_TYPE = "dapol";
 //spike or axle
 BEARING_TYPE = "spike";

@@ -271,18 +271,18 @@ def wheel_jobs():
                                    "WHEEL_POINTED": True
                                    },
         # class66
-        "class66_wheel": {"GEN_WHEELSET_SPACER": False,
-                          "GEN_WHEEL": True,
-                          "BEARING_TYPE": "axle",
-                          "DUMMY": False,
-                          "DIAMETER": 14
-                          },
-        "class66_dummy_wheel": {"GEN_WHEELSET_SPACER": False,
-                                "GEN_WHEEL": True,
-                                "BEARING_TYPE": "axle",
-                                "DUMMY": True,
-                                "DIAMETER": 14
-                                },
+        # "class66_wheel": {"GEN_WHEELSET_SPACER": False,
+        #                   "GEN_WHEEL": True,
+        #                   "BEARING_TYPE": "axle",
+        #                   "DUMMY": False,
+        #                   "DIAMETER": 14
+        #                   },
+        # "class66_dummy_wheel": {"GEN_WHEELSET_SPACER": False,
+        #                         "GEN_WHEEL": True,
+        #                         "BEARING_TYPE": "axle",
+        #                         "DUMMY": True,
+        #                         "DIAMETER": 14
+        #                         },
         "wheel_flat_14mm": {"GEN_WHEELSET_SPACER": False,
                                "GEN_WHEEL": True,
                                "BEARING_TYPE": "spike",

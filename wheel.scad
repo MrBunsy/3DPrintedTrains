@@ -25,7 +25,7 @@ spike bearings with pointed wheels require a < 19.65mm (echoed when generating s
 
 */
 
-include <constants.scad>
+// include <constants.scad>
 
 //spacers to hold said wheels square
 GEN_WHEELSET_SPACER = false;
@@ -39,7 +39,7 @@ BEARING_TYPE = "spike";
 //no flange - only used for centre wheel on class66 currently
 DUMMY = false;
 
-//12.5 or 14
+//12.5 or 14 for my rolling stock, but this can take any value
 DIAMETER = 14;//12.5;
 
 //if false axle is axle_width (25.65mm) long ended in points, if true axle is flat ended and the points are part of the wheels. if BEARING_TYPE is "axle" this is largely irrelevant
@@ -48,14 +48,33 @@ WHEEL_POINTED = false;
 //TODO
 STYLE = "modern";
 
+//NRMA standard S-4.2  https://www.nmra.org/sites/default/files/standards/sandrp/pdf/s-4.2_2019.01.04.pdf
+FLANGE_MAX_WIDTH = 0.76;
+//NRMA says "17.09" but that's clearly bollocks, using HO
+//14.55 still seems large compared to measuring various real wheelsets
+//my previous reverse engineered result came out at 14.65, which would be within NRMA tolerance, but struggled on a bit of dodgy track
+BACK_TO_BACK = 14.4;// tolerance: +0.05 -0.18, so 14.5 to 14.73
+WHEEL_WIDTH = 2.79;
+TREAD_WIDTH = WHEEL_WIDTH - FLANGE_MAX_WIDTH;
+//might take this one with a pinch of salt. NMRA says OO is 0.71. HO Deep flange is up to 1.19
+FLANGE_DEPTH = 2;
 
-diameters_12_5mm = [14.6,14.6, 12.7, 12.5];//not much gradient on the wheel part with this
-diameters_14mm = [16.5,16.5, 14.45, 14.0];
+//3deg slope
+TREAD_SLOPE_HEIGHT = tan(3) * TREAD_WIDTH;
+echo(TREAD_SLOPE_HEIGHT);
+
+corner_break = 0.2;
+
+diameters_12_5mm = [14.6,14.6, 12.5+TREAD_SLOPE_HEIGHT, 12.5, 12.5-corner_break];//not much gradient on the wheel part with this. TODO NMRA recomends 3deg slope
+diameters_14mm = [16.5,16.5, 14.0+TREAD_SLOPE_HEIGHT, 14.0];
 //trying making these smaller than the real wheels (powered loco seems fine, but the dummies derail quite easily, even weighted), maybe I should have raised them up on teh class66 after all!
-diameters_14mm_dummy_smaller = [14.2,14.2, 14.2, 13.75];
-diameters_14mm_dummy = [14.2,14.2, 14.2, 13.75];
-depths_thicker = [0.4, 0.3, 2.7];//total 3.4
-depths_thinner = [0.4, 0.3, 2];
+// diameters_14mm_dummy_smaller = [14.2,14.2, 13.75+TREAD_SLOPE_HEIGHT, 13.75];
+diameters_14mm_dummy = [14.2,14.2, 13.75+TREAD_SLOPE_HEIGHT, 13.75];
+//for the axle-bearing version
+depths_thicker = [0.4, FLANGE_MAX_WIDTH-0.4, 2.7];//total 3.4
+depths_thinner = [0.4, FLANGE_MAX_WIDTH-0.4, TREAD_WIDTH];
+
+function diameters(nominal_d=12.5) = [nominal_d + FLANGE_DEPTH, nominal_d + FLANGE_DEPTH, nominal_d + TREAD_SLOPE_HEIGHT/2, nominal_d - TREAD_SLOPE_HEIGHT/2];
 
 //sum depths provided
 function total_depth(depths, i=0) = depths[i] + (i < len(depths)-1 ? total_depth(depths, i+1) : 0);
@@ -96,7 +115,8 @@ module wheel(diameters=diameters_14mm, depths=depths, fn=2000){
 	//1.15 seems to be working for the pointed axleset and just about (almost loose) for the class 66 wheels
 	//note, 1.15 PETG does not produce as good wheels for the class66 (axle bearing) as 1.1 in PLA did.
 	//for pointed axles: 1.15 works well in the dark grey PETG for the spacer, the wheels not so well - they tend to fall off.
-	axle_r=GEN_WHEELSET_SPACER ? 1.15 : 1.125;
+	//latest design of wheels and 1.125 is way too loose in PETG
+	axle_r=GEN_WHEELSET_SPACER ? 1.15 : 1.1;
 	//extra_height = extra_axle_length;
 	fancy_internal_r=5.8/2;
 	fancy_edge_thick = 1.5;
@@ -167,15 +187,17 @@ if(GEN_WHEEL){
 	if(WHEEL_POINTED && BEARING_TYPE=="spike"){
 		wheel_with_point(diameters_with_extra[0], diameters_with_extra[1]);
 	}else{
-		wheel(diameters_with_extra[0], diameters_with_extra[1]);
+		wheel(diameters(DIAMETER), depths_thinner);
 	}
 }
 
 if(GEN_WHEELSET_SPACER){
 	//bits to slot along the axle to keep the wheels square and at the right distance
 	//make these slightly shorter to account for not being able to get the wheels perfectly against the spacer
-	fudge_factor = 0.2;
-	between_wheels = axle_width - 2*(flange_to_point + depths[0]);
+	fudge_factor = 0;
+	// between_wheels = axle_width - 2*(flange_to_point + depths[0]);
+	between_wheels = BACK_TO_BACK;
+	echo("between wheels", between_wheels);
 	mini_wheel_h = 2;
 	wheel([DIAMETER-2.5,DIAMETER-2.5,3.75,3.75], [mini_wheel_h,0,between_wheels/2-mini_wheel_h - fudge_factor]);
 }
