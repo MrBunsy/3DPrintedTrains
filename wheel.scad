@@ -59,14 +59,14 @@ TREAD_WIDTH = WHEEL_WIDTH - FLANGE_MAX_WIDTH;
 //might take this one with a pinch of salt. NMRA says OO is 0.71. HO Deep flange is up to 1.19
 FLANGE_DEPTH = 2;
 
-//3deg slope
-TREAD_SLOPE_HEIGHT = tan(3) * TREAD_WIDTH;
+//3deg slope - note, this just doesn't print well, so exaggerating
+TREAD_SLOPE_HEIGHT = 0.4;//tan(3) * TREAD_WIDTH;
 echo(TREAD_SLOPE_HEIGHT);
 
 corner_break = 0.2;
 
-diameters_12_5mm = [14.6,14.6, 12.5+TREAD_SLOPE_HEIGHT, 12.5, 12.5-corner_break];//not much gradient on the wheel part with this. TODO NMRA recomends 3deg slope
-diameters_14mm = [16.5,16.5, 14.0+TREAD_SLOPE_HEIGHT, 14.0];
+// diameters_12_5mm = [14.6,14.6, 12.5+TREAD_SLOPE_HEIGHT, 12.5, 12.5-corner_break];//not much gradient on the wheel part with this. TODO NMRA recomends 3deg slope
+// diameters_14mm = [16.5,16.5, 14.0+TREAD_SLOPE_HEIGHT, 14.0];
 //trying making these smaller than the real wheels (powered loco seems fine, but the dummies derail quite easily, even weighted), maybe I should have raised them up on teh class66 after all!
 // diameters_14mm_dummy_smaller = [14.2,14.2, 13.75+TREAD_SLOPE_HEIGHT, 13.75];
 diameters_14mm_dummy = [14.2,14.2, 13.75+TREAD_SLOPE_HEIGHT, 13.75];
@@ -103,7 +103,7 @@ module wheel_segment(diameters, depths, fn=2000, i=0){
         }
     }
 }
-module wheel(diameters=diameters_14mm, depths=depths, fn=2000){
+module wheel(diameters=diameters(14), depths=depths, fn=2000){
 	//2mm rod
 	//1mm radius works well for the 2mm rod with a clamp, but very hard to get wheel perfectly straight. trying slightly more loose but with more length
 	//1.1 works very well indeed for wheels that slide onto the axle, but they are a tiny bit too loose for ones that I don't want to be able to move along the axle.
@@ -172,15 +172,15 @@ module wheel_with_point(diameters=diameters_14mm, depths=depths, axle_length_red
 	
 }
 
-diameters = DIAMETER == 12.5 ? diameters_12_5mm : 
-				DIAMETER == 14 && DUMMY == false ? diameters_14mm : diameters_14mm_dummy;
+// diameters = DIAMETER == 12.5 ? diameters_12_5mm : 
+// 				DIAMETER == 14 && DUMMY == false ? diameters_14mm : diameters_14mm_dummy;
 				//DIAMETER == 14 && DUMMY == true ? 
 
 depths = BEARING_TYPE == "axle" ? depths_thicker : depths_thinner;
 
 extra_height = BEARING_TYPE == "axle" ? 2.5 : 3-total_depth(depths);
 
-diameters_with_extra = extra_height(diameters, depths, extra_height, DIAMETER/2);
+diameters_with_extra = extra_height(diameters(DIAMETER), depths, extra_height, DIAMETER/2);
 
 
 if(GEN_WHEEL){
