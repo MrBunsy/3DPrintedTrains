@@ -2447,36 +2447,75 @@ module buffer(){
 window_back_thick = 3;
 window_front_thick = 1.5;
 window_lip_size = 1.5;
-window_gap = 0.5;
+window_gap = 0.25;
 
 //just the side window, with no backing
 module side_window_part(extra_thick = 0){
 	//adding wall_thick to y so this is relative to the inside wall of the cab, rather than the 'end' of the loco (length/2)
+// scale([1,side_window_length/(side_window_length+window_gap),side_window_height/(side_window_height+window_gap)])
+//  scale([1,side_window_length/(side_window_length+window_gap),side_window_height/(side_window_height+window_gap)])
 translate([0,side_window_y-end_width_start + wall_thick,0])hull(){
 	
 				//main square bit
-				translate([0,side_window_length/2,0])centred_cube(window_front_thick+extra_thick,side_window_length,side_window_height);
+				translate([0,side_window_length/2,window_gap/2])centred_cube(window_front_thick+extra_thick,side_window_length,side_window_height-window_gap);
 				//top of front edge
-				translate([0,side_window_length+side_window_top_corner_y,side_window_height-side_window_bottom_corner_r])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=window_front_thick+extra_thick,center=true);
+				translate([0,side_window_length+side_window_top_corner_y-window_gap/2,side_window_height-side_window_bottom_corner_r-window_gap/2])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=window_front_thick+extra_thick,center=true);
 				//bottom of front end
-				translate([0,side_window_length+side_window_bottom_corner_y,side_window_bottom_corner_z-side_window_z])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=window_front_thick+extra_thick,center=true);
+				translate([0,side_window_length+side_window_bottom_corner_y-window_gap/2,side_window_bottom_corner_z-side_window_z+window_gap/2])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=window_front_thick+extra_thick,center=true);
 			}
 }
-
+//TODO: top of this needs to fit inside the roof shape!
+//side windows are full size, need a window gap - doneski
+//window gap doesn't need to be as big as it is - trying 0.25 instead of 0.5
 module front_windows(){
+	interior_width = end_width-wall_thick*2;
+	
 	difference(){
 		union(){
-			interior_width = end_width-wall_thick*2;
-			mirror_y()translate([interior_width/2-window_gap/2+window_front_thick/2,-(side_window_z-front_window_z),window_back_thick])rotate([90,0,0])side_window_part();
+			//interior_width/2-window_gap/2+window_front_thick/2
+			mirror_y()translate([0,-(side_window_z-front_window_z),window_back_thick])rotate([90,0,0])side_window_part(interior_width+window_front_thick);
 			//front two windows
 
 			//the inside wall of the front windows is at length/2-wall_thick/2. There is a notch taken out by the bottom of teh side window
+			intersection(){
+				translate([0,window_lip_size/2,0])
+				rounded_cube(interior_width-window_gap,front_window_height + window_lip_size,window_back_thick,front_window_r*0.75);
+				//just the inside of the roof
+				translate([0,-wall_height+(front_window_z+front_window_height/2)+window_gap/2,0])difference(){
+					//the roof shape, filled in
+					hull(){
+						intersection(){
+							//the roof shape
+							rotate([90,0,0])roof_shape(10);
+							centred_cube(interior_width-window_gap,100,20);
+						}
+						translate([0,10])centred_cube(interior_width-window_gap,1,5);
+					}
+					rotate([90,0,0])roof_shape(10);
+				}
+			}
+				color("blue")mirror_y()translate([front_window_x,0,window_back_thick])rounded_cube(front_window_width-window_gap*2,front_window_height-window_gap*2,window_front_thick,front_window_r,$fn);
 
-			centred_cube(interior_width-window_gap,front_window_height + window_lip_size*2,window_back_thick);
-			color("blue")mirror_y()translate([front_window_x,0,window_back_thick])rounded_cube(front_window_width-window_gap*2,front_window_height-window_gap*2,window_front_thick,front_window_r,$fn);
 		}
-		translate([0,0,-100])centred_cube(100,100,100);
+		union(){
+			translate([0,0,-100])centred_cube(100,100,100);
+			
+		}
 	}
+	// translate([0,-wall_height+(front_window_z+front_window_height/2),0])difference(){
+	// 				//the roof shape, filled in
+	// 				hull(){
+	// 					intersection(){
+	// 						//the roof shape
+	// 						rotate([90,0,0])roof_shape(10);
+	// 						centred_cube(interior_width-window_gap,100,20);
+	// 					}
+	// 					translate([0,10])centred_cube(interior_width-window_gap,1,5);
+	// 				}
+	// 				rotate([90,0,0])roof_shape(10);
+	// 			}
+	
+	
 	
 
 	//side of this must be the front slice of the side window - otherwise there's no easy way to fix that in place
