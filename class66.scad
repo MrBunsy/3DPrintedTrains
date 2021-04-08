@@ -72,7 +72,6 @@ Known variations I've not taken intoaccount:
  - two other headlight styles (but given led sizes, these wouldn't be feasible)
  - fuel tank sizes (related to petrol cap placement?)
 */
-
 //non-dummy base needs scaffolding
 GEN_BASE = false;
 //walls and roof together. Note that as teh bridged section of roof contracts slightly, the walls are pulled inwards and deform the shape of the roof a small amount.
@@ -2041,6 +2040,7 @@ front_window_x = 8-0.25;
 side_window_length = 12;
 side_window_height = 9.5-0.5;
 side_window_z = 8.3+1;
+//I think this is the rear edge of the window, relative to the "end_width_start"
 side_window_y = 4.9;
 side_window_bottom_corner_r=1.2;
 side_window_bottom_corner_z=side_window_z+1.9;
@@ -2102,8 +2102,8 @@ module shell(){
 					translate([width/2,ridgepos_boxtaper-front_outer_ridge_width,0])centred_cube(front_outer_ridge_width*2,front_outer_ridge_width*2,front_outer_ridge_height);
 				}
 			}
-			//very front
-			mirror_x(){
+			//very front ridges (just above the base)
+			color("pink")mirror_x(){
 				translate([0,length/2,0])centred_cube(end_width,front_ridge_width*2,front_ridge_height);
 				translate([0,length/2,0])centred_cube(end_width,front_outer_ridge_width*2,front_outer_ridge_height);
 			}
@@ -2143,7 +2143,7 @@ module shell(){
 			mirror_x(){
 			
 				intersection(){
-				hull(){
+				color("grey")hull(){
 					//wall inside the cab (raising up by ridge height)
 						mirror_y()translate([end_width/2-wall_thick/2,length/2-wall_thick/2,front_ridge_height])centred_cube(wall_thick,wall_thick,front_height - front_ridge_height);
 					//flat bit in the middle
@@ -2449,11 +2449,35 @@ window_front_thick = 1.5;
 window_lip_size = 1.5;
 window_gap = 0.5;
 
-module front_windows(){
+//just the side window, with no backing
+module side_window_part(extra_thick = 0){
+	//adding wall_thick to y so this is relative to the inside wall of the cab, rather than the 'end' of the loco (length/2)
+translate([0,side_window_y-end_width_start + wall_thick,0])hull(){
+	
+				//main square bit
+				translate([0,side_window_length/2,0])centred_cube(window_front_thick+extra_thick,side_window_length,side_window_height);
+				//top of front edge
+				translate([0,side_window_length+side_window_top_corner_y,side_window_height-side_window_bottom_corner_r])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=window_front_thick+extra_thick,center=true);
+				//bottom of front end
+				translate([0,side_window_length+side_window_bottom_corner_y,side_window_bottom_corner_z-side_window_z])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=window_front_thick+extra_thick,center=true);
+			}
+}
 
-	//front two windows
-	centred_cube(end_width-wall_thick*2-window_gap,front_window_height + window_lip_size*2,window_back_thick);
-	color("blue")mirror_y()translate([front_window_x,0,window_back_thick])rounded_cube(front_window_width-window_gap*2,front_window_height-window_gap*2,window_front_thick,front_window_r,$fn);
+module front_windows(){
+	difference(){
+		union(){
+			interior_width = end_width-wall_thick*2;
+			mirror_y()translate([interior_width/2-window_gap/2+window_front_thick/2,-(side_window_z-front_window_z),window_back_thick])rotate([90,0,0])side_window_part();
+			//front two windows
+
+			//the inside wall of the front windows is at length/2-wall_thick/2. There is a notch taken out by the bottom of teh side window
+
+			centred_cube(interior_width-window_gap,front_window_height + window_lip_size*2,window_back_thick);
+			color("blue")mirror_y()translate([front_window_x,0,window_back_thick])rounded_cube(front_window_width-window_gap*2,front_window_height-window_gap*2,window_front_thick,front_window_r,$fn);
+		}
+		translate([0,0,-100])centred_cube(100,100,100);
+	}
+	
 
 	//side of this must be the front slice of the side window - otherwise there's no easy way to fix that in place
 

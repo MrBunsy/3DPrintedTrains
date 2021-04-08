@@ -24,8 +24,8 @@ spike bearings without pointed wheels require a 25.65 (point to point) long 2mm 
 spike bearings with pointed wheels require a < 19.65mm (echoed when generating spike wheel) long 2mm brass rod 
 
 */
-
-// include <constants.scad>
+//needed for axle_width for the spike version
+include <constants.scad>
 
 //spacers to hold said wheels square
 GEN_WHEELSET_SPACER = false;
@@ -37,7 +37,7 @@ GEN_WHEEL = true;
 BEARING_TYPE = "spike";
 
 //no flange - only used for centre wheel on class66 currently
-DUMMY = false;
+DUMMY = true;
 
 //12.5 or 14 for my rolling stock, but this can take any value
 DIAMETER = 14;//12.5;
@@ -53,14 +53,15 @@ FLANGE_MAX_WIDTH = 0.76;
 //NRMA says "17.09" but that's clearly bollocks, using HO
 //14.55 still seems large compared to measuring various real wheelsets
 //my previous reverse engineered result came out at 14.65, which would be within NRMA tolerance, but struggled on a bit of dodgy track
-BACK_TO_BACK = 14.4;// tolerance: +0.05 -0.18, so 14.5 to 14.73
+//14.4 was still too large to be consistently reliable - some wheelsets worked and others didn't. Filing down the spacers a bit manually produced very reliable wheels, so I'm reducing this by 0.2? 0.4?
+BACK_TO_BACK = 14.4 - 0.3;// tolerance: +0.05 -0.18, so 14.5 to 14.73
 WHEEL_WIDTH = 2.79;
 TREAD_WIDTH = WHEEL_WIDTH - FLANGE_MAX_WIDTH;
 //might take this one with a pinch of salt. NMRA says OO is 0.71. HO Deep flange is up to 1.19
 FLANGE_DEPTH = 2;
 
-//3deg slope - note, this just doesn't print well, so exaggerating
-TREAD_SLOPE_HEIGHT = 0.4;//tan(3) * TREAD_WIDTH;
+//3deg slope - note, this just doesn't print well (contraction?), so exaggerating
+TREAD_SLOPE_HEIGHT = 0.25;//tan(3) * TREAD_WIDTH;
 echo(TREAD_SLOPE_HEIGHT);
 
 corner_break = 0.2;
@@ -74,7 +75,7 @@ diameters_14mm_dummy = [14.2,14.2, 13.75+TREAD_SLOPE_HEIGHT, 13.75];
 depths_thicker = [0.4, FLANGE_MAX_WIDTH-0.4, 2.7];//total 3.4
 depths_thinner = [0.4, FLANGE_MAX_WIDTH-0.4, TREAD_WIDTH];
 
-function diameters(nominal_d=12.5) = [nominal_d + FLANGE_DEPTH, nominal_d + FLANGE_DEPTH, nominal_d + TREAD_SLOPE_HEIGHT/2, nominal_d - TREAD_SLOPE_HEIGHT/2];
+function diameters(nominal_d=12.5, dummy = false) = [nominal_d + (dummy ? 0 :FLANGE_DEPTH), nominal_d + (dummy ? 0 :FLANGE_DEPTH), nominal_d + (dummy ? 0 :TREAD_SLOPE_HEIGHT/2), nominal_d - TREAD_SLOPE_HEIGHT/2];
 
 //sum depths provided
 function total_depth(depths, i=0) = depths[i] + (i < len(depths)-1 ? total_depth(depths, i+1) : 0);
@@ -157,7 +158,7 @@ module wheelset_model(diameter=12.5){
 }
 
 //axle_length reduction reduces length of axle - will introduce a bit more wobble (potentially) but increase strength of the point
-module wheel_with_point(diameters=diameters_14mm, depths=depths, axle_length_reduction = 0.1, fn=2000){
+module wheel_with_point(diameters=diameters(12.5), depths=depths, axle_length_reduction = 0.1, fn=2000){
 	
 	point_height = flange_to_point - (total_depth(depths)-depths[0]);
 	
@@ -187,7 +188,7 @@ if(GEN_WHEEL){
 	if(WHEEL_POINTED && BEARING_TYPE=="spike"){
 		wheel_with_point(diameters_with_extra[0], diameters_with_extra[1]);
 	}else{
-		wheel(diameters(DIAMETER), depths_thinner);
+		wheel(diameters(DIAMETER, DUMMY), depths_thinner);
 	}
 }
 
