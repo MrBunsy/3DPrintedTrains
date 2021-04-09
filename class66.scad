@@ -2481,7 +2481,7 @@ module front_windows(){
 				translate([0,window_lip_size/2,0])
 				rounded_cube(interior_width-window_gap,front_window_height + window_lip_size,window_back_thick,front_window_r*0.75);
 				//just the inside of the roof
-				translate([0,-wall_height+(front_window_z+front_window_height/2)+window_gap/2,0])difference(){
+				translate([0,-wall_height+(front_window_z+front_window_height/2)-window_gap/2,0])difference(){
 					//the roof shape, filled in
 					hull(){
 						intersection(){
