@@ -2445,7 +2445,9 @@ module buffer(){
 
 //this thickness is also the width of the front bit of the side windows
 window_back_thick = 3;
+side_window_back_thick = 1;
 window_front_thick = 1.5;
+side_window_front_thick = wall_thick;
 window_lip_size = 1.5;
 window_gap = 0.25;
 
@@ -2457,12 +2459,33 @@ module side_window_part(extra_thick = 0){
 translate([0,side_window_y-end_width_start + wall_thick,0])hull(){
 	
 				//main square bit
-				translate([0,side_window_length/2,window_gap/2])centred_cube(window_front_thick+extra_thick,side_window_length,side_window_height-window_gap);
+				translate([0,side_window_length/2,window_gap/2])centred_cube(side_window_front_thick+extra_thick,side_window_length,side_window_height-window_gap);
 				//top of front edge
-				translate([0,side_window_length+side_window_top_corner_y-window_gap/2,side_window_height-side_window_bottom_corner_r-window_gap/2])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=window_front_thick+extra_thick,center=true);
+				translate([0,side_window_length+side_window_top_corner_y-window_gap/2,side_window_height-side_window_bottom_corner_r-window_gap/2])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=side_window_front_thick+extra_thick,center=true);
 				//bottom of front end
-				translate([0,side_window_length+side_window_bottom_corner_y-window_gap/2,side_window_bottom_corner_z-side_window_z+window_gap/2])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=window_front_thick+extra_thick,center=true);
+				translate([0,side_window_length+side_window_bottom_corner_y-window_gap/2,side_window_bottom_corner_z-side_window_z+window_gap/2])rotate([0,90,0])cylinder(r=side_window_bottom_corner_r,h=side_window_front_thick+extra_thick,center=true);
 			}
+}
+
+//if full is true, this is the entire side window - for trains where I'm not using the front window (so teh camera can see out easily)
+//otherwise this is only the square bit of the window as the front curved bit is included in the sides of the front window module
+module side_windows(full=false){
+	x_pos = 20;
+	length = side_window_length + side_window_bottom_corner_y + side_window_bottom_corner_r + window_lip_size + (full ? 0 : - window_back_thick);
+
+	front_length = side_window_bottom_corner_y + side_window_bottom_corner_r;	
+	// mirror_y(){
+		intersection(){
+			union(){
+				centred_cube(side_window_height + window_lip_size*2, length, side_window_back_thick);
+				translate([-side_window_height/2,full ? (length/2 + window_gap/2) : length/2 + window_back_thick,side_window_back_thick+side_window_front_thick/2])
+				rotate([0,90,0])side_window_part();
+			}
+			if(!full){
+			 	centred_cube(side_window_height + window_lip_size*2, length, window_back_thick+window_front_thick);
+			}
+		}
+	// }
 }
 //TODO: top of this needs to fit inside the roof shape!
 //side windows are full size, need a window gap - doneski
@@ -2473,6 +2496,7 @@ module front_windows(){
 	difference(){
 		union(){
 			//interior_width/2-window_gap/2+window_front_thick/2
+			//sort of fudging lining up the side window perfectly, the window_gap obscures needing to make it perfect
 			mirror_y()translate([0,-(side_window_z-front_window_z),window_back_thick])rotate([90,0,0])side_window_part(interior_width+window_front_thick);
 			//front two windows
 
@@ -2609,7 +2633,9 @@ optional_rotate([0,0,ANGLE],ANGLE != 0){
 
 	if(GEN_WINDOWS){
 
-		front_windows();
+		translate([0,20,0])front_windows();
+		mirror_y()translate([20,0,0])side_windows(true);
+		mirror_y()translate([20,-20,0])side_windows(false);
 
 	}
 	
