@@ -2477,7 +2477,7 @@ module side_windows(full=false){
 	// mirror_y(){
 		intersection(){
 			union(){
-				centred_cube(side_window_height + window_lip_size*2, length, side_window_back_thick);
+				translate([-window_lip_size/2,0,0])centred_cube(side_window_height + window_lip_size, length, side_window_back_thick);
 				translate([-side_window_height/2,full ? (length/2 + window_gap/2) : length/2 + window_back_thick,side_window_back_thick+side_window_front_thick/2])
 				rotate([0,90,0])side_window_part();
 			}
