@@ -260,7 +260,7 @@ def wheel_jobs():
                                     "BEARING_TYPE": "spike",
                                     "DUMMY": False,
                                     "DIAMETER": 12.5,
-                                    "WHEEL_POINTED": False
+                                    "WHEEL_POINTED": True
                                     },
         # 12.5mm pointed wheel
         "wheel_flat_12_5mm": {"GEN_WHEELSET_SPACER": False,
@@ -268,7 +268,7 @@ def wheel_jobs():
                                    "BEARING_TYPE": "spike",
                                    "DUMMY": False,
                                    "DIAMETER": 12.5,
-                                   "WHEEL_POINTED": True
+                                   "WHEEL_POINTED": False
                                    },
         # class66
         # "class66_wheel": {"GEN_WHEELSET_SPACER": False,
@@ -287,19 +287,22 @@ def wheel_jobs():
                                "GEN_WHEEL": True,
                                "BEARING_TYPE": "spike",
                                "DUMMY": False,
-                               "DIAMETER": 14
+                               "DIAMETER": 14,
+                               "WHEEL_POINTED": False
                                },
         "wheel_flat_14mm_dummy": {"GEN_WHEELSET_SPACER": False,
                                  "GEN_WHEEL": True,
                                  "BEARING_TYPE": "spike",
                                  "DUMMY": True,
-                                 "DIAMETER": 14
+                                 "DIAMETER": 14,
+                                 "WHEEL_POINTED": False
                                  },
         "wheel_spacer_14mm": {"GEN_WHEELSET_SPACER": True,
                                 "GEN_WHEEL": False,
                                 "BEARING_TYPE": "spike",
                                 "DUMMY": False,
                                 "DIAMETER": 14,
+                                "WHEEL_POINTED": False
                                 },
     }
 

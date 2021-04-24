@@ -37,7 +37,7 @@ GEN_WHEEL = true;
 BEARING_TYPE = "spike";
 
 //no flange - only used for centre wheel on class66 currently
-DUMMY = true;
+DUMMY = false;
 
 //12.5 or 14 for my rolling stock, but this can take any value
 DIAMETER = 14;//12.5;
@@ -150,7 +150,7 @@ module wheel(diameters=diameters(14), depths=depths, fn=2000){
 
 module wheelset_model(diameter=12.5){
 	
-	diameters = diameter == 14 ? diameters_14mm : diameters_12_5mm;
+	diameters = diameters(diameter);
 	
 	mirror_y()translate([16.5/2-(depths[0] + depths[1]),0,0])rotate([0,90,0])wheel(diameters, depths, 50);
 	
@@ -173,15 +173,11 @@ module wheel_with_point(diameters=diameters(12.5), depths=depths, axle_length_re
 	
 }
 
-// diameters = DIAMETER == 12.5 ? diameters_12_5mm : 
-// 				DIAMETER == 14 && DUMMY == false ? diameters_14mm : diameters_14mm_dummy;
-				//DIAMETER == 14 && DUMMY == true ? 
-
 depths = BEARING_TYPE == "axle" ? depths_thicker : depths_thinner;
 
 extra_height = BEARING_TYPE == "axle" ? 2.5 : 3-total_depth(depths);
 
-diameters_with_extra = extra_height(diameters(DIAMETER), depths, extra_height, DIAMETER/2);
+diameters_with_extra = extra_height(diameters(DIAMETER, DUMMY), depths, extra_height, DIAMETER/2);
 
 
 if(GEN_WHEEL){
