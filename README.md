@@ -2,7 +2,7 @@
 
 Various attempts to 3D print OO gauge trains and accessories. Licenced under GNU GPL-3.0-or-later.
 
-## MWA Wagons
+## Box Wagons
 
 There are three variants: MWA (green), MWA-B (grey) and IOA (yellow). See below for more details.
 
@@ -47,11 +47,29 @@ Uses the IOA\_wagon\_\*.stl files and some MWA\_wagon\_\*.stl files. The brake c
  - MWA_wagon_buffer (x4): Black PETG
  - MWA_wagon_brake_wheel (x2): White PETG
 
+## Wheels
+
+I've attempted on a few different types of wheel - I still think it should be possible to use a jig and clamp to fix wheels onto an axle tightly, without them being wonky. However, I've settled on using spacers along the axle to keep the wheels true. There are two bearing types: axle, and spike. The axle bearing is where the axle itself clips into place, and is used on various motors. The spike type is like wheelsets you can buy - the axle ends in two points. The axle bearing wheels worked, and were reliable, but it was hard to adjust the wheel spacing, and so over time they tended to come apart and derail on pointwork. All types of wheel can be generated from wheel.scad.
+
+When slicing, make sure to use the minimum layer height possible for the flange. Prusaslicer's variable layer height is useful for this.
+
+In general, I think you're better off buying cheap plastic HO wheels from china, but it was a fun experiment and it provides future options for non-standard styles and sizes of wheel.
+
+There are two types of spike-bearing wheels: 
+ - "Flat": intended to slot onto a 2mm diameter, 25.65mm long pointed axle (the wheels are flat).
+ - "Pointed": intended to slot onto a 2mm diameter, 18.5mm long flat-ended axle (the wheels have a pointed cone).
+
+Both types are used the same way - two spacers are slotted onto the centre of the axle first, and then the wheels should fit onto the ends of the axle, with the spacers keeping the wheels at right angles to the axle. The spacers should slot on with minimal effort, but the wheels are designed to be a tight fit. However, this has proven to be slightly material dependant, so you may need to adjust the centre hole radius if you have trouble. 
+
+For the flat wheels I've used reclaimed axles from Dapol wheelsets (which proved very unreliable on anything other than perfect trackwork). This has proven very reliable and robust. Most of the printed wheelsets work first time, with only occasional wheels proving to be wonky after first assembly. I have experimented and can make my own spiked axle using 2mm brass rod, a dremel and a whetstone. I wouldn't recommend it though, it's quite a lot of effort.
+
+For the pointed wheels, I've used 2mm brass rod I cut with track-cutters (which ensures a nice clean, flat, cut). The points often need a bit of post-processing with pliars to cut off any blobs or strings. About half the wheelsets end up with a wonky wheel after first assembly, usually they're fine after replacing just a wheel. Provided you rectify any wonky wheelsets, these too have proven reliable on my garden railway.
+
 ## Couplings
 
 My first attempt at a coupling (hornby_bachman_style.scad) is an equivilant to Hornby's X8031. This is compatible with Bachman's trucks as well (at least the ones from the 90s). With the hook holder, it is slightly wider than the original, so may not fit all situations (I can't mount them on a hornby loco). The version without the hook should fit.
 
-A new configurable coupling generator (couplings_parametric.scad) is capable of producing not just a Hornby/Bachmann X8031, but a Dapol/Hornby/Airfix X9660 and Hornby dovetail fixing.
+A new configurable coupling generator (couplings_parametric.scad) is capable of producing not just a Hornby/Bachmann X8031, but a Dapol/Hornby/Airfix X9660, Hornby dovetail and NEM fixing.
 
 ### Hornby Dovetail
 Usually the real dovetail fixing creates a NEM socket, but I've skipped the middleman and produced a coupling that can slot straight into the Hornby chassis. In my experience, the real dovetail connectors fall out far too easily. The printed version isn't perfect, but stays in better than the real hornby ones I've used (when fitted with a wide coupling).
