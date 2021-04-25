@@ -43,7 +43,7 @@ DUMMY = false;
 DIAMETER = 14;//12.5;
 
 //if false axle is axle_width (25.65mm) long ended in points, if true axle is flat ended and the points are part of the wheels. if BEARING_TYPE is "axle" this is largely irrelevant
-WHEEL_POINTED = false;
+WHEEL_POINTED = true;
 
 //TODO
 STYLE = "modern";
@@ -64,6 +64,7 @@ FLANGE_DEPTH = 2;
 TREAD_SLOPE_HEIGHT = 0.25;//tan(3) * TREAD_WIDTH;
 echo(TREAD_SLOPE_HEIGHT);
 
+//'size' of tapered bit edge of wheel
 corner_break = 0.2;
 
 // diameters_12_5mm = [14.6,14.6, 12.5+TREAD_SLOPE_HEIGHT, 12.5, 12.5-corner_break];//not much gradient on the wheel part with this. TODO NMRA recomends 3deg slope
@@ -72,10 +73,10 @@ corner_break = 0.2;
 // diameters_14mm_dummy_smaller = [14.2,14.2, 13.75+TREAD_SLOPE_HEIGHT, 13.75];
 diameters_14mm_dummy = [14.2,14.2, 13.75+TREAD_SLOPE_HEIGHT, 13.75];
 //for the axle-bearing version
-depths_thicker = [0.4, FLANGE_MAX_WIDTH-0.4, 2.7];//total 3.4
-depths_thinner = [0.4, FLANGE_MAX_WIDTH-0.4, TREAD_WIDTH];
-
-function diameters(nominal_d=12.5, dummy = false) = [nominal_d + (dummy ? 0 :FLANGE_DEPTH), nominal_d + (dummy ? 0 :FLANGE_DEPTH), nominal_d + (dummy ? 0 :TREAD_SLOPE_HEIGHT/2), nominal_d - TREAD_SLOPE_HEIGHT/2];
+depths_thicker = [0.4, FLANGE_MAX_WIDTH-0.4, 2.7-corner_break/sqrt(2),corner_break/sqrt(2)];//total 3.4
+depths_thinner = [0.4, FLANGE_MAX_WIDTH-0.4, TREAD_WIDTH-corner_break/sqrt(2),corner_break/sqrt(2)];
+edge_of_wheel_depth_index = 3;
+function diameters(nominal_d=12.5, dummy = false) = [nominal_d + (dummy ? 0 :FLANGE_DEPTH), nominal_d + (dummy ? 0 :FLANGE_DEPTH), nominal_d + (dummy ? 0 :TREAD_SLOPE_HEIGHT/2), nominal_d - TREAD_SLOPE_HEIGHT/2 , nominal_d - TREAD_SLOPE_HEIGHT/2 - corner_break];
 
 //sum depths provided
 function total_depth(depths, i=0) = depths[i] + (i < len(depths)-1 ? total_depth(depths, i+1) : 0);
@@ -90,7 +91,9 @@ function extra_height(diameters, depths, height = 2.5, r = 2.9) = [concat(diamet
 //might need to make first dpeth longer to reduce wobble?
 $fn=1000;
 
-flange_to_point = 5.1;
+//previously calculated 5.1 by measuring, but now trying to improve on that a bit. this works out at 5.015, so seems good enough!
+flange_to_point = (axle_width - BACK_TO_BACK - 2*FLANGE_MAX_WIDTH)/2;//5.1;
+echo("flange_to_point",flange_to_point);
 //intended for a 2mm brass rod of length 21.2mm (better slightly shorter, so it doesn't stick out the ends and therefore is easy to use in a clamp)
 
 //recurive module used by wheel() to generate each segment just from an array of depths and diameters
@@ -122,7 +125,7 @@ module wheel(diameters=diameters(14), depths=depths, fn=2000){
 	fancy_internal_r=5.8/2;
 	fancy_edge_thick = 1.5;
 	//assuming diameters[flange outer, flange inner, mainwheel outer, mainwheel inner]
-	fancy_height = depth_up_to(depths,2)-0.5;
+	fancy_height = depth_up_to(depths,edge_of_wheel_depth_index)-0.5;
 	
 	difference(){
 		union(){
@@ -134,7 +137,7 @@ module wheel(diameters=diameters(14), depths=depths, fn=2000){
 		union(){
 			//2mm rod
 			cylinder(h=total_depth(depths)*2+1, r=axle_r, center=true);
-			echo ("depth up to 2", depth_up_to(depths,2));
+			echo ("depth up to edge of wheel", depth_up_to(depths,edge_of_wheel_depth_index));
 			difference(){
 				
 				translate([0,0,fancy_height])cylinder(h=50, r=diameters[3]/2-fancy_edge_thick, $fn=fn);
@@ -169,7 +172,7 @@ module wheel_with_point(diameters=diameters(12.5), depths=depths, axle_length_re
 	
 	
 	
-	echo("required axle length",axle_width-(axle_length_reduction + point_height)*2);
+	echo("required axle length",axle_width-(axle_length_reduction + point_height+ FLANGE_MAX_WIDTH)*2);
 	
 }
 
