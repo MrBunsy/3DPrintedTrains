@@ -55,9 +55,10 @@ def intermodal_wagon_jobs():
     bufferJob.addVariable("GEN_BUFFER", True)
 
     jobs.append(bufferJob)
-
-    bogieJob = JobDescription("intermodal_bogie.scad", "intermodal_wagon_bogie")
-    jobs.append(bogieJob)
+    for coupling in ["dapol", "hornby", "NEM"]:
+        bogieJob = JobDescription("intermodal_bogie.scad", "intermodal_wagon_bogie_{}".format(coupling))
+        bogieJob.addVariable("COUPLING_TYPE",coupling)
+        jobs.append(bogieJob)
 
     accessory_variables = ["brake_wheel", "brake_cylinder"]
 

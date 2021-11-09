@@ -20,12 +20,19 @@ lever_axle_height = 15
 lever_width = 8
 lever_thick = gap_thick-wiggle*2
 
-rod_length = 100
+#for the central bit of the rod in the lever mechanism
+rod_lever_bit_length=50
+rod_length = 50
 rod_base_thick = 3
 rod_lever_bit_thick= 1
 rod_lever_bit_height = (lever_axle_height - rod_base_thick)*0.8
 #TODO real maths on this
 rod_lever_bit_width = 15
+spring_thick=rod_base_thick*1.5
+spring_length = 20
+#maximum it will splay out sideways
+spring_width=gap_thick*2
+spring_kinks=4
 
 def gen_lever():
     #lever = cq.Workplane("XY")
@@ -39,16 +46,19 @@ def gen_lever():
     lever = lever.pushPoints([(0,0) , (0,lever_top_hinge_above_axle )]).circle(hinge_d/2).cutThruAll()
     return lever
 
-def gen_rod():
-    rod = cq.Workplane("XY").tag("rod_base").box(rod_length, gap_thick, rod_base_thick)#rect(rod_length,gap_thick).extrude(rod_base_thick)
+def gen_rod(double=False):
+    rod = cq.Workplane("XY").tag("rod_base").box(rod_lever_bit_length, gap_thick, rod_base_thick)#rect(rod_length,gap_thick).extrude(rod_base_thick)
     #add slot on top for the point lever to move
     rod = rod.faces(">Y").workplane(centerOption="CenterOfMass").move(rod_lever_bit_width/2,0).line(0,rod_lever_bit_height).line(rod_lever_bit_thick,0).line(rod_lever_bit_height,-rod_lever_bit_height).close().mirrorY().extrude(-gap_thick)
-    rod = rod.union(gen_spring(rod.faces(">X").workplane(centerOption="CenterOfMass"), rod_base_thick,20,gap_thick*2,3))
-    rod = rod.union(
-        gen_spring(rod.faces("<X").workplane(centerOption="CenterOfMass"), rod_base_thick, 20, gap_thick*2, 4))
+    #extend length
+    rod = rod.faces(">X").workplane(centerOption="CenterOfMass").box(gap_thick,rod_base_thick, rod_length)
+    rod = rod.union(gen_spring(rod.faces(">X").workplane(centerOption="CenterOfMass"), rod_base_thick,spring_thick, spring_length,spring_width,spring_kinks))
+    if double:
+        rod = rod.union(
+            gen_spring(rod.faces("<X").workplane(centerOption="CenterOfMass"), rod_base_thick,spring_thick, spring_length,spring_width,spring_kinks ))
     return rod
 
-def gen_spring(workplaneOnEnd, thick, totalLength, width, kinks):
+def gen_spring(workplaneOnEnd, thick_height, thick_width, totalLength, width, kinks):
     '''
     Spring on the XY plane in the Y direction
     TODO fix the shape of the end of teh spring
@@ -69,7 +79,7 @@ def gen_spring(workplaneOnEnd, thick, totalLength, width, kinks):
         points.append((posNeg*width/2,kinkLength*(i+1.5)))
     points.append((0, totalLength))
     path = workplaneInline.polyline(points)
-    return workplaneOnEnd.rect(thick, thick).sweep(path,isFrenet=True)
+    return workplaneOnEnd.rect(thick_width, thick_height).sweep(path,isFrenet=True)
 
 lever = gen_lever()
 rod = gen_rod()
