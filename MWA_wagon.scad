@@ -93,15 +93,17 @@ GEN_IN_SITU = false;
 //deprecated, now wagon is split into base and top (still used to generate the model)
 GEN_WAGON = false;
 GEN_BASE = false;
-GEN_TOP = false;
+GEN_TOP = true;
 GEN_BOGIE = false;
 GEN_BRAKE_WHEEL = false;
 GEN_BRAKE_CYLINDER = false;
 GEN_BUFFER = false;
 //bits that aren't printed, just part of the 3d model
-GEN_MODEL_BITS = false;
-GEN_GRAVEL = true;
+GEN_MODEL_BITS = true;
+GEN_GRAVEL = false;
 GRAVEL_SEED = 3;
+
+APPLY_LOGO = false;
 
 //"dapol", "hornby", "NEM"
 COUPLING_TYPE="dapol";
@@ -109,7 +111,7 @@ COUPLING_TYPE="dapol";
 BOGIE_EASY_PRINT = true;
 
 //MWA, MWA-B, IOA
-STYLE = "MWA";
+STYLE = "IOA";
 //MWA-B has no ladder, square nameplate, no small cylinder and brake-wheels on one bogie only - not on the main wagon body
 //IOA has no nameplate and taller 'ridge bits' around the top, also the brake cylinders are same colour as the body
 //and differently shaped triangular bits on the underside
@@ -1053,7 +1055,7 @@ module wagon_base(){
 
 module wagon_top(){
 	translate([0,0,wagon_height - wagon_base_thick])rotate([0,180,0])difference(){
-		wagon(true);
+		wagon(APPLY_LOGO);
 		union(){
 			//lop off the base
 			translate([0,0,wagon_height-wagon_base_thick])centred_cube(wagon_width*2,wagon_length*2,20);

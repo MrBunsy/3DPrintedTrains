@@ -23,8 +23,8 @@ import multiprocessing
 from pathlib import Path
 import argparse
 import numpy
-import stl
-from stl import mesh
+# import stl
+# from stl import mesh
 from OpenSCADJob import JobDescription, multiprocessJobs
 
 Path("out").mkdir(parents=True, exist_ok=True)
@@ -207,6 +207,7 @@ def mwa_wagon_jobs(just_gravel = False):
             jobs.append(job)
         return jobs
 
+
     for style in ["MWA", "MWA-B", "IOA"]:
         MWAariables = variables[style]
         fullMWAJob = JobDescription("MWA_wagon.scad", "{}_wagon_model".format(style))
@@ -222,25 +223,33 @@ def mwa_wagon_jobs(just_gravel = False):
 
         for v in MWAariables:
 
+            logos = [True]
+            if v == "top" and style in ["MWA", "MWA-B"]:
+                logos += [False]
             couplings = [""]
             if v == "bogie":
                 couplings = ["dapol", "NEM"]
             for coupling in couplings:
-                coupling_name = "" if len(coupling) == 0 else "_"+coupling
-                job = JobDescription("MWA_wagon.scad", "{}_wagon_{}{}".format(style, v, coupling_name))
-                job.addVariable("GEN_IN_SITU", False)
-                job.addVariable("GEN_MODEL_BITS", False)
-                job.addVariable("BOGIE_EASY_PRINT", True)
-                if len(coupling) > 0:
-                    job.addVariable("COUPLING_TYPE", coupling)
+                for logo in logos:
+                    coupling_name = "" if len(coupling) == 0 else "_"+coupling
+                    logoinfo = ""
+                    if not logo:
+                        logoinfo = "_without_logo"
+                    job = JobDescription("MWA_wagon.scad", "{}_wagon_{}{}{}".format(style, v, coupling_name, logoinfo))
+                    job.addVariable("GEN_IN_SITU", False)
+                    job.addVariable("GEN_MODEL_BITS", False)
+                    job.addVariable("BOGIE_EASY_PRINT", True)
+                    job.addVariable("APPLY_LOGO", logo)
+                    if len(coupling) > 0:
+                        job.addVariable("COUPLING_TYPE", coupling)
 
-                # disable anything left set to True
-                for dont in allOptions:
-                    job.addVariable("GEN_" + dont.upper(), False)
-                job.addVariable("STYLE", style)
-                for v2 in MWAariables:
-                    job.addVariable("GEN_" + v2.upper(), v == v2)
-                jobs.append(job)
+                    # disable anything left set to True
+                    for dont in allOptions:
+                        job.addVariable("GEN_" + dont.upper(), False)
+                    job.addVariable("STYLE", style)
+                    for v2 in MWAariables:
+                        job.addVariable("GEN_" + v2.upper(), v == v2)
+                    jobs.append(job)
         jobs.append(fullMWAJob)
     return jobs
 
